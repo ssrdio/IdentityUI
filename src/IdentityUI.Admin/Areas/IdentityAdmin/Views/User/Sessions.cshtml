@@ -1,0 +1,43 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User.UserSessionViewModel
+
+@{
+    ViewData["Title"] = "Sessions";
+}
+
+@section script{
+    <script src="~/identityAdmin/app/user/sessions/deleteSessions.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            new session('modalContainer', 'sessionContainer', '@Model.UserId');
+        });
+
+    </script>
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+        @await Component.InvokeAsync("IdentityErrorModal")
+    </div>
+}
+
+<div id="sessionContainer">
+    @(await Component.InvokeAsync("UserMenu", new { userId = Model.UserId, tabSelected = UserMenuViewComponent.TabSelected.Sessions, userName = Model.UserName }))
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Sessions
+                </h5>
+                <div class="header-button logoutUser logout-all">Logout all sessions</div>
+            </div>
+            <div class="card-body">
+                <div class="custom_container custom_table">
+                    <table id="sessionsTable" class="dataTableClass display"></table>
+                </div>
+            </div>
+    </div>
+</div>

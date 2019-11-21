@@ -1,0 +1,128 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User.UserDetailsViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.User;
+}
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+@section script{
+    @if (Model.StatusAlert != null)
+    {
+        <script>
+            $(document).ready(function () {
+                var x = document.getElementById("snackbar");
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+            });
+        </script>
+    }
+}
+
+<div>
+    @(await Component.InvokeAsync("UserMenu", new { userId = Model.Id, tabSelected = UserMenuViewComponent.TabSelected.Details, userName = Model.UserName }))
+
+    @if (Model.StatusAlert != null)
+    {
+        <div id="snackbar">
+            @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+        </div>
+    }
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Details
+                    </h5>
+                </div>
+                <form class="custom-form" method="post">
+                    <div class="form-group">
+                        <label asp-for="Id" class="control-label"></label>
+                        <input asp-for="Id" class="form-control disabled" disabled />
+                        <span asp-validation-for="Id" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="UserName" class="control-label"></label>
+                        <input asp-for="UserName" class="form-control disabled" disabled />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Email" class="control-label"></label>
+                        <div class="verify-email">
+                            <input asp-for="Email" class="form-control" />
+                            <button type="submit" class="btn btn-primary" asp-controller="User" asp-action="SendVerifyEmail" asp-route-id="@Model.Id">Verify Email</button>
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="FirstName" class="control-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LastName" class="control-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PhoneNumber" class="control-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="details-checkboxes">
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                <input asp-for="EmailConfirmed" type="checkbox" class="custom-control-input" id="customSwitches4">
+                                <label class="custom-control-label" for="customSwitches4"> @Html.DisplayNameFor(model => model.EmailConfirmed)</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                <input asp-for="PhoneNumberConfirmed" type="checkbox" class="custom-control-input" id="customSwitches">
+                                <label class="custom-control-label" for="customSwitches">@Html.DisplayNameFor(model => model.PhoneNumberConfirmed)</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                @if (Model.TwoFactorEnabled)
+                                {
+                                    <input asp-for="TwoFactorEnabled" type="checkbox" class="custom-control-input" id="customSwitches2">
+                                }
+                                else
+                                {
+                                    <input asp-for="TwoFactorEnabled" type="checkbox" class="custom-control-input" id="customSwitches2" disabled>
+                                }
+                                <label class="custom-control-label" for="customSwitches2">@Html.DisplayNameFor(model => model.TwoFactorEnabled)</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                <input asp-for="Enabled" type="checkbox" class="custom-control-input" id="customSwitches3">
+                                <label class="custom-control-label" for="customSwitches3">@Html.DisplayNameFor(model => model.Enabled)</label>
+                            </div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.LockoutEnd))
+                    {
+                        <div class="lockout-holder">
+                            <div>
+                                <label class="control-label text-danger lockout-text">Lockout ends: </label> <label class="control-label lockout-text lockout-text-padding"> @Model.LockoutEnd</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary main-card ml-2 lockout-button" asp-controller="User" asp-action="Unlock" asp-route-id="@Model.Id">Unlock user</button>
+                        </div>
+                    }
+
+                    <div class="button-holder">
+                        <button type="submit" class="btn btn-primary custom-submit" asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id">Save</button>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.LoginWith2faViewModel
+
+@section script {
+
+    <script type="text/javascript" src="~/account/app/components/twoFactor/2faFormScript.js"></script>
+}
+
+<div class="app-container">
+    <div class="h-100 bg-plum-plate bg-animation">
+        <div class="d-flex min-vh-100 justify-content-center align-items-center">
+            <div class="mx-auto app-login-box col-md-8">
+                <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
+                <div class="modal-dialog w-100 mx-auto">
+                    <div class="modal-content">
+                        <form class="" asp-area="Account" asp-controller="Account" asp-action="LoginWith2fa" asp-route-returnUrl="@ViewBag.RetunrUrl" method="post">
+                            <div class="modal-body extra-body-padding">
+                                <div class="h5 modal-title text-center">
+                                    <h4 class="mt-2 modal-header-custom">
+                                        <div>Welcome,</div>
+                                        <span>Please write the code you recived in the form below.</span>
+                                    </h4>
+                                </div>
+                                <input asp-for="RememberMe" type="hidden" />
+                                <div id="form2fa">
+                                    <div class="form-row">
+                                        <div class="col-md-12">
+                                            <div class="position-relative form-group">
+                                                <input asp-for="Code" placeholder="Code..." type="text" autocomplete="off" maxlength="7" class="form-control">
+                                                <span asp-validation-for="Code" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="position-relative form-check checkbox-keep">
+                                    <label class="form-check-label">
+                                        <input asp-for="RememberMachine" type="checkbox" class="form-check-input">
+                                        Remember device
+                                    </label>
+                                </div>
+                                <div asp-validation-summary="All" class="text-danger"></div>
+                            </div>
+                                <div class="modal-footer clearfix">
+                                    @* TO DO: add link to recover 2fa *@
+                                    <div class="float-right">
+                                        <button class="btn btn-primary btn-lg">Login</button>
+                                    </div>
+                                </div>
+</form>
+                    </div>
+                </div>
+                <div class="text-center text-white opacity-8 mt-3">Copyright © @CopyRightModel.NAME @CopyRightModel.YEAR </div>
+            </div>
+        </div>
+    </div>
+</div>

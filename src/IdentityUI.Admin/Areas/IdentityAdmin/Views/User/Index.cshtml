@@ -1,0 +1,78 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.User;
+}
+
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+
+@section script {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#userTable').DataTable({
+                serverSide: true,
+                processing: true,
+                columnDefs: [
+                    { "width": "100px", "targets": [2] }
+                ],
+                "targets": 'no-sort',
+                "bSort": false,
+                "order": [],
+                ajax: {
+                    url: '@PagePath.USER/GetAll',
+                    type: 'GET'
+                },
+                columns: [
+                    {
+                        data: "userName",
+                        title: "User name"
+                    },
+                    {
+                        data: "email",
+                        title: "Email"
+                    },
+                    {
+                        data: null,
+                        title: 'Action',
+                        defaultContent: '',
+                        render: function (data) {
+                            return `<div class="text-center pr-2"><a class="btn btn-primary table-button" href="@(string.Format(PagePath.USER_DETAILS, ""))${data.id}">Details</a> </div>`
+                        }
+                    }
+                ],
+                //language: { //Custom loading indicator
+                //    loadingRecords: "<i class='fa fa-spinner fa-spin'></i>",
+                //    processing: "<div class='loader'></div>"
+                //}
+            })
+        });
+
+    </script>
+}
+
+
+<div class="row">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="card-body">
+            
+
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Users:
+                </h5>
+                
+                    <a class="header-button" href="@PagePath.USER_NEW">Add User</a>
+                
+            </div>
+
+            <div class="custom_container custom_table">
+                <table id="userTable" class="dataTableClass display "></table>
+            </div>
+
+        </div>
+
+    </div>
+</div>

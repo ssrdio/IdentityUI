@@ -1,0 +1,64 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Role.Components.RoleMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role.RoleDetailViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Role;
+
+
+}
+
+@section script{
+    @if (Model.StatusAlert != null)
+    {
+        <script>
+            $(document).ready(function () {
+                var x = document.getElementById("snackbar");
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+            });
+        </script>
+    }
+}
+
+<div>
+    @(await Component.InvokeAsync("RoleMenu", new { roleId = Model.Id, tabSelected = RoleMenuViewComponent.TabSelected.Details, roleName = Model.Name }))
+
+    @if (Model.StatusAlert != null)
+    {
+    <div id="snackbar">
+        @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+    </div>
+    }
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Details
+                    </h5>
+                </div>
+                <form asp-controller="Role" asp-action="Edit" asp-route-id="@Model.Id" method="post" class="custom-form">
+                    <div class="form-group">
+                        <label asp-for="Id" class="control-label"></label>
+                        <input asp-for="Id" class="form-control disabled" disabled />
+                        <span asp-validation-for="Id" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control disabled" disabled />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="button-holder">
+                        <input type="submit" value="Save" class="btn btn-primary custom-submit" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+﻿
+@section script {
+    <script type="text/javascript">
+        document.getElementById("toDashboard").onclick = function () {
+            window.location.href = "@PagePath.HOME";
+        };
+        document.getElementById("logout").onclick = function () {
+            window.location.href = "@PagePath.LOGOUT";
+        };
+    </script>
+}
+
+<div class="app-container">
+    <div class="h-100 bg-plum-plate bg-animation">
+        <div class="d-flex min-vh-100 justify-content-center align-items-center">
+            <div class="mx-auto app-login-box col-md-8">
+                <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
+                <div class="modal-dialog w-100 mx-auto">
+                    <div class="modal-content">
+                        <div class="adminErrorDiv error-colors">
+                            <div class="icon-holder">
+                                <div class="icon-denied-square-1">
+                                    <div class="icon-denied-square-2">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                </div>
+        
+                            </div>
+                            Access denied!
+                        </div>
+
+                        <div class="modal-footer clearfix">
+                            <button id="toDashboard" class="btn btn-light btn-lg lBtnMarg">Go to Home</button>
+                            <button id="logout" class="btn btn-primary btn-lg">Logout</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-white opacity-8 mt-3">Copyright © @CopyRightModel.NAME @CopyRightModel.YEAR </div>
+            </div>
+        </div>
+    </div>
+</div>

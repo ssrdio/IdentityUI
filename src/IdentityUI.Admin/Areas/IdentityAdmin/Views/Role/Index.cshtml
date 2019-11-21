@@ -1,0 +1,67 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.Role;
+}
+
+@{
+    ViewData["Title"] = "Roles";
+}
+
+
+@section script {
+    <script>
+
+        $(document).ready(function () {
+            $('#roleTable').DataTable({
+                serverSide: true,
+                processing: true,
+                columnDefs: [
+                    { "width": "100px", "targets": [1] }
+                ],
+                "targets": 'no-sort',
+                "bSort": false,
+                "order": [],
+                ajax: {
+                    url: '@PagePath.ROLE/GetAll',
+                    type: 'GET'
+                },
+                columns: [
+                    {
+                        data: "name",
+                        title: "Name"
+                    },
+                    {
+                        data: null,
+                        defaultContent: '',
+                        render: function (data) {
+                            return `<div class="text-center pr-2"><a class="btn btn-primary table-button" href="@(string.Format(PagePath.ROLE_DETAILS, ""))${data.id}">Details</a></div>`
+                        }
+                    }
+                ],
+                //language: { //Custom loading indicator
+                //    loadingRecords: "<i class='fa fa-spinner fa-spin'></i>",
+                //    processing: "<div class='loader'></div>"
+                //}
+            })
+        });
+
+    </script>
+}
+
+<div class="row">
+
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Roles:
+                </h5>
+                <a class="header-button" href="@PagePath.ROLE_NEW">Add Role</a>
+            </div>
+            <div class="custom_container custom_table">
+                <table id="roleTable" class="dataTableClass display "></table>
+            </div>
+
+        </div>
+
+    </div>
+</div>

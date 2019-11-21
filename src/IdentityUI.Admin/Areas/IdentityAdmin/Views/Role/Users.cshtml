@@ -1,0 +1,73 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Role.Components.RoleMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role.RoleUserViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Role;
+}
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+@section script{
+    <script>
+
+        $(document).ready(function () {
+            $('#userTable').DataTable({
+                serverSide: true,
+                processing: true,
+                columnDefs: [
+                    { "width": "100px", "targets": [2] }
+                ],
+                "targets": 'no-sort',
+                "bSort": false,
+                "order": [],
+                ajax: {
+                    url: '@PagePath.ROLE/GetUsers/@Model.RoleId',
+                    type: 'GET'
+                },
+                columns: [
+                    {
+                        data: "userName",
+                        title: "Username"
+                    },
+                    {
+                        data: "email",
+                        title: "Email"
+                    },
+                    {
+                        data: null,
+                        defaultContent: '',
+                        render: function (data) {
+                            return `<div class="text-center pr-2"><a class="btn btn-primary table-button" href="@(string.Format(PagePath.USER_DETAILS, ""))${data.id}">Details</a></div>`
+                        }
+                    }
+                ],
+                //language: { //Custom loading indicator
+                //    loadingRecords: "<i class='fa fa-spinner fa-spin'></i>",
+                //    processing: "<div class='loader'></div>"
+                //}
+            })
+        });
+
+    </script>
+}
+
+<div>
+    @(await Component.InvokeAsync("RoleMenu", new { roleId = Model.RoleId, tabSelected = RoleMenuViewComponent.TabSelected.Users, roleName = Model.Name }))
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Users
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="custom_container custom_table">
+                    <table id="userTable" class="dataTableClass display "></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

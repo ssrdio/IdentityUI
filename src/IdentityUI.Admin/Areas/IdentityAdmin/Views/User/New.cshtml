@@ -1,0 +1,65 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User.NewUserViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.User;
+}
+
+@{
+    ViewData["Title"] = "New";
+}
+
+@section script{
+    @if (Model != null && Model.StatusAlert != null)
+    {
+        <script>
+            $(document).ready(function () {
+                var x = document.getElementById("snackbar");
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+            });
+        </script>
+    }
+}
+
+@if (Model != null && Model.StatusAlert != null)
+{
+    <div id="snackbar">
+        @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+    </div>
+}
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                New User:
+            </h5>
+        </div>
+        <form class="custom-form" asp-action="New">
+            <div class="form-group">
+                <label asp-for="UserName" class="control-label"></label>
+                <input asp-for="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FirstName" class="control-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="button-holder">
+                <input type="submit" value="Create" class="btn btn-primary custom-submit" />
+            </div>
+        </form>
+    </div>
+</div>
+

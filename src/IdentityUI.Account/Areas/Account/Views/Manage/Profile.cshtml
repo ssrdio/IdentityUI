@@ -1,0 +1,62 @@
+﻿@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.ProfileViewModel;
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Profile;
+}
+
+@section script{
+    @if (Model.StatusAlert != null)
+    {
+        <script>
+        $(document).ready(function () {
+            var x = document.getElementById("snackbar");
+            x.className = "show";
+            setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+        });
+        </script>
+    }
+}
+
+@if (Model.StatusAlert != null)
+{
+    <div id="snackbar">
+        @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+    </div>
+}
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Profile
+            </h5>
+        </div>
+        <form asp-controller="Manage" asp-action="Profile" method="post" class="custom-form">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="UserName" class="control-label"></label>
+                <input asp-for="UserName" class="form-control disabled" disabled />
+                <span asp-validation-for="UserName" class="text-danger error-alert-custom"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FirstName" class="control-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger error-alert-custom"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger error-alert-custom"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PhoneNumber" class="control-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger error-alert-custom"></span>
+            </div>
+            <div class="button-holder">
+                <button type="submit" class="btn btn-primary custom-submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>

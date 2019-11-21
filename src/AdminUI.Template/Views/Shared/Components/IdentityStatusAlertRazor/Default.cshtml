@@ -1,0 +1,21 @@
+﻿@model SSRD.AdminUI.Template.Models.StatusAlertViewModel
+
+@if (Model.Success)
+{
+    <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin">
+        <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+        @foreach (string message in Model.Messages)
+        {
+            @message <br />
+        }
+    </div>
+} else
+{
+<div class="alert-danger mb-3 pl-3 pb-2 pt-2 no-margin">
+    <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+    @foreach (string message in Model.Messages)
+    {
+        @message <br />
+    }
+</div>
+}

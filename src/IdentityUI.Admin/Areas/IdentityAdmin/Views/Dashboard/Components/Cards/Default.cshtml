@@ -1,0 +1,59 @@
+﻿
+
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Dashboard.StatisticsViewModel
+
+
+<div class="row cards-row">
+    <div class="col-md-3 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body card-blue">
+                <div class="icon">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+                <div class="text">
+                    <p class="custom-card-title">All Users</p>
+                    <h3 class="custom-card-info">@Model.UsersCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body card-green">
+                <div class="icon">
+                    <i class="fas fa-user-check fa-2x"></i>
+                </div>
+                <div class="text">
+                    <p class="custom-card-title">Active Users</p>
+                    <h3 class="custom-card-info">@Model.ActiveUsersCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body card-yellow">
+                <div class="icon">
+                    <i class="fas fa-user-times fa-2x"></i>
+                </div>
+                <div class="text">
+                    <p class="custom-card-title">Unconfirmed Users</p>
+                    <h3 class="custom-card-info">@Model.UnconfirmedUsersCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body card-red">
+                <div class="icon">
+                    <i class="fas fa-user-lock fa-2x"></i>
+                </div>
+                <div class="text">
+                    <p class="custom-card-title">Disabled Users</p>
+                    <h3 class="custom-card-info">@Model.DisabledUsersCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
