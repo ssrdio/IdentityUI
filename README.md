@@ -6,7 +6,7 @@ IdentityUI is a simple platform for administrative management of users and admin
 
 ## Nuget
 
-Install SSRD.IdentityUI package
+Install SSRD.IdentityUI package [NuGet](https://www.nuget.org/packages/SSRD.IdentityUI/)
 
 ## AppSettings:
 
