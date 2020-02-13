@@ -13,6 +13,7 @@ using SSRD.IdentityUI.Account;
 using SSRD.IdentityUI.Admin;
 using SSRD.IdentityUI.Core;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
+using SSRD.RevisionLogger.Extensions;
 
 namespace IdentityUI.Sample
 {
@@ -72,12 +73,30 @@ namespace IdentityUI.Sample
 
             services.AddScoped<IEmailSender, EmailSender>(); //this EmailSender does not send mails it jaust writes them in logs.
 
+            services.ConfigureRevisionLogger(options =>
+            {
+                options.UserIdentityClaimType = System.Security.Claims.ClaimTypes.NameIdentifier;
+
+                options.LogQueryData = false;
+                options.LogBodyData = false;
+
+                options.LogBodyDataMaxSize = 30 * 1024;
+                options.IgnoreLogignBodyForRoutes = new List<string>
+                {
+                    "Account/.*",
+                    "IdentityAdmin/User/SetNewPassword",
+                };
+
+                options.Version = "1.0.0";
+            });
+
             services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -86,20 +105,21 @@ namespace IdentityUI.Sample
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            //app.UseAuthorization();
-
-            app.UseIdentityUI(enableMigrations: false)
-                .UseAccountManagement()
-                .UseIdentityAdmin();
 
             app.SeedIdentityAdmin("admin", "Password");
 
+            app.UseStaticFiles();
+            app.UseRouting();
+
+            app.UseIdentityUI(enableMigrations: false);
+
+            app.UseRevisionLogger(configureNLogger: true);
+
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapAccountManagement();
+                endpoints.MapIdentityAdmin();
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
