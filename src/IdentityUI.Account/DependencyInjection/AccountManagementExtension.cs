@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SSRD.AdminUI.Template;
 using SSRD.IdentityUI.Account.DependencyInjection;
+using Microsoft.AspNetCore.Routing;
+using System;
 
 namespace SSRD.IdentityUI.Account
 {
@@ -28,6 +30,7 @@ namespace SSRD.IdentityUI.Account
             return builder;
         }
 
+        [Obsolete("UseAccountManagement is obsolete use MapAccountManagement insted")]
         /// <summary>
         /// Adds IdentityUI.Account to the specified Microsoft.AspNetCore.Builder.IApplicationBuilder
         /// </summary>
@@ -55,5 +58,23 @@ namespace SSRD.IdentityUI.Account
 #endif
             return builder;
         }
+
+#if NET_CORE2
+        public static void MapAccountManagement(this IRouteBuilder routes)
+        {
+            routes.MapAreaRoute(
+                name: "Account",
+                areaName: "Account",
+                template: "Account/{controller=Home}/{action=Index}/{id?}");
+        }
+#elif NET_CORE3
+        public static void MapAccountManagement(this IEndpointRouteBuilder endpoints)
+        {
+            endpoints.MapAreaControllerRoute(
+                "areas",
+                "Account",
+                "Account/{controller=Home}/{action=Index}/{id?}");
+        }
+#endif
     }
 }

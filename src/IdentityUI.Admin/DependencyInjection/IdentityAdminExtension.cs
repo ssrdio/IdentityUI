@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SSRD.IdentityUI.Admin.DependencyInjection;
 using SSRD.AdminUI.Template;
+using Microsoft.AspNetCore.Routing;
+using System;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -36,6 +38,7 @@ namespace SSRD.IdentityUI.Admin
             return builder;
         }
 
+        [Obsolete("UseIdentityAdmin is obsolete use MapIdentityAdmin insted")]
         /// <summary>
         /// Adds IdentityUI.Admin to the specified Microsoft.AspNetCore.Builder.IApplicationBuilder
         /// </summary>
@@ -64,5 +67,23 @@ namespace SSRD.IdentityUI.Admin
 
             return builder;
         }
+
+#if NET_CORE2
+        public static void MapIdentityAdmin(this IRouteBuilder routes)
+        {
+            routes.MapAreaRoute(
+                name: "IdentityAdmin",
+                areaName: "IdentityAdmin",
+                template: "IdentityAdmin/{controller=Home}/{action=Index}/{id?}");
+        }
+#elif NET_CORE3
+        public static void MapIdentityAdmin(this IEndpointRouteBuilder endpoints)
+        {
+            endpoints.MapAreaControllerRoute(
+                name: "areas",
+                areaName: "IdentityAdmin",
+                pattern: "IdentityAdmin/{controller=Home}/{action=Index}/{id?}");
+        }
+#endif
     }
 }
