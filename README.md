@@ -35,7 +35,7 @@ In ConfigureServices add:
 ```c#
 services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pass in your own identityUI options.
     .AddIdentityUI() // Adds IdentityManagement core services.
-    .AddAuth() // Adds Authentication. You can pass in your own CookiAuthenticationOptions.
+    .AddAuth() // Adds Authentication. You can pass in your own CookieAuthenticationOptions.
     .AddEmailSender() // Optional if you provide  custom implementation of IEmailSender
     .AddIdentityAdmin() // Adds services for IdentityAdminUI
     .AddAccountManagement(); // Adds services for AccountManagment.
@@ -43,9 +43,21 @@ services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pa
 
 In Configure add:
 ```c#
-app.UseIdentityUI(enableMigrations: false) // Adds IdentityUI
-    .UseAccountManagement()     // Adds AccountManagement UI
-    .UseIdentityAdmin();        // Adds IdentityAdmin UI
+app.UseIdentityUI(enableMigrations: false) // Adds IdentityUI   
+```
+
+.NET Core 2:  
+In `app.UseMvc()` add
+```c#
+routes.MapAccountManagement(); // Adds AccountManagement UI
+routes.MapIdentityAdmin(); // Adds IdentityAdmin UI
+```
+
+.NET Core 3:  
+In `app.UseEndpoints()` add
+```c#
+endpoints.MapAccountManagement(); // Adds AccountManagement UI
+endpoints.MapIdentityAdmin(); // Adds IdentityAdmin UI
 ```
 
 You can create Database with migrations or without migrations `app.CreateIdentityDatabase();`
