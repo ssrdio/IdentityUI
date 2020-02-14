@@ -38,7 +38,7 @@ namespace SSRD.IdentityUI.Admin
             return builder;
         }
 
-        [Obsolete("UseIdentityAdmin is obsolete use MapIdentityAdmin insted")]
+        [Obsolete("UseIdentityAdmin is obsolete use MapIdentityAdmin instead")]
         /// <summary>
         /// Adds IdentityUI.Admin to the specified Microsoft.AspNetCore.Builder.IApplicationBuilder
         /// </summary>

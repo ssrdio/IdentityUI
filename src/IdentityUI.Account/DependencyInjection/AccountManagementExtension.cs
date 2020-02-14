@@ -30,7 +30,7 @@ namespace SSRD.IdentityUI.Account
             return builder;
         }
 
-        [Obsolete("UseAccountManagement is obsolete use MapAccountManagement insted")]
+        [Obsolete("UseAccountManagement is obsolete use MapAccountManagement instead")]
         /// <summary>
         /// Adds IdentityUI.Account to the specified Microsoft.AspNetCore.Builder.IApplicationBuilder
         /// </summary>
