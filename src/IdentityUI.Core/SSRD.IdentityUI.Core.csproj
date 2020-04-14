@@ -26,7 +26,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="FluentValidation" Version="8.5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
