@@ -4,6 +4,7 @@
     <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     <NoWarn>EF1000</NoWarn>  <!--Change this now it is only for AbstractUpdate.ExecuteMigrationSql-->
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>

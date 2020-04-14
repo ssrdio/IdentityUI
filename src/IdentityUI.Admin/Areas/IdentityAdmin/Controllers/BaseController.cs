@@ -9,6 +9,7 @@ using System.Diagnostics;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = SSRD.IdentityUI.Core.Models.RoleConstats.IDENTITY_MANAGMENT_ROLE)]
     [Area(PagePath.IDENTITY_ADMIN_AREA_NAME)]
     public class BaseController : Controller
