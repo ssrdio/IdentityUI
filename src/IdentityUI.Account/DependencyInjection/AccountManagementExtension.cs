@@ -7,6 +7,7 @@ using SSRD.AdminUI.Template;
 using SSRD.IdentityUI.Account.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 using System;
+using SSRD.IdentityUI.Account.Areas.Account.Services.Account;
 
 namespace SSRD.IdentityUI.Account
 {
@@ -24,6 +25,7 @@ namespace SSRD.IdentityUI.Account
             builder.Services.AddAdminTemplate();
 
             builder.Services.AddScoped<IManageDataService, ManageDataService>();
+            builder.Services.AddScoped<IAccountDataService, AccountDataService>();
 
             builder.Services.ConfigureOptions(typeof(UIConfigureOptions));
 

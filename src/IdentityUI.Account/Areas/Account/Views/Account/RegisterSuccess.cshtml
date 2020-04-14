@@ -1,4 +1,6 @@
-﻿@section script {
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.RegisterSuccessViewModel
+
+@section script {
     <script type="text/javascript">
         document.getElementById("toDashboard").onclick = function () {
             window.location.href = "@PagePath.HOME";
@@ -24,8 +26,15 @@
                                 </div>
                             </div>
                            
-                                Registration link has been sent to your email
-                            
+                            @if(Model.UseEmailSender)
+                            {
+                                <span>Registration link has been sent to your email</span>
+                            }
+                            else 
+                            {
+                                <span>Registration was successful</span>
+                            }
+
                         </div>
 
                         <div class="modal-footer clearfix">

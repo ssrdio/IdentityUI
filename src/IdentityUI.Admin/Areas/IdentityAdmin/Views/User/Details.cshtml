@@ -53,10 +53,17 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="Email" class="control-label"></label>
-                        <div class="verify-email">
-                            <input asp-for="Email" class="form-control" />
-                            <button type="submit" class="btn btn-primary" asp-controller="User" asp-action="SendVerifyEmail" asp-route-id="@Model.Id">Verify Email</button>
-                        </div>
+                        @if (Model.UseEmailSender)
+                        {
+                            <div class="verify-email">
+                                <input asp-for="Email" class="form-control" />
+                                <button type="submit" class="btn btn-primary" asp-controller="User" asp-action="SendVerifyEmail" asp-route-id="@Model.Id">Verify Email</button>
+                            </div>
+                        }
+                        else
+                        {
+                             <input asp-for="Email" class="form-control" />
+                        }
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <div class="form-group">

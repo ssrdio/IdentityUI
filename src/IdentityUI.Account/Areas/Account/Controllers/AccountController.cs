@@ -15,6 +15,7 @@ using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SSRD.IdentityUI.Account.Areas.Account.Services.Account;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -25,27 +26,29 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         private readonly IAddUserService _addUserService;
         private readonly IEmailService _emailService;
         private readonly ICredentialsService _credentialsService;
-        private readonly IdentityUIEndpoints _identityManagementEndpoints;
+        private readonly IAccountDataService _accountDataService;
+
+        private readonly IdentityUIEndpoints _identityUIEndpoints;
 
         public AccountController(ILoginService loginService, IEmailService emailService, IAddUserService addUserService, ICredentialsService credentialsService,
-            IOptionsSnapshot<IdentityUIEndpoints> identityManagmentEndpoints)
+            IAccountDataService accountDataService, IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
         {
             _loginService = loginService;
             _emailService = emailService;
             _addUserService = addUserService;
             _credentialsService = credentialsService;
+            _accountDataService = accountDataService;
 
-            _identityManagementEndpoints = identityManagmentEndpoints.Value;
+            _identityUIEndpoints = identityUIEndpoints.Value;
         }
 
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
-            ViewBag.RetunrUrl = returnUrl;
-            ViewBag.RegistrationEnabled = _identityManagementEndpoints.RegisterEnabled;
+            LoginViewModel loginViewModel = _accountDataService.GetLoginViewModel(returnUrl);
 
-            return View();
+            return View(loginViewModel);
         }
 
         [AllowAnonymous]
@@ -54,7 +57,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Login));
+                LoginViewModel loginViewModel = _accountDataService.GetLoginViewModel(returnUrl);
+                return View(loginViewModel);
             }
 
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -74,12 +78,10 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             }
             else
             {
-                ViewBag.RetunrUrl = returnUrl;
-                ViewBag.RegistrationEnabled = _identityManagementEndpoints.RegisterEnabled;
+                LoginViewModel loginViewModel = _accountDataService.GetLoginViewModel(returnUrl);
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt");
-
-                return View();
+                return View(loginViewModel);
             }
 
         }
@@ -149,40 +151,42 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Register(string returnUrl)
+        public IActionResult Register()
         {
-            if (!_identityManagementEndpoints.RegisterEnabled)
+            if (!_identityUIEndpoints.RegisterEnabled)
             {
                 return NotFound();
             }
 
-            ViewBag.RetunrUrl = returnUrl;
+            RegisterViewModel registerViewModel = _accountDataService.GetRegisterViewModel();
 
-            return View();
+            return View(registerViewModel);
         }
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterRequest registerRequest, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
-            if(!_identityManagementEndpoints.RegisterEnabled)
+            if(!_identityUIEndpoints.RegisterEnabled)
             {
                 return NotFound();
             }
 
             if(!ModelState.IsValid)
             {
-                return View();
+                RegisterViewModel registerViewModel = _accountDataService.GetRegisterViewModel();
+
+                return View(registerViewModel);
             }
 
             Result result = await _addUserService.Register(registerRequest);
             if(result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return View();
-            }
+                RegisterViewModel registerViewModel = _accountDataService.GetRegisterViewModel();
 
-            returnUrl = returnUrl ?? Url.Content("~/");
+                ModelState.AddErrors(result.Errors);
+                return View(registerViewModel);
+            }
 
             return RedirectToAction(nameof(RegisterSuccess));
         }
@@ -191,13 +195,20 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RegisterSuccess()
         {
-            return View();
+            RegisterSuccessViewModel registerSuccessViewModel = _accountDataService.GetRegisterSuccessViewModel();
+
+            return View(registerSuccessViewModel);
         }
 
         [AllowAnonymous]
         [HttpGet]
         public IActionResult ResetPassword(string code = null)
         {
+            if(!_identityUIEndpoints.UseEmailSender)
+            {
+                return NotFound();
+            }
+
             ResetPasswordViewModel viewModel = new ResetPasswordViewModel(
                 code: code);
 
@@ -208,6 +219,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
+            if (!_identityUIEndpoints.UseEmailSender)
+            {
+                return NotFound();
+            }
+
             if (!ModelState.IsValid)
             {
                 return RedirectToAction(nameof(Login));
@@ -229,6 +245,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult ResetPasswordSuccess()
         {
+            if (!_identityUIEndpoints.UseEmailSender)
+            {
+                return NotFound();
+            }
+
             return View();
         }
 
@@ -236,6 +257,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RecoverPassword()
         {
+            if (!_identityUIEndpoints.UseEmailSender)
+            {
+                return NotFound();
+            }
+
             return View();
         }
 
@@ -243,6 +269,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost]
         public async Task<IActionResult> RecoverPassword(RecoverPasswordRequest request)
         {
+            if (!_identityUIEndpoints.UseEmailSender)
+            {
+                return NotFound();
+            }
+
             if (!ModelState.IsValid)
             {
                 return RedirectToAction(nameof(Login));
@@ -262,6 +293,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RecoverPasswordSuccess()
         {
+            if (!_identityUIEndpoints.UseEmailSender)
+            {
+                return NotFound();
+            }
+
             return View();
         }
 

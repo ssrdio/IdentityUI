@@ -17,6 +17,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Models;
+using SSRD.IdentityUI.Core.Models.Options;
+using Microsoft.Extensions.Options;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
 {
@@ -26,16 +29,20 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
         private readonly IRoleRepository _roleRepository;
         private readonly IBaseRepository<SessionEntity> _sessionRepository;
 
+        private readonly IdentityUIEndpoints _identityUIEndpoints;
+
         private readonly IValidator<DataTableRequest> _dataTableValidator;
 
         private readonly ILogger<UserDataService> _logger;
 
         public UserDataService(IUserRepository userRepository, IRoleRepository roleRepository, IBaseRepository<SessionEntity> sessionRepository,
-            IValidator<DataTableRequest> dataTableValidator, ILogger<UserDataService> logger)
+            IOptions<IdentityUIEndpoints> identityUIEndpoints, IValidator<DataTableRequest> dataTableValidator, ILogger<UserDataService> logger)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _sessionRepository = sessionRepository;
+
+            _identityUIEndpoints = identityUIEndpoints.Value;
 
             _dataTableValidator = dataTableValidator;
 
@@ -116,7 +123,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 /*phoneNumberConfirmed:*/ x.PhoneNumberConfirmed,
                 /*twoFactorEnabled:*/ x.TwoFactorEnabled,
                 /*enabled:*/ x.Enabled,
-                /*LockoutEnd:*/ x.LockoutEnd.HasValue ? x.LockoutEnd.Value.ToString("d.M.yyyy HH:mm:ss") : null));
+                /*LockoutEnd:*/ x.LockoutEnd.HasValue ? x.LockoutEnd.Value.ToString("d.M.yyyy HH:mm:ss") : null,
+                /*UseEmailSender*/ _identityUIEndpoints.UseEmailSender));
 
             UserDetailsViewModel userDetails = _userRepository.Get(userSpecification);
             if (userDetails == null)
