@@ -195,13 +195,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 if(registrationData != null)
                 {
                     viewModel.Add(new RegistrationsViewModel(
-                        date: date.ToString("d.M.yyyy"),
+                        date: date.ToString("o"),
                         count: registrationData.Count));
                 }
                 else
                 {
                     viewModel.Add(new RegistrationsViewModel(
-                        date: date.ToString("d.M.yyyy"),
+                        date: date.ToString("o"),
                         count: 0));
                 }
             }

@@ -1,39 +1,89 @@
-﻿
+﻿class registarionsGraph {
+    constructor() {
+        this.fromDate = moment.utc().startOf('month');
+        this.toDate = moment.utc().add(1, 'M').startOf('month');
 
-var selectedMonthString = moment().startOf('month').format('MMMM YYYY');
-document.getElementById("selected-month").innerHTML = selectedMonthString;
+        $('#minus-one').click(() => {
+            this.monthMinusOne();
+        });
 
-var fromDate = moment().startOf('month').format();
-var toDate = moment().add(1, 'M').startOf('month').format();
+        $('#plus-one').click(() => {
+            this.monthPlusOne();
+        });
 
-$(document).ready(function () {
-    getGraph(fromDate, toDate);
-});
+        this.initChart();
 
-$('#minus-one').click(() => {
-    monthMinusOne();
-});
+        this.getGraph();
+    }
 
-$('#plus-one').click(() => {
-    monthPlusOne();
-});
+    initChart() {
+        this.chart = new ApexCharts(
+            document.querySelector("#chart-apex-area"),
+            {
+                chart: {
+                    height: 350,
+                    type: 'area',
+                    zoom: {
+                        enabled: false
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'straight'
+                },
+                series: [],
+                xaxis: {
+                    type: 'datetime',
+                    tickPlacement: 'between',
+                },
+                yaxis: {
+                    forceNiceScale: false,
+                    decimalsInFloat: 2,
+                    opposite: true
+                },
+                legend: {
+                    horizontalAlign: 'left'
+                }
+            });
 
-function monthMinusOne() {
-    var newFromDate = moment(fromDate).subtract(1, 'M').format()
-    var newToDate = moment(toDate).subtract(1, 'M').format();
-    selectedMonthString = moment(newFromDate).format('MMMM YYYY');
-    document.getElementById("selected-month").innerHTML = selectedMonthString;
-    fromDate = newFromDate;
-    toDate = newToDate;
-    updateGraph(fromDate, toDate)
-}
+        this.chart.render();
+    }
 
-function monthPlusOne() {
-    var newFromDate = moment(fromDate).add(1, 'M').format()
-    var newToDate = moment(toDate).add(1, 'M').format();
-    selectedMonthString = moment(newFromDate).format('MMMM YYYY');
-    document.getElementById("selected-month").innerHTML = selectedMonthString;
-    fromDate = newFromDate;
-    toDate = newToDate;
-    updateGraph(fromDate, toDate)
+    monthMinusOne() {
+        this.fromDate = this.fromDate.subtract(1, 'M');
+        this.toDate = this.toDate.subtract(1, 'M');
+
+        this.getGraph();
+    }
+
+    monthPlusOne() {
+        this.fromDate = this.fromDate.add(1, 'M');
+        this.toDate = this.toDate.add(1, 'M');
+
+        this.getGraph();
+    }
+
+    getGraph() {
+        Api.get(`/IdentityAdmin/GetRegistrationStatistics?from=${this.fromDate.toISOString()}&to=${this.toDate.toISOString()}`)
+            .done((data) => {
+                let series = data.map((e) => {
+                    let r = { x: e.date, y: e.count }
+
+                    return r;
+                });
+
+                this.chart.updateSeries([{
+                    name: 'Registarions',
+                    data: series
+                }]);
+
+                let selectedMonthString = this.fromDate.format('MMMM YYYY');
+                $("#selected-month").text(selectedMonthString);
+            })
+            .fail((resp) => {
+                console.log(resp);
+            });
+    }
 }
