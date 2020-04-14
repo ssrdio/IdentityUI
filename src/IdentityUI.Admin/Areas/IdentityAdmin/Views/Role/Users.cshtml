@@ -29,11 +29,13 @@
                 columns: [
                     {
                         data: "userName",
-                        title: "Username"
+                        title: "Username",
+                        render: $.fn.dataTable.render.text()
                     },
                     {
                         data: "email",
-                        title: "Email"
+                        title: "Email",
+                        render: $.fn.dataTable.render.text()
                     },
                     {
                         data: null,
