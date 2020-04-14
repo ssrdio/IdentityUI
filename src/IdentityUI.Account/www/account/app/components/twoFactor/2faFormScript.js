@@ -7,57 +7,60 @@ class code2fa {
             height: 150
         });
 
+        let showCodeText = 'Show Code';
+        let hideCodeText = 'Hide Code';
+
+        let showCode = false;
+
+        let $code = $('.code');
+        let $showCodeLink = $('.linkCode');
+
         //Show/hide code
-        $('.linkCode').on('click', function (event) {
-            $('.code').addClass('showCode');
-            $('.linkCode').addClass('hide');
+        $('.linkCode').on('click', () => {
+            if (showCode === true) {
+                showCode = false;
+
+                $code.hide();
+                $showCodeLink.text(showCodeText);
+            }
+            else {
+                showCode = true;
+
+                $code.show();
+                $showCodeLink.text(hideCodeText);
+            }
         });
 
-			$('#form2fa').find('input').val("");
+        const $form = $('#form2fa');
+
+        var $input = $form.find('.verefication-code');
+
+        $input.on('keyup', () => {
+            // When user select text in the document, also abort.
+            var selection = window.getSelection().toString();
+            if (selection !== '') {
+                return;
+            }
+
+            // When the arrow keys are pressed, abort.
+            if ($.inArray(event.keyCode, [38, 40, 37, 39]) !== -1) {
+                return;
+            }
+
+            var input = $input.val();
+            input = input.replace(/[\W\s\._\-]+/g, '');
+
+            var split = 3;
+            var chunk = [];
+
+            for (var i = 0, len = input.length; i < len; i += split) {
+                // split = 4; //(i >= 4 && i <= 32) ? 4 : 8;
+                chunk.push(input.substr(i, split));
+            }
+
+            $input.val(() => {
+                return chunk.join('-').toUpperCase();
+            });
+        });
     }
 }
-
-
-
-// input Formating
-
-(function($, undefined) {
-  'use strict';
-
-  // When ready.
-  $(function() {
-      var $form = $('#form2fa');
-    var $input = $form.find('input');
-
-    $input.on('keyup', function(event) {
-      // When user select text in the document, also abort.
-      var selection = window.getSelection().toString();
-      if (selection !== '') {
-        return;
-      }
-
-      // When the arrow keys are pressed, abort.
-      if ($.inArray(event.keyCode, [38, 40, 37, 39]) !== -1) {
-        return;
-      }
-
-      var $this = $(this);
-      var input = $this.val();
-      input = input.replace(/[\W\s\._\-]+/g, '');
-
-      var split = 3;
-      var chunk = [];
-
-      for (var i = 0, len = input.length; i < len; i += split) {
-        // split = 4; //(i >= 4 && i <= 32) ? 4 : 8;
-        chunk.push(input.substr(i, split));
-      }
-
-      $this.val(function() {
-        return chunk.join('-').toUpperCase();
-      });
-    });
-
-   
-  });
-})(jQuery);
