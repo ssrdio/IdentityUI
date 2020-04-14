@@ -86,8 +86,8 @@ ConfigureIdentityUI(Configuration, endpoints =>
     endpoints.ConfirmeEmail = "/Account/ConfirmEmail";
     endpoints.ResetPassword = "/Account/ResetPassword";
 
-    endpoints.RegisterEnabled = false;
-
+    endpoints.RegisterEnabled = true;
+    endpoints.UseEmailSender = false;
 }) // These are the default endpoints options.
 ```
 

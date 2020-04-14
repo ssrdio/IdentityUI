@@ -8,7 +8,7 @@
                 <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
                 <div class="modal-dialog w-100 mx-auto">
                     <div class="modal-content">
-                        <form class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewBag.RetunrUrl" method="post">
+                        <form class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                             <div class="modal-body extra-body-padding">
                                 <div class="h5 modal-title text-center">
                                     <h4 class="mt-2 modal-header-custom">
@@ -38,13 +38,16 @@
                                     </label>
                                 </div>
                                 <div class="divider"></div>
-                                @if (ViewBag.RegistrationEnabled)
+                                @if (Model.RegistrationEnabled)
                                 {
                                     <h6 class="mb-0">No account? <a href="@PagePath.REGISTER" class="text-primary">Sign up</a> </h6>
                                 }
-                                <div class="password-margin">
-                                    <h6 class="mb-0">Forgotten Password? <a href="@PagePath.RECOVER_PASSWORD" class="text-primary">Recover</a> </h6>
-                                </div>
+                                @if (Model.PasswordRecoveryEnabled)
+                                {
+                                    <div class="password-margin">
+                                        <h6 class="mb-0">Forgotten Password? <a href="@PagePath.RECOVER_PASSWORD" class="text-primary">Recover</a> </h6>
+                                    </div>
+                                }
                             </div>
                             <div class="modal-footer clearfix">
                                 <div class="float-right">

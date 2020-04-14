@@ -32,6 +32,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.DependencyInjection;
+using SSRD.IdentityUI.Core.Infrastructure.Services;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -65,15 +66,50 @@ namespace SSRD.IdentityUI.Core
         public static IdentityUIServicesBuilder ConfigureIdentityUI(this IServiceCollection services, IConfiguration configuration,
             Action<IdentityUIEndpoints> endpointAction)
         {
-            services.Configure<IdentityUIOptions>(configuration.GetSection("IdentityUI"));
-            services.Configure<DatabaseOptions>(configuration.GetSection($"IdentityUI:{nameof(IdentityUIOptions.Database)}"));
-            services.Configure<EmailSenderOptions>(configuration.GetSection($"IdentityUI:{nameof(IdentityUIOptions.EmailSender)}"));
+            IdentityUIOptions identityUIOptions = configuration.GetSection("IdentityUI").Get<IdentityUIOptions>();
+
+            if(identityUIOptions == null)
+            {
+                identityUIOptions = new IdentityUIOptions();
+            }
+
+            services.Configure<IdentityUIOptions>(options => 
+            {
+                options.BasePath = identityUIOptions.BasePath;
+                options.Database = identityUIOptions.Database;
+                options.EmailSender = identityUIOptions.EmailSender;
+            });
+
+            services.Configure<DatabaseOptions>(options => 
+            {
+                options.ConnectionString = identityUIOptions.Database?.ConnectionString;
+            });
+
+            services.Configure<EmailSenderOptions>(options => 
+            {
+                options.Ip = identityUIOptions.EmailSender?.Ip;
+                options.Port = identityUIOptions.EmailSender?.Port ?? -1;
+                options.UserName = identityUIOptions.EmailSender?.UserName;
+                options.Password = identityUIOptions.EmailSender?.Password;
+            });
+
             services.Configure<IdentityUIEndpoints>(endpointAction);
 
             IdentityUIEndpoints identityManagementEndpoints = new IdentityUIEndpoints();
             endpointAction?.Invoke(identityManagementEndpoints);
 
+            if ((identityUIOptions.EmailSender == null || string.IsNullOrEmpty(identityUIOptions.EmailSender.Ip)) && !identityManagementEndpoints.UseEmailSender)
+            {
+                identityManagementEndpoints.UseEmailSender = false;
+            }
+            else
+            {
+                identityManagementEndpoints.UseEmailSender = true;
+            }
+
             IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints);
+
+            builder.Services.AddScoped<IEmailSender, NullEmailSender>();
 
             return builder;
         }
@@ -177,7 +213,7 @@ namespace SSRD.IdentityUI.Core
         /// <returns></returns>
         public static IdentityUIServicesBuilder AddEmailSender(this IdentityUIServicesBuilder builder)
         {
-            builder.Services.AddScoped<IEmailSender, Infrastructure.Services.EmailSender>();
+            builder.Services.AddScoped<IEmailSender, EmailSender>();
 
             return builder;
         }

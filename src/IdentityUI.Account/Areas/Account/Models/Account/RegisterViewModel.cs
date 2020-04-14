@@ -18,5 +18,12 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
         [DisplayName("Confirm password")]
 
         public string ConfirmPassword { get; set; }
+
+        public bool RecoverPasswordEnabled { get; set; }
+
+        public RegisterViewModel(bool recoverPasswordEnabled)
+        {
+            RecoverPasswordEnabled = recoverPasswordEnabled;
+        }
     }
 }

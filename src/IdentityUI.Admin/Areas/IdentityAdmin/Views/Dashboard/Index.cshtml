@@ -10,6 +10,13 @@
 
 @section script {
     <script src="~/identityAdmin/app/user/graph/graph.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            new registarionsGraph();
+        });
+
+    </script>
 }
 
 @await Component.InvokeAsync("Cards")

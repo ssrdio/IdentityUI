@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize]
     [Area(PagePath.ACCOUNT_AREA_NAME)]
     public class BaseController : Controller

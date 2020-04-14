@@ -104,7 +104,15 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         }
 
         /// <summary>
-        /// Seeds admin and some users
+        /// Seeds admin and the following users
+        /// <br>carson.alexander@{your email domain}</br>
+        /// <br>merdith.alonso@{your email domain}</br>
+        /// <br>arturo.anad@{your email domain}</br>
+        /// <br>gytis.barzdukas@{your email domain}</br>
+        /// <br>yan.li@{your email domain}</br>
+        /// <br>peggy.justice@{your email domain}</br>
+        /// <br>laura.norman@{your email domain}</br>
+        /// <br>nino.olivetto@{your email domain}</br>
         /// </summary>
         /// <param name="app"></param>
         /// <param name="password"></param>

@@ -15,16 +15,19 @@
       },
       columns: [
         {
-          data: 'ip',
-          title: 'IP'
+            data: 'ip',
+            title: 'IP',
+            render: $.fn.dataTable.render.text()
         },
         {
-          data: 'created',
-          title: 'Created'
+            data: 'created',
+            title: 'Created',
+            render: $.fn.dataTable.render.text()
         },
         {
-          data: 'lastAccess',
-          title: 'Last Access'
+            data: 'lastAccess',
+            title: 'Last Access',
+            render: $.fn.dataTable.render.text()
         },
         {
           data: 'id',
