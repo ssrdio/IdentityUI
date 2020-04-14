@@ -42,7 +42,7 @@ namespace IdentityUI.Sample
                 endpoints.ResetPassword = "/Account/ResetPassword";
 
                 endpoints.RegisterEnabled = true;
-
+                endpoints.UseEmailSender = false;
             })
             .AddIdentityUI(options =>
             {
@@ -106,12 +106,11 @@ namespace IdentityUI.Sample
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.SeedIdentityAdmin("admin", "Password");
-
             app.UseStaticFiles();
             app.UseRouting();
 
-            app.UseIdentityUI(enableMigrations: false);
+            app.UseIdentityUI(enableMigrations: true);
+            app.SeedIdentityAdmin("admin", "Password");
 
             app.UseRevisionLogger(configureNLogger: true);
 
