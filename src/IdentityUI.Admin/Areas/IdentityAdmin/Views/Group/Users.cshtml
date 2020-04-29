@@ -1,0 +1,53 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group.GroupUserViewModel
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Group;
+}
+
+@section script{
+    <script src="~/identityAdmin/app/group/group-users.js"></script>
+    <script>
+        $(document).ready(function () {
+            new GroupUsers('@Model.GroupId', '@User.GetUserId()', '@Json.Serialize(Model.CanMangeGroupRoles)', '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True', '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True')
+        });
+    </script>
+}
+
+@section modal{
+    <div id="modal-container">
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
+        {
+            @await Component.InvokeAsync("AddExistingUserToGroupModal")
+        }
+
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div>
+    @(await Component.InvokeAsync("GroupMenu", Model.ToViewComponent(GroupMenuViewComponent.TabSelected.Users)))
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Users
+                    </h5>
+                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
+                    {
+                        <button id="add-existing-user-button" class="header-button">Add Existing User</button>
+                    }
+                    <button id="invite-user-button" class="header-button" disabled>Invite User</button>
+                </div>
+                <div class="custom_container custom_table">
+                    <table id="user-table" class="dataTableClass display "></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

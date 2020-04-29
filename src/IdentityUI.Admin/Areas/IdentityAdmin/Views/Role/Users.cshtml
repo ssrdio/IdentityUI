@@ -1,5 +1,5 @@
 ﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Role.Components.RoleMenu
-@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role.RoleUserViewModel
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role.RoleMenuViewModel
 
 @{
     SidebarSelection.SelectedOption = SidebarOptions.Role;
@@ -56,10 +56,10 @@
 }
 
 <div>
-    @(await Component.InvokeAsync("RoleMenu", new { roleId = Model.RoleId, tabSelected = RoleMenuViewComponent.TabSelected.Users, roleName = Model.Name }))
+    @(await Component.InvokeAsync("RoleMenu", Model.ToComponentViewModel(RoleMenuViewComponent.TabSelected.Users)))
 
     <div class="tab-content">
-        <div class="main-card mb-3 card">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
             <div class="card-title-space">
                 <h5 class="card-title">
                     Users

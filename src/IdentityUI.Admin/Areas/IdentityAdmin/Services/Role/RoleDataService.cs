@@ -14,6 +14,13 @@ using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role;
+using SSRD.AdminUI.Template.Models;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
+using SSRD.IdentityUI.Core.Data.Enums.Entity;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Razor;
+using System.Runtime.CompilerServices;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
 {
@@ -35,6 +42,23 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
             _dataTableValidator = dataTableValidator;
 
             _logger = logger;
+        }
+
+        private IEnumerable<SelectListItem> GetRoleTypesList(RoleTypes? selected = null)
+        {
+            RoleTypes[] roleTypes = new RoleTypes[]
+            {
+                RoleTypes.System,
+                RoleTypes.Group,
+            };
+
+            IEnumerable<SelectListItem> selectListItems = roleTypes
+                .Select(x => new SelectListItem(
+                    text: $"{x}",
+                    value: ((int)x).ToString(),
+                    selected: selected.HasValue ? x == selected : false));
+
+            return selectListItems;
         }
 
         public Result<DataTableResult<RoleListViewModel>> GetAll(DataTableRequest request)
@@ -59,7 +83,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
             baseSpecification.AppalyPaging(request.Start, request.Length);
             baseSpecification.AddSelect(x => new RoleListViewModel(
                 x.Id,
-                x.Name));
+                x.Name,
+                x.Type.ToString()));
 
             PaginatedData<RoleListViewModel> pagedResult = _roleRepository.GetPaginated(baseSpecification);
 
@@ -80,7 +105,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
             roleSpecification.AddSelect(x => new RoleDetailViewModel(
                 x.Id,
                 x.Name,
-                x.Description));
+                x.Description,
+                x.Type));
 
             RoleDetailViewModel roleDetail = _roleRepository.Get(roleSpecification);
             if (roleDetail == null)
@@ -89,7 +115,24 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
                 return Result.Fail<RoleDetailViewModel>("no_role", "No Role");
             }
 
+            roleDetail.RoleTypes = GetRoleTypesList(roleDetail.Type);
+
             return Result.Ok(roleDetail);
+        }
+
+        public NewRoleViewModel GetNewRoleViewModel(Result result = null)
+        {
+            StatusAlertViewModel statusAlert = null;
+            if(result != null)
+            {
+                statusAlert = StatusAlertViewExtension.Get(result);
+            }
+
+            NewRoleViewModel newRoleViewModel = new NewRoleViewModel(
+                statusAlert: statusAlert,
+                roleTypes: GetRoleTypesList());
+
+            return newRoleViewModel;
         }
 
         public Result<DataTableResult<UserViewModel>> GetUsers(string roleId, DataTableRequest request)
@@ -97,7 +140,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
             ValidationResult validationResult = _dataTableValidator.Validate(request);
             if (!validationResult.IsValid)
             {
-                _logger.LogWarning($"Invlid DataTableRequest model");
+                _logger.LogWarning($"Invalid DataTableRequest model");
                 return Result.Fail<DataTableResult<UserViewModel>>(ResultUtils.ToResultError(validationResult.Errors.ToList()));
             }
 
@@ -144,19 +187,19 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
             return Result.Ok(result);
         }
 
-        public Result<RoleUserViewModel> GetUsersViewModel(string id)
+        public Result<RoleMenuViewModel> GetRoleMenuViewModel(string id)
         {
-            SelectSpecification<RoleEntity, RoleUserViewModel> roleSpecification = new SelectSpecification<RoleEntity, RoleUserViewModel>();
+            SelectSpecification<RoleEntity, RoleMenuViewModel> roleSpecification = new SelectSpecification<RoleEntity, RoleMenuViewModel>();
             roleSpecification.AddFilter(x => x.Id == id);
-            roleSpecification.AddSelect(x => new RoleUserViewModel(
+            roleSpecification.AddSelect(x => new RoleMenuViewModel(
                 x.Id,
                 x.Name));
 
-            RoleUserViewModel roleUser = _roleRepository.Get(roleSpecification);
+            RoleMenuViewModel roleUser = _roleRepository.Get(roleSpecification);
             if (roleUser == null)
             {
                 _logger.LogWarning($"No Role. RoleId {id}");
-                return Result.Fail<RoleUserViewModel>("no_role", "No Role");
+                return Result.Fail<RoleMenuViewModel>("no_role", "No Role");
             }
 
             return Result.Ok(roleUser);

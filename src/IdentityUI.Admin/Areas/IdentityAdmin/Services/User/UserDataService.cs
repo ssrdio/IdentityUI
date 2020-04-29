@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
 using Microsoft.Extensions.Options;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
 {

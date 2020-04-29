@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Dashboard;
-using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Models.Result;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {

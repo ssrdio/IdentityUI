@@ -78,6 +78,14 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                 count: count);
         }
 
+        public bool Remove(TEntity entity)
+        {
+            _context.Entry(entity).State = EntityState.Deleted;
+
+            int changes = _context.SaveChanges();
+            return changes > 0;
+        }
+
         public bool Update(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;

@@ -17,5 +17,6 @@ namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
 
         bool Add(TEntity entity);
         bool Update(TEntity entity);
+        bool Remove(TEntity entity);
     }
 }

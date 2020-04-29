@@ -1,6 +1,5 @@
 ﻿using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
-using SSRD.IdentityUI.Core.Infrastructure.Data.Config;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -10,12 +9,23 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Config;
+using SSRD.IdentityUI.Core.Data.Entities.Group;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Config.Group;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data
 {
     internal class IdentityDbContext : IdentityDbContext<AppUserEntity, RoleEntity, string, UserClaimEntity, UserRoleEntity, UserLoginEntity, RoleClaimEntity, UserTokenEntity>
     {
         public DbSet<SessionEntity> Sessions { get; set; }
+        public DbSet<RoleAssignmentEntity> RoleAssignments { get; set; }
+        public DbSet<PermissionEntity> Permissions { get; set; }
+        public DbSet<PermissionRoleEntity> PermissionRole { get; set; }
+
+        public DbSet<GroupAttributeEntity> GroupAttributes { get; set; }
+        public DbSet<GroupEntity> Groups { get; set; }
+        public DbSet<GroupUserEntity> GroupUsers { get; set; }
 
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
             : base(options)
@@ -35,13 +45,13 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
 
-            builder.ApplyConfiguration(new AppUserConfiguration());
-            builder.ApplyConfiguration(new RoleConfiguration());
-            builder.ApplyConfiguration(new UserClaimConfiguration());
-            builder.ApplyConfiguration(new UserRoleConfiguration());
-            builder.ApplyConfiguration(new UserLoginConfiguration());
-            builder.ApplyConfiguration(new RoleClaimConfiguration());
-            builder.ApplyConfiguration(new UserTokenConfiguration());
+            builder.ConfigureIdentity();
+            builder.ConfigureGroup();
+
+            builder.ApplyConfiguration(new SessionConfiguration());
+            builder.ApplyConfiguration(new RoleAssignmentConfiguration());
+            builder.ApplyConfiguration(new PermissionConfiguration());
+            builder.ApplyConfiguration(new PermissionRoleConfiguration());
 
             builder.Entity<SessionEntity>().HasQueryFilter(x => x._DeletedDate == null);
         }

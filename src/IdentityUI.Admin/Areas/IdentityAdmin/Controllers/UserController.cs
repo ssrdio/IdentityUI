@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User;
-using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
@@ -14,6 +13,7 @@ using SSRD.IdentityUI.Core.Services.Auth.Session.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {

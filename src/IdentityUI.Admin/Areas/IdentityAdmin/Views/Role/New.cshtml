@@ -21,36 +21,41 @@
     }
 }
 
-        <div>
-            @if (Model != null && Model.StatusAlert != null)
-            {
-                <div id="snackbar">
-                    @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
-                </div>
-            }
-
-            <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
-                <div class="card-body">
-                    <div class="card-title-space">
-                        <h5 class="card-title">
-                            New Role:
-                        </h5>
-                    </div>
-                    <form class="custom-form" asp-action="New">
-                        <div class="form-group">
-                            <label asp-for="Name" class="control-label"></label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger error-alert-custom"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="Description" class="control-label"></label>
-                            <textarea asp-for="Description" class="form-control"></textarea>
-                            <span asp-validation-for="Description" class="text-danger error-alert-custom"></span>
-                        </div>
-                        <div class="button-holder">
-                            <input type="submit" value="Create" class="btn btn-primary custom-submit" />
-                        </div>
-                    </form>
-                </div>
-            </div>
+<div>
+    @if (Model != null && Model.StatusAlert != null)
+    {
+        <div id="snackbar">
+            @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
         </div>
+    }
+
+    <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    New Role:
+                </h5>
+            </div>
+            <form class="custom-form" asp-action="New">
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Type" class="control-label"></label>
+                    <select asp-for="Type" class="form-control" asp-items="Model.RoleTypes"></select>
+                    <span asp-validation-for="Type" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="button-holder">
+                    <input type="submit" value="Create" class="btn btn-primary custom-submit" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -8,11 +8,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string Type { get; set; }
 
-        public RoleListViewModel(string id, string name)
+        public RoleListViewModel(string id, string name, string type)
         {
             Id = id;
             Name = name;
+            Type = type;
         }
     }
 }

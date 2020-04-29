@@ -25,13 +25,17 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
 
         public const string ROLE_DETAILS = ROLE + "/Details/{0}";
         public const string ROLE_USERS = ROLE + "/Users/{0}";
+        public const string ROLE_ASSIGNMENTS = ROLE + "/Assignments/{0}";
+        public const string ROLE_PERMISSIONS = ROLE + "/Permissions/{0}";
 
         public const string ROLE_NEW = ROLE + "/New";
 
-        public const string CLIENT = IDENTITY_ADMIN_AREA + "/Client";
+        public const string PERMISSION = IDENTITY_ADMIN_AREA + "/Permission";
 
-        public const string CLIENT_NEW = CLIENT + "/New";
-        public const string CLIENT_DETAILS = CLIENT + "/Details/{0}";
+        public const string GROUP = IDENTITY_ADMIN_AREA + "/Group";
+        public const string GROUP_USERS = GROUP + "/Users/{0}";
+        public const string GROUP_ATTRIBUTES = GROUP + "/Attributes/{0}";
+
 
         public static string LOGOUT;
         public static string MANAGE;

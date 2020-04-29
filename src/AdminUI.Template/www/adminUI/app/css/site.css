@@ -1,0 +1,11 @@
+﻿.select2-container {
+    width: 100% !important;
+}
+
+.btn-danger {
+    color: #ff4747 !important;
+}
+
+.btn-danger:hover, .btn-danger:active {
+    color: white !important;
+}

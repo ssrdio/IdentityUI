@@ -10,6 +10,13 @@ using SSRD.IdentityUI.Admin.DependencyInjection;
 using SSRD.AdminUI.Template;
 using Microsoft.AspNetCore.Routing;
 using System;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
+using Microsoft.AspNetCore.DataProtection;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -34,6 +41,13 @@ namespace SSRD.IdentityUI.Admin
 
             builder.Services.AddScoped<IUserDataService, UserDataService>();
             builder.Services.AddScoped<IRoleDataService, RoleDataService>();
+
+            builder.Services.AddScoped<IRoleAssignmentDataService, RoleAssignmentDataService>();
+            builder.Services.AddScoped<IGroupDataService, GroupDataService>();
+            builder.Services.AddScoped<IRolePermissionsDataService, RolePermissionDataService>();
+            builder.Services.AddScoped<IGroupUserDataService, GroupUserDataService>();
+            builder.Services.AddScoped<IGroupAttributeDataService, GroupAttributeDataService>();
+            builder.Services.AddScoped<IPermissionDataService, PermissionDataService>();
 
             return builder;
         }

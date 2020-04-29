@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Data.Enums.Entity;
+using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data
 {
@@ -135,15 +139,17 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
                 if (context.Users.Any())
                 {
-                    logger.LogInformation($"Databse was not seeded, because Users table is not empty");
+                    logger.LogInformation($"Database was not seeded, because Users table is not empty");
                     return;
                 }
 
                 if (context.Roles.Any())
                 {
-                    logger.LogInformation($"Database was no seeded, because Role tabe is not empty");
+                    logger.LogInformation($"Database was no seeded, because Role table is not empty");
                     return;
                 }
+
+                SeedSystemEntities(context, roleManager, logger);
 
                 SeedAdmin(adminUserName, adminPassword, context, userManager, roleManager, logger);
                 Seed(emailDomain, password, userManager, roleManager, logger);
@@ -167,23 +173,18 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 IdentityResult createAdminResult = createAdmin.Result;
                 if (!createAdminResult.Succeeded)
                 {
-                    throw new Exception($"Faild to add admin. {string.Join(" ", createAdminResult.Errors.Select(x => x.Description))}");
+                    throw new Exception($"Failed to add admin. {string.Join(" ", createAdminResult.Errors.Select(x => x.Description))}");
                 }
             }
 
-            RoleEntity role;
+            RoleEntity role = context.Roles
+                .Where(x => x.Name == IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)
+                .SingleOrDefault();
 
-            role = new RoleEntity(RoleConstats.IDENTITY_MANAGMENT_ROLE, "Has access to IdentityServerManagment");
-
+            if (role == null)
             {
-                var createRole = roleManager.CreateAsync(role);
-                Task.WaitAll(createRole);
-
-                IdentityResult createRoleResult = createRole.Result;
-                if (!createRoleResult.Succeeded)
-                {
-                    throw new Exception($"Faild to add admin role. {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
-                }
+                logger.LogCritical($"No IdentityUI admin role");
+                throw new Exception("No IdentityUI admin role");
             }
 
             UserRoleEntity userRole = new UserRoleEntity(admin.Id, role.Id);
@@ -193,7 +194,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             int changes = context.SaveChanges();
             if (changes <= 0)
             {
-                throw new Exception($"Faild to link admin to admin role");
+                throw new Exception($"Failed to link admin to admin role");
             }
 
             logger.LogInformation($"Admin was seeded");
@@ -218,10 +219,78 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 Task.WaitAll(userManager.CreateAsync(user, password));
             }
 
-            Task.WaitAll(roleManager.CreateAsync(new RoleEntity("Admin", "Admin role")));
-            Task.WaitAll(roleManager.CreateAsync(new RoleEntity("Normal", "Normal role")));
+            Task.WaitAll(roleManager.CreateAsync(new RoleEntity("Admin", "Admin role", RoleTypes.System)));
+            Task.WaitAll(roleManager.CreateAsync(new RoleEntity("Normal", "Normal role", RoleTypes.System)));
 
             logger.LogInformation($"Identity database was Seeded");
+        }
+
+        private static void SeedSystemEntities(IdentityDbContext context, RoleManager<RoleEntity> roleManager, ILogger logger)
+        {
+            if(context.Roles.Any() || context.Permissions.Any() || context.PermissionRole.Any())
+            {
+                logger.LogInformation($"Db is not empty. Skiping seeded system entities");
+                return;
+            }
+
+            List<PermissionEntity> permissions = new List<PermissionEntity>();
+
+            foreach(string permission in IdentityUIPermissions.ALL_PERMISSIONS)
+            {
+                PermissionEntity permissionEntity = new PermissionEntity(
+                    name: permission,
+                    description: null);
+
+                permissions.Add(permissionEntity);
+            }
+
+            context.Permissions.AddRange(permissions);
+            int addPermissionChanges = context.SaveChanges();
+            if (addPermissionChanges != permissions.Count)
+            {
+                logger.LogCritical($"Failed to add system Permission.");
+                throw new Exception("failed_to_add_system_permission");
+            }
+
+            List<RoleEntity> roles = new List<RoleEntity>();
+            foreach(string roleName in IdentityUIRoles.ALL_ROLES)
+            {
+                RoleEntity roleEntity = new RoleEntity(roleName, null, RoleTypes.System);
+                roles.Add(roleEntity);
+
+                Task<IdentityResult> createRole = roleManager.CreateAsync(roleEntity);
+                Task.WaitAll(createRole);
+
+                IdentityResult createRoleResult = createRole.Result;
+                if (!createRoleResult.Succeeded)
+                {
+                    logger.LogCritical($"Failed to add IdentityUI system role. RoleNam {roleName}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
+                    throw new Exception($"Failed to add IdentityUI system role.");
+                }
+            }
+
+            RoleEntity identityAdminRole = context.Roles
+                .Where(x => x.Name == IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)
+                .SingleOrDefault();
+
+            if(identityAdminRole == null)
+            {
+                logger.LogCritical($"No IdentityUI admin role");
+                throw new Exception("No IdentityUI admin role");
+            }
+
+            IEnumerable<PermissionRoleEntity> permissionRoles = permissions
+                .Select(x => new PermissionRoleEntity(
+                    permissionId: x.Id,
+                    roleId: identityAdminRole.Id));
+
+            context.PermissionRole.AddRange(permissionRoles);
+            int addPermissionRoleChanges = context.SaveChanges();
+            if(addPermissionRoleChanges != permissionRoles.Count())
+            {
+                logger.LogCritical($"Failed to add IdentityUI admin role permissions");
+                throw new Exception("Failed to add IdentityUI admin role permissions");
+            }
         }
     }
 }

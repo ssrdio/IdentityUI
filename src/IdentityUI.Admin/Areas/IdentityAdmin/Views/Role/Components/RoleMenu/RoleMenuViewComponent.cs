@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,22 +8,25 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Role.Components.RoleMe
 {
     public class RoleMenuViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke(string roleId, TabSelected tabSelected, string roleName)
+        public IViewComponentResult Invoke(ViewModel viewModel)
         {
-            return View("Default", new ViewModel(roleId, tabSelected, roleName));
+            return View("Default", viewModel);
         }
 
         public class ViewModel
         {
             public string RoleId { get; set; }
-            public TabSelected TabSelected { get; set; }
             public string RoleName { get; set; }
 
-            public ViewModel(string roleId, TabSelected tabSelected, string roleName)
+            public TabSelected TabSelected { get; set; }
+
+
+            public ViewModel(string roleId, string roleName, TabSelected tabSelected)
             {
                 RoleId = roleId;
-                TabSelected = tabSelected;
                 RoleName = roleName;
+
+                TabSelected = tabSelected;
             }
         }
 
@@ -30,6 +34,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Role.Components.RoleMe
         {
             Details = 1,
             Users = 2,
+            Assignments = 3,
+            Permissions = 4,
         }
     }
 }

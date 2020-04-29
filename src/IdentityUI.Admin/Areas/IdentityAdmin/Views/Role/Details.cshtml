@@ -21,13 +21,13 @@
 }
 
 <div>
-    @(await Component.InvokeAsync("RoleMenu", new { roleId = Model.Id, tabSelected = RoleMenuViewComponent.TabSelected.Details, roleName = Model.Name }))
+    @(await Component.InvokeAsync("RoleMenu", new RoleMenuViewComponent.ViewModel(Model.Id, Model.Name, RoleMenuViewComponent.TabSelected.Details)))
 
     @if (Model.StatusAlert != null)
     {
-    <div id="snackbar">
-        @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
-    </div>
+        <div id="snackbar">
+            @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+        </div>
     }
 
     <div class="tab-content">
@@ -40,14 +40,14 @@
                 </div>
                 <form asp-controller="Role" asp-action="Edit" asp-route-id="@Model.Id" method="post" class="custom-form">
                     <div class="form-group">
-                        <label asp-for="Id" class="control-label"></label>
-                        <input asp-for="Id" class="form-control disabled" disabled />
-                        <span asp-validation-for="Id" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
                         <label asp-for="Name" class="control-label"></label>
                         <input asp-for="Name" class="form-control disabled" disabled />
                         <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Type" class="control-label"></label>
+                        <select asp-for="Type" class="form-control" asp-items="Model.RoleTypes" disabled></select>
+                        <span asp-validation-for="Type" class="text-danger error-alert-custom"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="Description" class="control-label"></label>

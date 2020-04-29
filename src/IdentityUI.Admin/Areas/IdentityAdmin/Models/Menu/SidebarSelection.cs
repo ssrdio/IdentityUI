@@ -14,5 +14,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu
         Dashboard = 1,
         User = 2,
         Role = 3,
+        Permission = 4,
+        Group = 5
     }
 }

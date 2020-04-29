@@ -2,23 +2,60 @@
 
 <nav class="sidebar sidebar-offcanvas menu-line-color" id="sidebar">
     <ul class="nav">
-        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Dashboard ? "active": "")">
-            <a class="nav-link" href="@PagePath.DASHBOARD">
-                <i class="fas fa-chart-line"></i>
-                <span class="menu-title i-mar">Dashboard</span>
-            </a>
-        </li>
-        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.User ? "active": "")">
-            <a class="nav-link" href="@PagePath.USER">
-                <i class="fas fa-user"></i>
-                <span class="menu-title i-mar">User</span>
-            </a>
-        </li>
-        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Role ? "active": "")">
-            <a class="nav-link" href="@PagePath.ROLE">
-                <i class="far fa-id-badge"></i>
-                <span class="menu-title i-mar">Role</span>
-            </a>
-        </li>
-    </ul>
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Dashboard ? "active" : "")">
+                <a class="nav-link" href="@PagePath.DASHBOARD">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="menu-title i-mar">Dashboard</span>
+                </a>
+            </li>
+        }
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.User ? "active" : "")">
+                <a class="nav-link" href="@PagePath.USER">
+                    <i class="fas fa-user"></i>
+                    <span class="menu-title i-mar">User</span>
+                </a>
+            </li>
+        }
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Role ? "active" : "")">
+                <a class="nav-link" href="@PagePath.ROLE">
+                    <i class="far fa-id-badge"></i>
+                    <span class="menu-title i-mar">Role</span>
+                </a>
+            </li>
+        }
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Permission ? "active" : "")">
+                <a class="nav-link" href="@PagePath.PERMISSION">
+                    <i class="fas fa-stop"></i>
+                    <span class="menu-title i-mar">Permission</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Group ? "active" : "")">
+                @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+                {
+                    <a class="nav-link" href="@PagePath.GROUP">
+                        <i class="fas fa-user-friends"></i>
+                        <span class="menu-title i-mar">Group</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="nav-link">
+                        <i class="fas fa-user-friends"></i>
+                        <span class="menu-title i-mar">Group</span>
+                    </span>
+                }
+            </li>
+        }
+        </ul>
 </nav>

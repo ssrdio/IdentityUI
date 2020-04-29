@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
-using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
 using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Repository;
@@ -33,6 +32,12 @@ using System.Text;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.DependencyInjection;
 using SSRD.IdentityUI.Core.Infrastructure.Services;
+using SSRD.IdentityUI.Core.Services.Group;
+using SSRD.IdentityUI.Core.Interfaces.Services.Group;
+using SSRD.IdentityUI.Core.Interfaces.Services.Role;
+using SSRD.IdentityUI.Core.Services.Role.Models;
+using SSRD.IdentityUI.Core.Services.Permission;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -165,7 +170,7 @@ namespace SSRD.IdentityUI.Core
                 options.ValidationInterval = TimeSpan.FromMinutes(1);
                 options.OnRefreshingPrincipal = context =>
                 {
-                    Claim sessionCode = context.CurrentPrincipal.FindFirst(IdentityManagementClaims.SESSION_CODE);
+                    Claim sessionCode = context.CurrentPrincipal.FindFirst(IdentityUIClaims.SESSION_CODE);
                     if (sessionCode != null)
                     {
                         context.NewPrincipal.Identities.First().AddClaim(sessionCode);
@@ -269,6 +274,14 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddScoped<IRoleService, RoleService>();
 
+            builder.Services.AddScoped<IGroupService, GroupService>();
+            builder.Services.AddScoped<IRoleAssignmentService, RoleAssignmentService>();
+            builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+            builder.Services.AddScoped<IGroupUserService, GroupUserService>();
+            builder.Services.AddScoped<IGroupAttributeService, GroupAttributeService>();
+
+            builder.Services.AddScoped<IPermissionService, PermissionService>();
+
             builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<ITwoFactorAuthService, TwoFactorAuthService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
@@ -307,6 +320,20 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Session.Models.LogoutSessionRequest>, Core.Services.Auth.Session.Models.LogoutSessionValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Session.Models.LogoutUserSessionsRequest>, Core.Services.Auth.Session.Models.LogoutUserSessionValidator>();
+
+            builder.Services.AddSingleton<IValidator<AddRoleAssignmentRequest>, AddRoleAssignmentRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.AddGroupRequest>, Services.Group.Models.AddGroupRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<AddRolePermissionRequest>, Services.Role.Models.AddRolePermissionRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.AddExistingUserRequest>, Services.Group.Models.AddExisingUserRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.InviteUserToGroupRequest>, Services.Group.Models.InviteUserToGroupRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.AddGroupAttributeRequest>, Services.Group.Models.AddGroupAttributeRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.EditGroupAttributeRequest>, Services.Group.Models.EditGroupAttributeRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Permission.Models.AddPermissionRequest>, Services.Permission.Models.AddPermissionRequestValidator>();
         }
 
         /// <summary>
