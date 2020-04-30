@@ -58,7 +58,10 @@ namespace SSRD.IdentityUI.Core.Services.Identity
             {
                 claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ID, groupData.GroupId));
 
-                claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ROLE, groupData.RoleName));
+                if(!string.IsNullOrEmpty(groupData.RoleName))
+                {
+                    claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ROLE, groupData.RoleName));
+                }
 
                 foreach (string permission in groupData.Permissions)
                 {

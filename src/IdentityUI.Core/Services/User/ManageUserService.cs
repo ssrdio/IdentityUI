@@ -24,7 +24,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         private readonly IUserRepository _userRepository;
 
-        private readonly IEmailService _emailService;
+        private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ISessionService _sessionService;
 
         private readonly IValidator<EditUserRequest> _editUserValidator;
@@ -35,7 +35,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         private readonly ILogger<ManageUserService> _logger;
 
-        public ManageUserService(UserManager<AppUserEntity> userManager, IUserRepository userRepository, IEmailService emailService,
+        public ManageUserService(UserManager<AppUserEntity> userManager, IUserRepository userRepository, IEmailConfirmationService emailConfirmationService,
             ISessionService sessionService, IValidator<EditUserRequest> editUserValidator, IValidator<SetNewPasswordRequest> setNewPasswordValidator,
             IValidator<EditProfileRequest> editRequestValidator, IValidator<UnlockUserRequest> unlockUserValidator,
             IValidator<SendEmailVerificationMailRequest> sendEmailVerificationMailValidator, ILogger<ManageUserService> logger)
@@ -44,7 +44,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             _userRepository = userRepository;
 
-            _emailService = emailService;
+            _emailConfirmationService = emailConfirmationService;
             _sessionService = sessionService;
 
             _editUserValidator = editUserValidator;
@@ -307,7 +307,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
 
-            await _emailService.SendVerificationMail(appUser, code);
+            await _emailConfirmationService.SendVerificationMail(appUser, code);
 
             return Result.Ok();
         }

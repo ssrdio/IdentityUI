@@ -11,7 +11,9 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Group
         public string Name { get; private set; }
 
         public ICollection<GroupUserEntity> Users { get; private set; }
-        public ICollection<GroupAttributeEntity> GroupAttributes { get; set; }
+        public ICollection<GroupAttributeEntity> GroupAttributes { get; private set; }
+
+        public ICollection<InviteEntity> Invites { get; private set; }
 
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }

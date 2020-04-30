@@ -34,8 +34,12 @@
 
         this.statusAlert = new StatusAlertComponent('#status-alert-container');
 
+        const inviteUserModal = new InviteUserModal(this.groupId, `/IdentityAdmin/Invite/AddToGroup/${this.groupId}`, () => {
+            this.statusAlert.showSuccess("User was invited");
+        })
+
         $('#invite-user-button').on('click', () => {
-            console.log("invite user");
+            inviteUserModal.showModal();
         });
     }
 

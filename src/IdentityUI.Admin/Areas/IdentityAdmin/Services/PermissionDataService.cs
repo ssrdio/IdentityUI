@@ -9,9 +9,6 @@ using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Models.Result;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
 {
@@ -63,6 +60,25 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
                 data: paginatedData.Data);
 
             return Result.Ok(dataTableResult);
+        }
+
+        public Result<PermissionViewModel> GetViewModel(string id)
+        {
+            SelectSpecification<PermissionEntity, PermissionViewModel> selectSpecification = new SelectSpecification<PermissionEntity, PermissionViewModel>();
+            selectSpecification.AddFilter(X => X.Id == id);
+            selectSpecification.AddSelect(x => new PermissionViewModel(
+                x.Id,
+                x.Name,
+                x.Description));
+
+            PermissionViewModel permission = _permissionRepository.SingleOrDefault(selectSpecification);
+            if(permission == null)
+            {
+                _logger.LogError($"No Permission");
+                return Result.Fail<PermissionViewModel>("no_permission", "No Permission");
+            }
+
+            return Result.Ok(permission);
         }
     }
 }

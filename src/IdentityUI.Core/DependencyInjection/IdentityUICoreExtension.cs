@@ -11,7 +11,6 @@ using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services;
 using SSRD.IdentityUI.Core.Services.Auth;
-using SSRD.IdentityUI.Core.Services.Auth.Email;
 using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth;
 using SSRD.IdentityUI.Core.Services.Identity;
 using SSRD.IdentityUI.Core.Services.Role;
@@ -38,6 +37,8 @@ using SSRD.IdentityUI.Core.Interfaces.Services.Role;
 using SSRD.IdentityUI.Core.Services.Role.Models;
 using SSRD.IdentityUI.Core.Services.Permission;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using SSRD.IdentityUI.Core.Services.Email;
+using SSRD.IdentityUI.Core.Services.Auth.Email;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -96,6 +97,7 @@ namespace SSRD.IdentityUI.Core
                 options.Port = identityUIOptions.EmailSender?.Port ?? -1;
                 options.UserName = identityUIOptions.EmailSender?.UserName;
                 options.Password = identityUIOptions.EmailSender?.Password;
+                options.SenderName = identityUIOptions.EmailSender?.SenderName;
             });
 
             services.Configure<IdentityUIEndpoints>(endpointAction);
@@ -282,9 +284,13 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddScoped<IPermissionService, PermissionService>();
 
+            builder.Services.AddScoped<IInviteService, InviteService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IManageEmailService, ManageEmailService>();
+
             builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<ITwoFactorAuthService, TwoFactorAuthService>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<Interfaces.Services.Auth.IEmailConfirmationService, EmailConfirmationService>();
 
             builder.Services.AddScoped<ICredentialsService, Core.Services.Auth.Credentials.CredentialsService>();
 
@@ -300,6 +306,7 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddSingleton<IValidator<Core.Services.User.Models.NewUserRequest>, Core.Services.User.Models.NewUserRequestValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.User.Models.RegisterRequest>, Core.Services.User.Models.RegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.AcceptInviteRequest>, Services.User.Models.AcceptInviteRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginRequest>, Core.Services.Auth.Login.Models.LoginRequestValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginWith2faRequest>, Core.Services.Auth.Login.Models.LoginWith2faRequestValidator>();
@@ -334,6 +341,11 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Services.Group.Models.EditGroupAttributeRequest>, Services.Group.Models.EditGroupAttributeRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Permission.Models.AddPermissionRequest>, Services.Permission.Models.AddPermissionRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Email.Models.AddEmailRequest>, Services.Email.Models.AddEmailRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Email.Models.EditEmailRequest>, Services.Email.Models.EditEmailRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.InviteRequest>, Services.InviteRequestValidator>();
         }
 
         /// <summary>

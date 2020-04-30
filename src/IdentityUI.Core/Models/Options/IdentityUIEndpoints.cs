@@ -16,6 +16,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
 
         public string ConfirmeEmail { get; set; } = "/Account/ConfirmEmail";
         public string ResetPassword { get; set; } = "/Account/ResetPassword";
+        public string AcceptInvite { get; set; } = "/Account/AcceptInvite";
 
         public bool RegisterEnabled { get; set; } = true;
 

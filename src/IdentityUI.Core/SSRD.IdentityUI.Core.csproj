@@ -48,12 +48,15 @@
 
   <ItemGroup>
     <Folder Include="Infrastructure\Data\Scripts\Migrations\" />
-    <Folder Include="Services\Auth\Email\Models\" />
     <Folder Include="Infrastructure\Data\ReleaseManagment\Updates\" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Infrastructure\Data\Scripts\Migrations\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Stubble.Core" Version="1.7.2" />
   </ItemGroup>
 
 </Project>

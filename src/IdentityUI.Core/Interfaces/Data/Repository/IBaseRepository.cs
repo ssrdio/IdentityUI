@@ -10,8 +10,12 @@ namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
     public interface IBaseRepository<TEntity> where TEntity : class, IBaseEntity
     {
         bool Exist(IBaseSpecification<TEntity> specification);
+
         TEntity Get(IBaseSpecification<TEntity> specification);
+        TEntity SingleOrDefault(IBaseSpecification<TEntity> specification);
         TData Get<TData>(ISelectSpecification<TEntity, TData> specification);
+        TData SingleOrDefault<TData>(ISelectSpecification<TEntity, TData> specification);
+
         List<TData> GetList<TData>(ISelectSpecification<TEntity, TData> specification);
         PaginatedData<TData> GetPaginated<TData>(IPaginationSpecification<TEntity, TData> specification);
 

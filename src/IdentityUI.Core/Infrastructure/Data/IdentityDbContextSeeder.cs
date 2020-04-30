@@ -229,7 +229,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         {
             if(context.Roles.Any() || context.Permissions.Any() || context.PermissionRole.Any())
             {
-                logger.LogInformation($"Db is not empty. Skiping seeded system entities");
+                logger.LogInformation($"Databse is not empty. Skiping seeded system entities");
                 return;
             }
 
@@ -290,6 +290,51 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             {
                 logger.LogCritical($"Failed to add IdentityUI admin role permissions");
                 throw new Exception("Failed to add IdentityUI admin role permissions");
+            }
+
+            SeedEmails(context, logger);
+        }
+
+        private static void SeedEmails(IdentityDbContext context, ILogger logger)
+        {
+            if(context.Emails.Any())
+            {
+                logger.LogInformation($"Database is not empty. Skiping seeded system entities");
+                return;
+            }
+
+            List<EmailEntity> emails = new List<EmailEntity>();
+
+            EmailEntity inviteEmail = new EmailEntity(
+                subject: "Invitation",
+                body: "You have been invited. If you wish to register <a href='{{token}}'>click here</a>",
+                type: EmailTypes.Invite);
+            emails.Add(inviteEmail);
+
+            EmailEntity confirmationEmail = new EmailEntity(
+                subject: "Confirm your email",
+                body: "Please confirm your account by <a href='{{token}}'>clicking here</a>.",
+                type: EmailTypes.EmailConfirmation);
+            emails.Add(confirmationEmail);
+
+            EmailEntity passwordRecovery = new EmailEntity(
+                subject: "Reset Password",
+                body: "Please reset your password by <a href='{{token}}'>clicking here</a>",
+                type: EmailTypes.PasswordRecovery);
+            emails.Add(passwordRecovery);
+
+            EmailEntity passwordWasReset = new EmailEntity(
+                subject: "Password was reset",
+                body: "Your password has been reset",
+                type: EmailTypes.PasswordWasReset);
+            emails.Add(passwordWasReset);
+
+            context.Emails.AddRange(emails);
+            int changes = context.SaveChanges();
+            if(changes != emails.Count)
+            {
+                logger.LogCritical($"Failed to add system emails");
+                throw new Exception("Failed to add system emails");
             }
         }
     }

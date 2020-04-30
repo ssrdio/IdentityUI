@@ -57,5 +57,14 @@
                 }
             </li>
         }
-        </ul>
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Invite ? "active" : "")">
+                <a class="nav-link" href="@PagePath.INVITE">
+                    <i class="far fa-envelope"></i>
+                    <span class="menu-title i-mar">Invite</span>
+                </a>
+            </li>
+        }
+    </ul>
 </nav>

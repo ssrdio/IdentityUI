@@ -6,6 +6,7 @@
 
 @section script{
     <script src="~/identityAdmin/app/group/group-users.js"></script>
+    <script src="~/identityAdmin/app/invite/invite-user-modal.js"></script>
     <script>
         $(document).ready(function () {
             new GroupUsers('@Model.GroupId', '@User.GetUserId()', '@Json.Serialize(Model.CanMangeGroupRoles)', '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True', '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True')
@@ -18,6 +19,11 @@
         @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
         {
             @await Component.InvokeAsync("AddExistingUserToGroupModal")
+        }
+
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
+        {
+            @await Component.InvokeAsync("InviteUserModal")
         }
 
         @await Component.InvokeAsync("IdentityConfirmationModal")
@@ -42,7 +48,10 @@
                     {
                         <button id="add-existing-user-button" class="header-button">Add Existing User</button>
                     }
-                    <button id="invite-user-button" class="header-button" disabled>Invite User</button>
+                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
+                    {
+                        <button id="invite-user-button" class="header-button">Invite User</button>
+                    }
                 </div>
                 <div class="custom_container custom_table">
                     <table id="user-table" class="dataTableClass display "></table>

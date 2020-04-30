@@ -27,6 +27,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         public DbSet<GroupEntity> Groups { get; set; }
         public DbSet<GroupUserEntity> GroupUsers { get; set; }
 
+        public DbSet<InviteEntity> Invite { get; set; }
+        public DbSet<EmailEntity> Emails { get; set; }
+
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
             : base(options)
         {
@@ -52,6 +55,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             builder.ApplyConfiguration(new RoleAssignmentConfiguration());
             builder.ApplyConfiguration(new PermissionConfiguration());
             builder.ApplyConfiguration(new PermissionRoleConfiguration());
+
+            builder.ApplyConfiguration(new InviteConfiguration());
+            builder.ApplyConfiguration(new EmailConfiguration());
 
             builder.Entity<SessionEntity>().HasQueryFilter(x => x._DeletedDate == null);
         }

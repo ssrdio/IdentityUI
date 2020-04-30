@@ -30,10 +30,16 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
 
             EmailSenderOptions emailSender = options.Value;
 
+            bool enambleSsl = true;
+
+#if DEBUG
+            enambleSsl = false;
+#endif
+
             _smtpClient = new SmtpClient(emailSender.Ip, emailSender.Port)
             {
                 DeliveryFormat = SmtpDeliveryFormat.International,
-                EnableSsl = true,
+                EnableSsl = enambleSsl,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(emailSender.UserName, emailSender.Password)
             };

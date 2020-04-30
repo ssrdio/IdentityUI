@@ -48,6 +48,7 @@ namespace SSRD.IdentityUI.Admin
             builder.Services.AddScoped<IGroupUserDataService, GroupUserDataService>();
             builder.Services.AddScoped<IGroupAttributeDataService, GroupAttributeDataService>();
             builder.Services.AddScoped<IPermissionDataService, PermissionDataService>();
+            builder.Services.AddScoped<IInviteDataService, InviteDataService>();
 
             return builder;
         }

@@ -10,5 +10,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces
     public interface IPermissionDataService
     {
         Result<DataTableResult<PermissionTableModel>> Get(DataTableRequest dataTableRequest);
+        Result<PermissionViewModel> GetViewModel(string id);
     }
 }

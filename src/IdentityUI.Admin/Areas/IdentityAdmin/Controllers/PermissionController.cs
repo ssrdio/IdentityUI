@@ -32,6 +32,18 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         }
 
         [HttpGet]
+        public IActionResult Details(string id)
+        {
+            Result<PermissionViewModel> result = _permissionDataService.GetViewModel(id);
+            if (result.Failure)
+            {
+                return NotFoundView();
+            }
+
+            return View(result.Value);
+        }
+
+        [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<PermissionTableModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public IActionResult Get([FromQuery] DataTableRequest dataTableRequest)

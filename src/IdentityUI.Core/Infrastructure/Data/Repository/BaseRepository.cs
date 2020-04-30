@@ -86,6 +86,22 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
             return changes > 0;
         }
 
+        public TEntity SingleOrDefault(IBaseSpecification<TEntity> specification)
+        {
+            return _context
+                .Set<TEntity>()
+                .ApplayBaseSpecification(specification)
+                .SingleOrDefault();
+        }
+
+        public TData SingleOrDefault<TData>(ISelectSpecification<TEntity, TData> specification)
+        {
+            return _context
+                 .Set<TEntity>()
+                 .ApplaySelectSpecification(specification)
+                 .SingleOrDefault();
+        }
+
         public bool Update(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
