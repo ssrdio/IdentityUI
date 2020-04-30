@@ -88,6 +88,7 @@ namespace SSRD.IdentityUI.Core
 
             services.Configure<DatabaseOptions>(options => 
             {
+                options.Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory;
                 options.ConnectionString = identityUIOptions.Database?.ConnectionString;
             });
 
