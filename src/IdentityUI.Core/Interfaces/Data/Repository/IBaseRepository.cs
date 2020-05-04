@@ -13,14 +13,21 @@ namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
 
         TEntity Get(IBaseSpecification<TEntity> specification);
         TEntity SingleOrDefault(IBaseSpecification<TEntity> specification);
+
         TData Get<TData>(ISelectSpecification<TEntity, TData> specification);
+        TData GetWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification);
         TData SingleOrDefault<TData>(ISelectSpecification<TEntity, TData> specification);
+        TData SingleOrDefaultWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification);
 
         List<TData> GetList<TData>(ISelectSpecification<TEntity, TData> specification);
         PaginatedData<TData> GetPaginated<TData>(IPaginationSpecification<TEntity, TData> specification);
 
         bool Add(TEntity entity);
+        bool AddRange(IEnumerable<TEntity> entities);
+        
         bool Update(TEntity entity);
+
         bool Remove(TEntity entity);
+        bool RemoveRange(IEnumerable<TEntity> entities);
     }
 }

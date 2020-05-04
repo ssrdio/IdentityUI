@@ -20,8 +20,8 @@ using SSRD.IdentityUI.Core.Services.Identity;
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     //TODO: change this to api controller
-    [Route("[area]/Group/{groupId}/[controller]/[action]")]
     [AllowAnonymous]
+    [Route("[area]/Group/{groupId}/[controller]/[action]")]
     [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
     public class GroupUserController : BaseController
     {

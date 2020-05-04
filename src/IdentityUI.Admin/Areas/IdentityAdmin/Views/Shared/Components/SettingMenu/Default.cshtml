@@ -1,0 +1,20 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.SettingMenu
+@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.SettingMenu.SettingMenuViewComponent.ViewModel
+
+<div class="custom-header">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div>
+                @Model.Name
+            </div>
+        </div>
+    </div>
+    <ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == SettingMenuViewComponent.TabSelected.Email ? "active" : "") show" href="@(PagePath.SETTING_EMAIL)" aria-selected="@(Model.TabSelected == SettingMenuViewComponent.TabSelected.Email ? "true" : "false")">
+                <span>Emails</span>
+            </a>
+        </li>
+    </ul>
+</div>

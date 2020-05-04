@@ -90,7 +90,7 @@ namespace SSRD.IdentityUI.Core.Services
                 token: token,
                 status: Data.Enums.Entity.InviteStatuses.Pending,
                 groupId: inviteRequest.GroupId,
-                expiresAt: DateTimeOffset.UtcNow.AddHours(12));
+                expiresAt: DateTimeOffset.UtcNow.Add(_identityManagementEndpoints.InviteValidForTimeSpan));
 
             bool addInvite = _inviteRepository.Add(inviteEntity);
             if(!addInvite)

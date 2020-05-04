@@ -39,6 +39,9 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
 
         public const string INVITE = IDENTITY_ADMIN_AREA + "/Invite";
 
+        public const string SETTING = IDENTITY_ADMIN_AREA + "/Setting";
+        public const string SETTING_EMAIL = SETTING + "/Email";
+        public const string SETTING_EMAIL_DETAILS = SETTING_EMAIL + "/Details/{0}";
 
         public static string LOGOUT;
         public static string MANAGE;

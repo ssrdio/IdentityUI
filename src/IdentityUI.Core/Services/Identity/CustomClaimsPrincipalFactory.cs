@@ -18,15 +18,12 @@ namespace SSRD.IdentityUI.Core.Services.Identity
 {
     public class CustomClaimsPrincipalFactory : UserClaimsPrincipalFactory<AppUserEntity, RoleEntity>
     {
-        private readonly IBaseRepository<UserRoleEntity> _userRoleRepository;
-        private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
+        private readonly IBaseRepository<AppUserEntity> _userRepository;
 
         public CustomClaimsPrincipalFactory(UserManager<AppUserEntity> userManager, RoleManager<RoleEntity> roleManager,
-            IOptions<IdentityOptions> identityOptions, IBaseRepository<UserRoleEntity> userRoleRepository,
-            IBaseRepository<GroupUserEntity> groupUserRepository) : base(userManager, roleManager, identityOptions)
+            IOptions<IdentityOptions> identityOptions, IBaseRepository<AppUserEntity> userRepository) : base(userManager, roleManager, identityOptions)
         {
-            _userRoleRepository = userRoleRepository;
-            _groupUserRepository = groupUserRepository;
+            _userRepository = userRepository;
         }
 
         public override Task<ClaimsPrincipal> CreateAsync(AppUserEntity user)
@@ -40,65 +37,32 @@ namespace SSRD.IdentityUI.Core.Services.Identity
 
             //return claimsPrincipal;
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity("Identity.Application");
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
-            claimsIdentity.AddClaim(new Claim(Options.ClaimsIdentity.SecurityStampClaimType, user.SecurityStamp));
+            SelectSpecification<AppUserEntity, UserData> userDataSpecification = new SelectSpecification<AppUserEntity, UserData>();
+            userDataSpecification.AddFilter(x => x.Id == user.Id);
+            userDataSpecification.AddSelect(x => new UserData(
+                x.Id,
+                x.UserName,
+                x.SecurityStamp,
+                x.Groups
+                    .Select(c => new GroupData(
+                        c.Group.Id,
+                        c.Group.Name,
+                        c.Role.Name,
+                        c.Role.Permissions.Select(v => v.Permission.Name))),
+                x.UserRoles.Select(c => new RoleData(
+                    c.Role.Name,
+                    c.Role.Type,
+                    c.Role.Permissions.Select(v => v.Permission.Name)))
+                ));
 
-            SelectSpecification<GroupUserEntity, GroupData> getGroupIdSpecification = new SelectSpecification<GroupUserEntity, GroupData>();
-            getGroupIdSpecification.AddFilter(x => x.UserId == user.Id);
-            getGroupIdSpecification.AddSelect(x => new GroupData(
-                x.Group.Id,
-                x.Group.Name,
-                x.Role.Name,
-                x.Role.Permissions.Select(c => c.Permission.Name)));
+            UserData userData = _userRepository.SingleOrDefaultWithNoTracking(userDataSpecification);
 
-            GroupData groupData = _groupUserRepository.Get(getGroupIdSpecification);
-            if(groupData != null)
+            if(userData == null)
             {
-                claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ID, groupData.GroupId));
-
-                if(!string.IsNullOrEmpty(groupData.RoleName))
-                {
-                    claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ROLE, groupData.RoleName));
-                }
-
-                foreach (string permission in groupData.Permissions)
-                {
-                    claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_PERMISSION, permission));
-                }
+                throw new Exception("no user");
             }
 
-            SelectSpecification<UserRoleEntity, RoleData> selectSpecification = new SelectSpecification<UserRoleEntity, RoleData>();
-            selectSpecification.AddFilter(x => x.UserId == user.Id);
-            selectSpecification.AddSelect(x => new RoleData(
-                x.Role.Name,
-                x.Role.Type,
-                x.Role.Permissions.Select(c => c.Permission.Name)));
-
-            List<RoleData> roles = _userRoleRepository.GetList(selectSpecification);
-
-            foreach (RoleData role in roles)
-            {
-                if (role.Type == RoleTypes.System)
-                {
-                    claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role.Name));
-
-                    foreach (string permission in role.Permissions)
-                    {
-                        claimsIdentity.AddClaim(new Claim(IdentityUIClaims.PERMISSION, permission));
-                    }
-                }
-                else if (role.Type == RoleTypes.Group)
-                {
-                    claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ROLE, role.Name));
-
-                    foreach (string permission in role.Permissions)
-                    {
-                        claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_PERMISSION, permission));
-                    }
-                }
-            }
+            ClaimsIdentity claimsIdentity = userData.ToClaimIdentity(Options.ClaimsIdentity.SecurityStampClaimType);
 
             ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
@@ -138,6 +102,71 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 GroupName = groupName;
                 RoleName = roleName;
                 Permissions = permissions;
+            }
+        }
+
+        public class UserData
+        {
+            public string Id { get; set; }
+            public string Username { get; set; }
+            public string Email { get; set; }
+            public string SecurityStamp { get; set; }
+
+            public IEnumerable<GroupData> Groups { get; set; }
+            public IEnumerable<RoleData> Roles { get; set; }
+
+            public UserData(string id, string username, string securityStamp, IEnumerable<GroupData> groups, IEnumerable<RoleData> roles)
+            {
+                Id = id;
+                Username = username;
+                SecurityStamp = securityStamp;
+                Groups = groups;
+                Roles = roles;
+            }
+
+            public ClaimsIdentity ToClaimIdentity(string securityStampClaimType)
+            {
+                ClaimsIdentity claimsIdentity = new ClaimsIdentity("Identity.Application");
+
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, Id));
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, Username));
+                claimsIdentity.AddClaim(new Claim(securityStampClaimType, SecurityStamp));
+
+                if(Groups.Count() != 0 && Groups.Count() != 1)
+                {
+                    throw new Exception("multiply groups not supported");
+                }
+
+                GroupData group = Groups.FirstOrDefault();
+                if(group != null)
+                {
+                    claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ID, group.GroupId));
+
+                    if (!string.IsNullOrEmpty(group.RoleName))
+                    {
+                        claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ROLE, group.RoleName));
+                    }
+
+                    foreach (string permission in group.Permissions)
+                    {
+                        claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_PERMISSION, permission));
+                    }
+                }
+
+                foreach (RoleData role in Roles)
+                {
+                    if (role.Type == RoleTypes.System)
+                    {
+                        claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role.Name));
+
+                        foreach (string permission in role.Permissions)
+                        {
+                            claimsIdentity.AddClaim(new Claim(IdentityUIClaims.PERMISSION, permission));
+                        }
+                    }
+                }
+
+                return claimsIdentity;
             }
         }
     }

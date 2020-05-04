@@ -17,5 +17,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu
         Permission = 4,
         Group = 5,
         Invite = 6,
+        Setting = 7,
     }
 }

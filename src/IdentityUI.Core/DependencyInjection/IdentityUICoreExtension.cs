@@ -39,6 +39,7 @@ using SSRD.IdentityUI.Core.Services.Permission;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Services.Email;
 using SSRD.IdentityUI.Core.Services.Auth.Email;
+using SSRD.IdentityUI.Core.Data.Models;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -345,6 +346,7 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddSingleton<IValidator<Services.Email.Models.AddEmailRequest>, Services.Email.Models.AddEmailRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.Email.Models.EditEmailRequest>, Services.Email.Models.EditEmailRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Email.Models.SendTesEmailRequest>, Services.Email.Models.SendTestEmailRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.InviteRequest>, Services.InviteRequestValidator>();
         }
@@ -354,8 +356,9 @@ namespace SSRD.IdentityUI.Core
         /// </summary>
         /// <param name="app"></param>
         /// <param name="enableMigrations">Flag indicating if migrations should be run</param>
+        /// <param name="roles">Roles that you need for your application to run</param>
         /// <returns></returns>
-        public static IdentityUIAppBuilder UseIdentityUI(this IApplicationBuilder app, bool enableMigrations = false)
+        public static IdentityUIAppBuilder UseIdentityUI(this IApplicationBuilder app, bool enableMigrations = false, List<RoleData> roles = null)
         {
             app.UseAuthentication();
 #if NET_CORE3
@@ -366,6 +369,8 @@ namespace SSRD.IdentityUI.Core
             {
                 app.ApplyIdentityMigrations();
             }
+
+            app.SeedIdentityUIEntities(roles);
 
             return new IdentityUIAppBuilder(app); 
         }

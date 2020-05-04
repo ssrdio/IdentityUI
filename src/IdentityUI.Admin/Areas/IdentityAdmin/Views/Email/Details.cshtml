@@ -1,0 +1,107 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.SettingMenu
+@model             SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Setting.Email.EmailViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Setting;
+
+
+}
+
+@section script{
+    <script src="~/identityAdmin/app/setting/send-test-email.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            const statusAlert = new StatusAlertComponent('#status-alert-container');
+            new SendTestEmailModal(@Model.Id, '@Model.Email', () => {
+                statusAlert.hide();
+                statusAlert.showSuccess('Test mail was sent');
+            });
+        });
+    </script>
+
+    @if (Model.StatusAlert != null)
+    {
+        <script>
+                $(document).ready(function () {
+                    var x = document.getElementById("snackbar");
+                    x.className = "show";
+                    setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+                });
+        </script>
+    }
+}
+
+<div>
+    @(await Component.InvokeAsync("SettingMenu", new SettingMenuViewComponent.ViewModel("Email", SettingMenuViewComponent.TabSelected.Email)))
+
+    <div id="status-alert-container">
+        <div id="snackbar" class="snackbar">
+            <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && Model.StatusAlert.Success) ? "" : "none")">
+                <div class="alertMessage" style="width: 80%;display: inline-block;">
+                    @if ((Model.StatusAlert != null && Model.StatusAlert.Success))
+                    {
+                        @foreach (string message in Model.StatusAlert.Messages)
+                        {
+                            @message <br />
+                        }
+                    }
+                </div>
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+            </div>
+            <div class="alert-danger mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && !Model.StatusAlert.Success) ? "" : "none")">
+                <div class="alertMessage" style="width: 80%;display: inline-block;">
+                    @if ((Model.StatusAlert != null && !Model.StatusAlert.Success))
+                    {
+                        @foreach (string message in Model.StatusAlert.Messages)
+                        {
+                            @message <br />
+                        }
+                    }
+                </div>
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.UseEmailSender)
+    {
+        @await Component.InvokeAsync("SendTestEmailModal")
+    }
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Details
+                    </h5>
+                    @if (Model.UseEmailSender)
+                    {
+                        <button id="send-test-email" class="header-button">Send Test Email</button>
+                    }
+                </div>
+                <form asp-controller="Email" asp-action="Edit" asp-route-id="@Model.Id" method="post" class="custom-form">
+                    <div class="form-group">
+                        <label asp-for="Type" class="control-label"></label>
+                        <input asp-for="Type" class="form-control disabled" disabled />
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Subject" class="control-label"></label>
+                        <input asp-for="Subject" class="form-control" />
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Body" class="control-label"></label>
+                        <textarea asp-for="Body" class="form-control"></textarea>
+                        <span asp-validation-for="Body" class="text-danger"></span>
+                    </div>
+                    <div class="button-holder">
+                        <input type="submit" value="Edit" class="btn btn-primary custom-submit" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

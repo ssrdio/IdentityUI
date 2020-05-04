@@ -17,6 +17,8 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 using Microsoft.AspNetCore.DataProtection;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Setting;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -49,6 +51,7 @@ namespace SSRD.IdentityUI.Admin
             builder.Services.AddScoped<IGroupAttributeDataService, GroupAttributeDataService>();
             builder.Services.AddScoped<IPermissionDataService, PermissionDataService>();
             builder.Services.AddScoped<IInviteDataService, InviteDataService>();
+            builder.Services.AddScoped<IEmailDataService, EmailDataService>();
 
             return builder;
         }

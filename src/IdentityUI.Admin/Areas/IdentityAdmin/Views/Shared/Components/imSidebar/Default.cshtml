@@ -66,5 +66,14 @@
                 </a>
             </li>
         }
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Setting ? "active" : "")">
+                <a class="nav-link" href="@PagePath.SETTING">
+                    <i class="fas fa-cogs"></i>
+                    <span class="menu-title i-mar">Setting</span>
+                </a>
+            </li>
+        }
     </ul>
 </nav>

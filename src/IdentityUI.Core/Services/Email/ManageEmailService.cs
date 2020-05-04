@@ -21,15 +21,20 @@ namespace SSRD.IdentityUI.Core.Services
         private readonly IEmailService _emailService;
 
         private readonly IValidator<EditEmailRequest> _editEmailValidator;
+        private readonly IValidator<SendTesEmailRequest> _sendTestEmailValidator;
 
         private readonly ILogger<ManageEmailService> _logger;
 
         public ManageEmailService(IBaseRepository<EmailEntity> emailRepository, IEmailService emailService,
-            IValidator<EditEmailRequest> editEmailValidator, ILogger<ManageEmailService> logger)
+            IValidator<EditEmailRequest> editEmailValidator, IValidator<SendTesEmailRequest> sendTestEmailValidator, ILogger<ManageEmailService> logger)
         {
             _emailRepository = emailRepository;
+
             _emailService = emailService;
+
             _editEmailValidator = editEmailValidator;
+            _sendTestEmailValidator = sendTestEmailValidator;
+
             _logger = logger;
         }
 
@@ -50,6 +55,8 @@ namespace SSRD.IdentityUI.Core.Services
 
         public Result Edit(long id, EditEmailRequest editEmail)
         {
+            _logger.LogInformation($"Editing Email. EmailId {id}");
+
             ValidationResult validationResult = _editEmailValidator.Validate(editEmail);
             if(!validationResult.IsValid)
             {
@@ -76,15 +83,22 @@ namespace SSRD.IdentityUI.Core.Services
             return Result.Ok();
         }
 
-        public async Task<Result> TestEmail(long id, string email)
+        public async Task<Result> TestEmail(long id, SendTesEmailRequest sendTesEmail)
         {
+            ValidationResult validationResult = _sendTestEmailValidator.Validate(sendTesEmail);
+            if(!validationResult.IsValid)
+            {
+                _logger.LogWarning($"Invalid {nameof(SendTesEmailRequest)} model");
+                return Result.Fail(validationResult.Errors);
+            }
+
             Result<EmailEntity> getEmailResult = Get(id);
             if(getEmailResult.Failure)
             {
                 return Result.Fail(getEmailResult.Errors);
             }
 
-            Result result = await _emailService.SendTest(email, getEmailResult.Value);
+            Result result = await _emailService.SendTest(sendTesEmail.Email, getEmailResult.Value);
             if(result.Failure)
             {
                 return Result.Fail(result.Errors);

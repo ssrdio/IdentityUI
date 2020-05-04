@@ -10,6 +10,6 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
     public interface IManageEmailService
     {
         Result Edit(long id, EditEmailRequest editEmail);
-        Task<Result> TestEmail(long id, string email);
+        Task<Result> TestEmail(long id, SendTesEmailRequest sendTesEmail);
     }
 }

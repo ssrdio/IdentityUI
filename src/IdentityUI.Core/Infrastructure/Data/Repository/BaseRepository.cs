@@ -53,6 +53,15 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                 .FirstOrDefault();
         }
 
+        public TData GetWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification)
+        {
+            return _context
+                .Set<TEntity>()
+                .AsNoTracking()
+                .ApplaySelectSpecification(specification)
+                .FirstOrDefault();
+        }
+
         public List<TData> GetList<TData>(ISelectSpecification<TEntity, TData> specification)
         {
             return _context
@@ -102,12 +111,41 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                  .SingleOrDefault();
         }
 
+        public TData SingleOrDefaultWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification)
+        {
+            return _context
+                 .Set<TEntity>()
+                 .AsNoTracking()
+                 .ApplaySelectSpecification(specification)
+                 .SingleOrDefault();
+        }
+
         public bool Update(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
             int changes = _context.SaveChanges();
 
             return changes > 0;
+        }
+
+        public bool AddRange(IEnumerable<TEntity> entities)
+        {
+            _context
+                .Set<TEntity>()
+                .AddRange(entities);
+
+            int changes = _context.SaveChanges();
+            return changes == entities.Count();
+        }
+
+        public bool RemoveRange(IEnumerable<TEntity> entities)
+        {
+            _context
+                .Set<TEntity>()
+                .RemoveRange(entities);
+
+            int changes = _context.SaveChanges();
+            return changes == entities.Count();
         }
     }
 }

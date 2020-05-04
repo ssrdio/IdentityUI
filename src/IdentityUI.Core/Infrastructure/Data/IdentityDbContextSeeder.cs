@@ -15,13 +15,14 @@ using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using SSRD.IdentityUI.Core.Data.Models;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data
 {
     public static class IdentityDbContextSeeder
     {
         /// <summary>
-        /// Seeds admin
+        /// Seeds identityAdmin
         /// </summary>
         /// <param name="app"></param>
         /// <param name="userName"></param>
@@ -45,13 +46,36 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                     return;
                 }
 
-                if (context.Roles.Any())
+                SeedIdentityAdmin(userName, password, context, userManager, logger);
+            }
+        }
+
+        /// <summary>
+        /// Seeds admin
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <param name="roles"></param>
+        public static void SeedIdentityAdmin(this IApplicationBuilder app, string userName, string password, List<string> roles)
+        {
+            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                IServiceProvider serviceProvider = scope.ServiceProvider;
+
+                IdentityDbContext context = serviceProvider.GetService<IdentityDbContext>();
+                UserManager<AppUserEntity> userManager = serviceProvider.GetService<UserManager<AppUserEntity>>();
+
+                ILoggerFactory loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
+                ILogger logger = loggerFactory.CreateLogger(typeof(IdentityDbContextSeeder));
+
+                if (context.Users.Any())
                 {
-                    logger.LogInformation($"Admin was no seeded, because Role tabe is not empty");
+                    logger.LogInformation($"Admin was not seeded, because Users table is not empty");
                     return;
                 }
 
-                SeedAdmin(userName, password, context, userManager, roleManager, logger);
+                Task.WaitAll(SeedAdmin(userName, password, roles, userManager, logger));
             }
         }
 
@@ -143,21 +167,13 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                     return;
                 }
 
-                if (context.Roles.Any())
-                {
-                    logger.LogInformation($"Database was no seeded, because Role table is not empty");
-                    return;
-                }
-
-                SeedSystemEntities(context, roleManager, logger);
-
-                SeedAdmin(adminUserName, adminPassword, context, userManager, roleManager, logger);
+                SeedIdentityAdmin(adminUserName, adminPassword, context, userManager, logger);
                 Seed(emailDomain, password, userManager, roleManager, logger);
             }
         }
 
-        private static void SeedAdmin(string userName, string password, IdentityDbContext context, UserManager<AppUserEntity> userManager,
-            RoleManager<RoleEntity> roleManager, ILogger logger)
+        private static void SeedIdentityAdmin(string userName, string password, IdentityDbContext context,
+            UserManager<AppUserEntity> userManager, ILogger logger)
         {
             AppUserEntity admin = new AppUserEntity()
             {
@@ -173,7 +189,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 IdentityResult createAdminResult = createAdmin.Result;
                 if (!createAdminResult.Succeeded)
                 {
-                    throw new Exception($"Failed to add admin. {string.Join(" ", createAdminResult.Errors.Select(x => x.Description))}");
+                    throw new Exception($"Failed to add identity admin. {string.Join(" ", createAdminResult.Errors.Select(x => x.Description))}");
                 }
             }
 
@@ -197,7 +213,36 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 throw new Exception($"Failed to link admin to admin role");
             }
 
-            logger.LogInformation($"Admin was seeded");
+            logger.LogInformation($"IdentityAdmin was seeded");
+        }
+
+        private static async Task SeedAdmin(string userName, string password, List<string> adminRoles, UserManager<AppUserEntity> userManager, ILogger logger)
+        {
+            AppUserEntity appUser = await userManager.FindByNameAsync(userName);
+            if(appUser == null)
+            {
+                appUser = new AppUserEntity()
+                {
+                    UserName = userName,
+                    EmailConfirmed = true,
+                    Enabled = true,
+                };
+
+                IdentityResult createAdminResult = await userManager.CreateAsync(appUser, password);
+
+                if (!createAdminResult.Succeeded)
+                {
+                    throw new Exception($"Failed to add admin. {string.Join(" ", createAdminResult.Errors.Select(x => x.Description))}");
+                }
+            }
+
+            IdentityResult addToRolesResult = await userManager.AddToRolesAsync(appUser, adminRoles); //chack if any roles are group roles
+            if(!addToRolesResult.Succeeded)
+            {
+                throw new Exception($"Failed to add admin to roles. {string.Join(" ", addToRolesResult.Errors.Select(x => x.Description))}");
+            }
+
+            logger.LogInformation("Admin was added");
         }
 
         private static void Seed(string emailDomain, string password, UserManager<AppUserEntity> userManager, RoleManager<RoleEntity> roleManager, ILogger logger)
@@ -225,17 +270,46 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             logger.LogInformation($"Identity database was Seeded");
         }
 
-        private static void SeedSystemEntities(IdentityDbContext context, RoleManager<RoleEntity> roleManager, ILogger logger)
+        public static void SeedIdentityUIEntities(this IApplicationBuilder app, List<RoleData> roles)
         {
-            if(context.Roles.Any() || context.Permissions.Any() || context.PermissionRole.Any())
+            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                logger.LogInformation($"Databse is not empty. Skiping seeded system entities");
-                return;
-            }
+                IServiceProvider serviceProvider = scope.ServiceProvider;
 
+                IdentityDbContext context = serviceProvider.GetService<IdentityDbContext>();
+                UserManager<AppUserEntity> userManager = serviceProvider.GetService<UserManager<AppUserEntity>>();
+                RoleManager<RoleEntity> roleManager = serviceProvider.GetService<RoleManager<RoleEntity>>();
+
+                ILoggerFactory loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
+                ILogger logger = loggerFactory.CreateLogger(typeof(IdentityDbContextSeeder));
+
+                if (context.Roles.Any() || context.Permissions.Any() || context.PermissionRole.Any())
+                {
+                    logger.LogInformation($"Database is not empty. Skipping seeded system entities");
+                    return;
+                }
+
+                if (context.Emails.Any())
+                {
+                    logger.LogInformation($"Database is not empty. Skipping seeded system entities");
+                    return;
+                }
+
+                SeedIdentityUIRolesPermissions(context, roleManager, logger);
+                SeedIdentityUIEmails(context, logger);
+
+                if (roles != null)
+                {
+                    SeedRolesAndPermissions(context, roleManager, roles, logger);
+                }
+            }
+        }
+
+        private static void SeedIdentityUIRolesPermissions(IdentityDbContext context, RoleManager<RoleEntity> roleManager, ILogger logger)
+        {
             List<PermissionEntity> permissions = new List<PermissionEntity>();
 
-            foreach(string permission in IdentityUIPermissions.ALL_PERMISSIONS)
+            foreach (string permission in IdentityUIPermissions.ALL_PERMISSIONS)
             {
                 PermissionEntity permissionEntity = new PermissionEntity(
                     name: permission,
@@ -253,10 +327,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             }
 
             List<RoleEntity> roles = new List<RoleEntity>();
-            foreach(string roleName in IdentityUIRoles.ALL_ROLES)
+            foreach (string roleName in IdentityUIRoles.ALL_ROLES)
             {
                 RoleEntity roleEntity = new RoleEntity(roleName, null, RoleTypes.System);
-                roles.Add(roleEntity);
 
                 Task<IdentityResult> createRole = roleManager.CreateAsync(roleEntity);
                 Task.WaitAll(createRole);
@@ -264,16 +337,18 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 IdentityResult createRoleResult = createRole.Result;
                 if (!createRoleResult.Succeeded)
                 {
-                    logger.LogCritical($"Failed to add IdentityUI system role. RoleNam {roleName}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
+                    logger.LogCritical($"Failed to add IdentityUI system role. RoleName {roleName}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
                     throw new Exception($"Failed to add IdentityUI system role.");
                 }
+
+                roles.Add(roleEntity);
             }
 
             RoleEntity identityAdminRole = context.Roles
                 .Where(x => x.Name == IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)
                 .SingleOrDefault();
 
-            if(identityAdminRole == null)
+            if (identityAdminRole == null)
             {
                 logger.LogCritical($"No IdentityUI admin role");
                 throw new Exception("No IdentityUI admin role");
@@ -286,23 +361,87 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
             context.PermissionRole.AddRange(permissionRoles);
             int addPermissionRoleChanges = context.SaveChanges();
-            if(addPermissionRoleChanges != permissionRoles.Count())
+            if (addPermissionRoleChanges != permissionRoles.Count())
             {
                 logger.LogCritical($"Failed to add IdentityUI admin role permissions");
                 throw new Exception("Failed to add IdentityUI admin role permissions");
             }
-
-            SeedEmails(context, logger);
         }
 
-        private static void SeedEmails(IdentityDbContext context, ILogger logger)
+        private static void SeedRolesAndPermissions(IdentityDbContext context, RoleManager<RoleEntity> roleManager, List<RoleData> roles, ILogger logger)
         {
-            if(context.Emails.Any())
+            List<string> permissionNames = roles
+                .SelectMany(x => x.Permissions)
+                .Select(x => x.Name)
+                .Distinct()
+                .ToList();
+
+            List<PermissionEntity> permissions = context.Permissions
+                .Where(x => permissionNames.Select(c => c.ToUpper()).Contains(x.Name.ToUpper()))
+                .ToList();
+
+            List<string> missingPermissions = permissionNames
+                .Where(x => !permissions.Select(c => c.Name.ToUpper()).Contains(x.ToUpper()))
+                .ToList();
+
+            foreach (string permission in missingPermissions)
             {
-                logger.LogInformation($"Database is not empty. Skiping seeded system entities");
-                return;
+                PermissionEntity permissionEntity = new PermissionEntity(
+                    name: permission,
+                    description: null);
+
+                permissions.Add(permissionEntity);
             }
 
+            context.Permissions.AddRange(permissions);
+            int addPermissionChanges = context.SaveChanges();
+            if (addPermissionChanges != permissions.Count)
+            {
+                logger.LogCritical($"Failed to add Permission.");
+                throw new Exception("failed_to_add_permission");
+            }
+
+            List<PermissionRoleEntity> permissionRoles = new List<PermissionRoleEntity>();
+
+            foreach (RoleData roleData in roles)
+            {
+                RoleEntity roleEntity = new RoleEntity(roleData.Name, roleData.Description, RoleTypes.System);
+
+                Task<IdentityResult> createRole = roleManager.CreateAsync(roleEntity);
+                Task.WaitAll(createRole);
+
+                IdentityResult createRoleResult = createRole.Result;
+                if (!createRoleResult.Succeeded)
+                {
+                    logger.LogCritical($"Failed to add role. RoleName {roleData.Name}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
+                    throw new Exception($"Failed to add role.");
+                }
+
+                foreach(PermissionData permissionData in roleData.Permissions)
+                {
+                    PermissionEntity permission = permissions
+                        .Where(x => x.Name.ToUpper() == permissionData.Name.ToUpper())
+                        .Single();
+
+                    PermissionRoleEntity permissionRoleEntity = new PermissionRoleEntity(
+                        permissionId: permission.Id,
+                        roleId: roleEntity.Id);
+
+                    permissionRoles.Add(permissionRoleEntity);
+                }
+            }
+
+            context.PermissionRole.AddRange(permissionRoles);
+            int addPermissionRoleChanges = context.SaveChanges();
+            if (addPermissionRoleChanges != permissionRoles.Count)
+            {
+                logger.LogCritical($"Failed to add Permission Roles.");
+                throw new Exception("failed_to_add_permission_roles");
+            }
+        }
+
+        private static void SeedIdentityUIEmails(IdentityDbContext context, ILogger logger)
+        {
             List<EmailEntity> emails = new List<EmailEntity>();
 
             EmailEntity inviteEmail = new EmailEntity(

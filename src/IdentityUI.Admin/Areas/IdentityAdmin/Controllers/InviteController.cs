@@ -73,7 +73,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         }
 
         [HttpPost("/[area]/[controller]/[action]/{groupId}")]
-        [Authorize]
+        [AllowAnonymous]
         [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -94,7 +94,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return Ok(new EmptyResult());
         }
 
-        [HttpPost()]
+        [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public IActionResult Remove([FromRoute] string id)
