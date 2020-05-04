@@ -1,6 +1,8 @@
 # IdentityUI
+[![stable](https://img.shields.io/nuget/v/SSRD.IdentityUI.Core.svg?label=stable)](https://www.nuget.org/packages/SSRD.IdentityUI.Core/)
 
 IdentityUI is a simple platform for administrative management of users and admins with a graphical interface. It is easy to set up, has a clean API, and runs on all recent .NET Core releases.
+
 
 ![](images/dashboard.png)
 
