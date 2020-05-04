@@ -62,6 +62,7 @@
                 },
                 {
                     data: null,
+                    className: "table-input",
                     title: "Group Role",
                     mRender: (data) => {
                         if (this.hasRoleManagmentPermission) {

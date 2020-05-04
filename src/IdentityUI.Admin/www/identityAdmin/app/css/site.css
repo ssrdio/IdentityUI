@@ -1,0 +1,58 @@
+﻿
+
+.header-button
+{
+    border: 0 !important;
+}
+
+.dt-head-center {
+    padding: 0px;
+    text-align: center;
+    padding-left: 0px !important;
+}
+
+.attributes-center {
+    padding 0px;
+    padding-left: 0px !important;
+    text-align: center;
+}
+
+.attributes-center div {
+    min-width: 230px;
+    text-align: center;
+}
+
+select.form-control{
+    color: black !important;
+}
+
+
+.table-input {
+    padding: 10px;
+}
+
+.table-input input {
+    padding: 5px !important;
+    height: 38px;
+}
+
+    .table-input select {
+        padding: 5px !important;
+        height: 38px;
+    }
+
+
+.modal-body .select2-selection {
+    border: 1px solid #c9ccd7 !important;
+    font-weight: 400;
+    height: 46px;
+    font-size: 0.875rem !important;
+}
+
+.modal-body .select2-selection__arrow{
+    height: 46px !important;
+}
+
+.modal-body .select2-selection__rendered {
+    line-height: 46px !important;
+}

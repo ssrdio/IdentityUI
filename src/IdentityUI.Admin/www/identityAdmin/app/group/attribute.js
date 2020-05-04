@@ -61,6 +61,7 @@
                 {
                     data: null,
                     title: "Value",
+                    className: "table-input",
                     mRender: (data) => {
                         let view = `<input class="form-control mr-1 attribute-{{key}}" value="{{value}}"/>`
                         let output = Mustache.render(view, { key: data.key, value: data.value });
@@ -70,7 +71,8 @@
                 },
                 {
                     data: null,
-                    className: "dt-head-center",
+                    className: "attributes-center",
+
                     mRender: function (data) {
                         return `<div>
                                     <button class='btn btn-primary table-button edit' data-key='${data.key}'">Edit</button>
