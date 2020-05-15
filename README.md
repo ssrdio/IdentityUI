@@ -9,7 +9,7 @@
 IdentityUI is a simple platform for administrative management of users and admins with a graphical interface. It is easy to set up, has a clean API, and runs on all recent .NET Core releases.
 
 
-![](images/dashboard.png)
+![](images/example.gif)
 
 ## Nuget
 Install SSRD.IdentityUI package [NuGet](https://www.nuget.org/packages/SSRD.IdentityUI/)
