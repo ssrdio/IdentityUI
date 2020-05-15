@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityUI.Sample.Services;
 using Microsoft.AspNetCore.Builder;
@@ -71,8 +72,6 @@ namespace IdentityUI.Sample
             .AddIdentityAdmin()
             .AddAccountManagement();
 
-            services.AddScoped<IEmailSender, EmailSender>(); //this EmailSender does not send mails it jaust writes them in logs.
-
             services.ConfigureRevisionLogger(options =>
             {
                 options.UserIdentityClaimType = System.Security.Claims.ClaimTypes.NameIdentifier;
@@ -86,6 +85,9 @@ namespace IdentityUI.Sample
                     "Account/.*",
                     "IdentityAdmin/User/SetNewPassword",
                 };
+
+                options.UserIdentityClaimType = ClaimTypes.NameIdentifier;
+                options.UseXForwardedForIp = true;
 
                 options.Version = "1.0.0";
             });
@@ -109,10 +111,9 @@ namespace IdentityUI.Sample
             app.UseStaticFiles();
             app.UseRouting();
 
-            app.UseIdentityUI(enableMigrations: true);
-            app.SeedIdentityAdmin("admin", "Password");
+            app.UseIdentityUI();
 
-            app.UseRevisionLogger(configureNLogger: true);
+            app.UseRevisionLogger();
 
             app.UseEndpoints(endpoints =>
             {

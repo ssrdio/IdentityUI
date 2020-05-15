@@ -9,6 +9,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.LayoutRenderers;
 using NLog.Web;
+using SSRD.IdentityUI.Core.Infrastructure.Data;
+using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment;
 using SSRD.RevisionLogger.NLogExtensions.LayoutRenderers;
 
 namespace IdentityUI.Sample
@@ -19,11 +21,19 @@ namespace IdentityUI.Sample
         {
             LayoutRenderer.Register<UserIdLayoutRenderer>("user-id");
 
-            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            NLog.Logger logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
                 logger.Debug("init main");
-                CreateHostBuilder(args).Build().Run();
+                IHost host = CreateHostBuilder(args).Build();
+
+                host.RunIdentityMigrations();
+                host.SeedSystemEntities();
+
+                host.SeedIdentityAdmin("admin", "Password");
+
+                logger.Debug("run host");
+                host.Run();
             }
             catch (Exception exception)
             {
