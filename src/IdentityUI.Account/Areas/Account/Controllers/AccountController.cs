@@ -205,7 +205,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult ResetPassword(string code = null)
         {
-            if(!_identityUIEndpoints.UseEmailSender)
+            if(!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -220,7 +220,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -246,7 +246,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult ResetPasswordSuccess()
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -258,7 +258,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RecoverPassword()
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -270,7 +270,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost]
         public async Task<IActionResult> RecoverPassword(RecoverPasswordRequest request)
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -294,7 +294,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RecoverPasswordSuccess()
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }

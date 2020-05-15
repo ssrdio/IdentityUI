@@ -94,7 +94,7 @@ namespace SSRD.IdentityUI.Core.Services.Role
 
         private Result Remove(BaseSpecification<PermissionRoleEntity> baseSpecification)
         {
-            PermissionRoleEntity permissionRole = _permissionRoleRepository.Get(baseSpecification);
+            PermissionRoleEntity permissionRole = _permissionRoleRepository.SingleOrDefault(baseSpecification);
             if (permissionRole == null)
             {
                 _logger.LogError($"No PermissionRole.");

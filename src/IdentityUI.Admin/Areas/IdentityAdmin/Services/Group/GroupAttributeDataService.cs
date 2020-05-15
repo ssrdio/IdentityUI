@@ -48,6 +48,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
             }
 
             paginationSpecification.AddSelect(x => new GroupAttributeTableModel(
+                x.Id,
                 x.Key,
                 x.Value));
             paginationSpecification.AppalyPaging(dataTableRequest.Start, dataTableRequest.Length);

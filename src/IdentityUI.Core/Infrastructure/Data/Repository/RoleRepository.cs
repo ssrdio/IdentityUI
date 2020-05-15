@@ -21,7 +21,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             return _context.UserRoles
                 .Where(x => x.UserId == userId)
-                .Where(x => x.Role.Type == RoleTypes.System)
+                .Where(x => x.Role.Type == RoleTypes.Global)
                 .Select(x => x.Role)
                 .ToList();
         }
@@ -30,13 +30,13 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             List<string> assingedRoles = _context.UserRoles
                 .Where(x => x.UserId == userId)
-                .Where(x => x.Role.Type == RoleTypes.System)
+                .Where(x => x.Role.Type == RoleTypes.Global)
                 .Select(x => x.RoleId)
                 .ToList();
 
             List<RoleEntity> roles = _context.Roles
                 .Where(x => !assingedRoles.Contains(x.Id))
-                .Where(x => x.Type == RoleTypes.System)
+                .Where(x => x.Type == RoleTypes.Global)
                 .ToList();
 
             return roles;

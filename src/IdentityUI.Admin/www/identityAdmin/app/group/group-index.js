@@ -1,6 +1,5 @@
 ﻿class GroupIndex {
     constructor() {
-
         this.$addGroupModal = $('#add-group-modal');
         this.$addGroupModal.on('hidden.bs.modal', () => {
             this.hideModalErrors();
@@ -20,6 +19,18 @@
 
         this.$groupTable = $('#group-table');
         this.initTable();
+
+        this.confirmationModal = new conformationModal(
+            $('#modal-container'),
+            onYesClick => {
+                if (onYesClick === null || onYesClick === undefined) {
+                    return;
+                }
+
+                if (onYesClick.key === 'removeGroup') {
+                    this.remove(onYesClick.id);
+                }
+            });
 
         $('#add-group-button').on('click', () => {
             this.$addGroupModal.modal('show');
@@ -46,16 +57,22 @@
                 {
                     data: null,
                     className: "dt-head-center",
-                    width: "160px",
+                    width: "250px",
                     mRender: function (data) {
                         return `
                                 <div>
                                     <a class="btn btn-primary table-button" href="/IdentityAdmin/Group/Users/${data.id}">Details</a>
+                                    <button class="btn btn-danger table-button remove" data-id="${data.id}">Remove</button>
                                 </div>
                             `;
                     }
                 }
             ],
+        });
+
+        this.$groupTable.on('click', 'button.remove', (event) => {
+            let id = $(event.target).data("id");
+            this.confirmationModal.show({ key: 'removeGroup', id: id }, 'Are you sure that you want to remove Group?');
         });
     }
 
@@ -103,5 +120,19 @@
             .fail((resp) => {
                 this.showModalErrors(resp.responseJSON);
             });
+    }
+
+    remove(id) {
+        this.statusAlert.hide();
+
+        Api.post(`/IdentityAdmin/Group/Remove/${id}`)
+            .done(() => {
+                this.reloadTable();
+                this.statusAlert.showSuccess('Group was removed');
+            })
+            .fail((resp) => {
+                this.reloadTable();
+                this.statusAlert.showErrors(resp.responseJSON['']);
+            })
     }
 }

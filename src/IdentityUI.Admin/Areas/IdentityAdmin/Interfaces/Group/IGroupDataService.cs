@@ -11,8 +11,9 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group
     public interface IGroupDataService
     {
         Result<DataTableResult<GroupTableModel>> Get(DataTableRequest dataTableRequest);
+        
         Result<GroupMenuViewModel> GetMenuViewModel(string id);
-
-        Result<GroupUserViewModel> GetGroupUserViewModel(string groupId, string userId, bool hasGlobalPermission);
+        Result<GroupUserViewModel> GetGroupUserViewModel(string groupId);
+        Result<GroupInviteViewModel> GetInviteViewModel(string groupId);
     }
 }

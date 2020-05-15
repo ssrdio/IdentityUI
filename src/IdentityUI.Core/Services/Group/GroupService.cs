@@ -4,6 +4,7 @@ using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Specifications;
+using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -17,14 +18,17 @@ namespace SSRD.IdentityUI.Core.Services.Group
     internal class GroupService : IGroupService
     {
         private readonly IBaseRepository<GroupEntity> _groupRepository;
+        private readonly IGroupStore _groupStore;
 
         private readonly IValidator<AddGroupRequest> _addGroupValidator;
 
         private readonly ILogger<GroupService> _logger;
 
-        public GroupService(IBaseRepository<GroupEntity> groupRepository, IValidator<AddGroupRequest> addGroupValidator, ILogger<GroupService> logger)
+        public GroupService(IBaseRepository<GroupEntity> groupRepository, IGroupStore groupStore,
+            IValidator<AddGroupRequest> addGroupValidator, ILogger<GroupService> logger)
         {
             _groupRepository = groupRepository;
+            _groupStore = groupStore;
 
             _addGroupValidator = addGroupValidator;
 
@@ -58,6 +62,28 @@ namespace SSRD.IdentityUI.Core.Services.Group
             {
                 _logger.LogError($"Failed to add group");
                 return Result.Fail("failed_to_add_group", "Failed to add group");
+            }
+
+            return Result.Ok();
+        }
+
+        public Result Remove(string id)
+        {
+            Result<GroupEntity> getGroupResult = _groupStore.Get(id);
+            if(getGroupResult.Failure)
+            {
+                return Result.Fail(getGroupResult.Errors);
+            }
+
+            _logger.LogInformation($"Removing group. GroupId {id}");
+
+            GroupEntity groupEntity = getGroupResult.Value;
+
+            bool removeResult = _groupRepository.Remove(groupEntity);
+            if(!removeResult)
+            {
+                _logger.LogError($"Failed to remove Group. GroupId {id}");
+                return Result.Fail("failed_to_remove_group", "Failed to remove group");
             }
 
             return Result.Ok();

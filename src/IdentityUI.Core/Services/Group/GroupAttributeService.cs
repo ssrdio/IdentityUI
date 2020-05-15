@@ -81,23 +81,23 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return Result.Ok();
         }
 
-        private Result<GroupAttributeEntity> Get(string groupId, string key)
+        private Result<GroupAttributeEntity> Get(string groupId, long id)
         {
             BaseSpecification<GroupAttributeEntity> baseSpecification = new BaseSpecification<GroupAttributeEntity>();
             baseSpecification.AddFilter(x => x.GroupId == groupId);
-            baseSpecification.AddFilter(x => x.Key.ToUpper() == key.ToUpper());
+            baseSpecification.AddFilter(x => x.Id == id);
 
-            GroupAttributeEntity groupAttribute = _groupAttributeRepository.Get(baseSpecification);
+            GroupAttributeEntity groupAttribute = _groupAttributeRepository.SingleOrDefault(baseSpecification);
             if(groupAttribute == null)
             {
-                _logger.LogError($"No GroupAttribute. GroupId {groupId}, key {key}");
+                _logger.LogError($"No GroupAttribute. GroupId {groupId}, Id {id}");
                 return Result.Fail<GroupAttributeEntity>("no_group_attribute", "No GroupAttribute");
             }
 
             return Result.Ok(groupAttribute);
         }
 
-        public Result Edit(string groupId, string key, EditGroupAttributeRequest editGroupAttribute)
+        public Result Edit(string groupId, long id, EditGroupAttributeRequest editGroupAttribute)
         {
             ValidationResult validationResult = _editGroupAttributeValidator.Validate(editGroupAttribute);
             if(!validationResult.IsValid)
@@ -106,7 +106,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Result.Fail(validationResult.Errors);
             }
 
-            Result<GroupAttributeEntity> groupAttributeResult = Get(groupId, key);
+            Result<GroupAttributeEntity> groupAttributeResult = Get(groupId, id);
             if(groupAttributeResult.Failure)
             {
                 return Result.Fail(groupAttributeResult.Errors);
@@ -118,16 +118,16 @@ namespace SSRD.IdentityUI.Core.Services.Group
             bool updateResult = _groupAttributeRepository.Update(groupAttribute);
             if(!updateResult)
             {
-                _logger.LogError($"Failed to update GroupAttribute. GroupId {groupId}, key {key}");
+                _logger.LogError($"Failed to update GroupAttribute. GroupId {groupId}, Id {id}");
                 return Result.Fail("failed_to_update_group_attribute", "Failed to update GroupAttribute");
             }
 
             return Result.Ok();
         }
 
-        public Result Remove(string groupId, string key)
+        public Result Remove(string groupId, long id)
         {
-            Result<GroupAttributeEntity> groupAttributeResult = Get(groupId, key);
+            Result<GroupAttributeEntity> groupAttributeResult = Get(groupId, id);
             if(groupAttributeResult.Failure)
             {
                 return Result.Fail(groupAttributeResult.Errors);

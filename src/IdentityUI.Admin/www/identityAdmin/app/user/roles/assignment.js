@@ -2,44 +2,10 @@
     constructor(roleId) {
         this.roleId = roleId;
 
-        this.$addAssignmentModal = $('#add-assignment-modal');
-        this.$addAssignmentModal.on('hidden.bs.modal', () => {
-            this.assignRoleSelectComponent.selectOption(null);
-
-            this.hideAddAssignmentErrors();
-        });
-        this.$addAssignmentModal.on('click', 'button.confirm', () => {
-            this.add();
-        });
-
         this.$assignmentTable = $('#assignment-table');
         this.initTable();
 
-        const $addAssignmentForm = this.$addAssignmentModal.find('#add-assignment-form');
-        this.$assignRoleSelect = $addAssignmentForm.find('#assign-role-select .select2-container');
-        this.assignRoleSelectComponent = new SelectComponent($addAssignmentForm, '#assign-role-select');
-
-        this.addAssignmentErrorAlert = new ErrorAlert($addAssignmentForm);
-
-        this.initAssigneGroupRoleSelect();
-
         this.statusAlert = new StatusAlertComponent('#status-alert-container');
-
-        this.confirmationModal = new conformationModal(
-            $('#modal-container'),
-            onYesClick => {
-                if (onYesClick === null || onYesClick === undefined) {
-                    return;
-                }
-
-                if (onYesClick.key === 'removeAssignment') {
-                    this.remove(onYesClick.id);
-                }
-            });
-
-        $('#add-assignment-button').on('click', () => {
-            this.$addAssignmentModal.modal('show');
-        });
     }
 
     initTable() {
@@ -55,27 +21,40 @@
             },
             columns: [
                 {
+                    data: null,
+                    className: "checkbox-holder",
+                    mRender: (data) => {
+                        if (data.isAssigned) {
+                            return `<input type="checkbox" class="form-control in-assignment styled-checkbox" data-id="${data.id}" id="${data.id}" checked/><label for="${data.id}"></label>`
+                        }
+                        else {
+                            return `<input type="checkbox" class="form-control in-assignment styled-checkbox" id="${data.id}" data-id="${data.id}"/><label for="${data.id}"></label>`
+                        }
+                    }
+                },
+                {
                     data: "name",
                     title: "Name",
                     render: $.fn.dataTable.render.text()
-                },
-                {
-                    data: null,
-                    className: "dt-head-center",
-                    width: "160px",
-                    render: function (data) {
-                        return `
-                            <div >
-                                <button class="btn btn-danger table-button remove" data-id="${data.id}">Remove</button>
-                            </div>`
-                    }
                 }
             ],
         });
 
-        this.$assignmentTable.on('click', 'button.remove', (event) => {
-            let id = $(event.target).data("id");
-            this.confirmationModal.show({ key: 'removeAssignment', id: id }, 'Are you sure that you want to remove Role Assignment?');
+
+        this.$assignmentTable.on('change', 'input.in-assignment', (event) => {
+            let add = event.currentTarget.checked;
+
+            let id = $(event.target).data('id');
+
+            if (add === true) {
+                this.add(id);
+            }
+            else if (add === false) {
+                this.remove(id);
+            }
+            else {
+                console.log('error');
+            }
         });
     }
 
@@ -84,17 +63,6 @@
             .DataTable()
             .clear()
             .draw();
-    }
-
-    initAssigneGroupRoleSelect() {
-        this.$assignRoleSelect.select2({
-            ajax: {
-                url: `/IdentityAdmin/Role/${this.roleId}/Assignment/GetUnassigned`,
-                type: 'GET',
-                dataType: 'json',
-                delay: 250
-            }
-        });
     }
 
     remove(id) {
@@ -106,45 +74,29 @@
                 this.statusAlert.showSuccess(`Role Assignment was removed`);
             })
             .fail((resp) => {
-                this.statusAlert.showErrors(resp.responseJSON);
+                this.statusAlert.showErrors(resp.responseJSON['']);
             });
     }
 
-    showAddAssignmentErrors(errors) {
-        if (errors[''] !== null && errors[''] !== undefined) {
-            this.addAssignmentErrorAlert.showErrors(errors['']);
-        }
-
-        this.assignRoleSelectComponent.showError(errors.roleId);
-    }
-
-    hideAddAssignmentErrors() {
-        this.addAssignmentErrorAlert.hide();
-
-        this.assignRoleSelectComponent.hideError();
-    }
-
-    getData() {
+    getData(id) {
         return {
-            roleId: this.assignRoleSelectComponent.value()
+            roleId: id
         };
     }
 
-    add() {
-        this.hideAddAssignmentErrors();
+    add(id) {
         this.statusAlert.hide();
 
-        const data = this.getData()
+        const data = this.getData(id)
 
         Api.post(`/IdentityAdmin/Role/${this.roleId}/Assignment/Add`, data)
             .done(() => {
-                this.$addAssignmentModal.modal('hide');
                 this.reloadTable();
 
                 this.statusAlert.showSuccess('Role Assignment was added');
             })
             .fail((resp) => {
-                this.showAddAssignmentErrors(resp.responseJSON);
+                this.statusAlert.showErrors(resp.responseJSON['']);
             });
     }
 }

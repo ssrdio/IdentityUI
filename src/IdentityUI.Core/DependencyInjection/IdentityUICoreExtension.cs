@@ -40,6 +40,8 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Services.Email;
 using SSRD.IdentityUI.Core.Services.Auth.Email;
 using SSRD.IdentityUI.Core.Data.Models;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Seeders;
+using SSRD.IdentityUI.Core.Interfaces;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -53,14 +55,7 @@ namespace SSRD.IdentityUI.Core
         /// <returns></returns>
         public static IdentityUIServicesBuilder ConfigureIdentityUI(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<IdentityUIOptions>(configuration.GetSection("IdentityUI"));
-            services.Configure<DatabaseOptions>(configuration.GetSection($"IdentityUI:{nameof(IdentityUIOptions.Database)}"));
-            services.Configure<EmailSenderOptions>(configuration.GetSection($"IdentityUI:{nameof(IdentityUIOptions.EmailSender)}"));
-            services.Configure<IdentityUIEndpoints>(configuration);
-
-            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, new IdentityUIEndpoints());
-
-            return builder;
+            return ConfigureIdentityUI(services, configuration, null);
         }
 
         /// <summary>
@@ -102,19 +97,39 @@ namespace SSRD.IdentityUI.Core
                 options.SenderName = identityUIOptions.EmailSender?.SenderName;
             });
 
-            services.Configure<IdentityUIEndpoints>(endpointAction);
-
             IdentityUIEndpoints identityManagementEndpoints = new IdentityUIEndpoints();
             endpointAction?.Invoke(identityManagementEndpoints);
 
-            if ((identityUIOptions.EmailSender == null || string.IsNullOrEmpty(identityUIOptions.EmailSender.Ip)) && !identityManagementEndpoints.UseEmailSender)
+            if (!identityManagementEndpoints.UseEmailSender.HasValue)
             {
-                identityManagementEndpoints.UseEmailSender = false;
+                if (identityUIOptions.EmailSender == null || string.IsNullOrEmpty(identityUIOptions.EmailSender.Ip))
+                {
+                    identityManagementEndpoints.UseEmailSender = false;
+                }
+                else
+                {
+                    identityManagementEndpoints.UseEmailSender = true;
+                }
             }
-            else
+
+            services.Configure<IdentityUIEndpoints>(options =>
             {
-                identityManagementEndpoints.UseEmailSender = true;
-            }
+                options.Home = identityManagementEndpoints.Home;
+
+                options.Login = identityManagementEndpoints.Login;
+                options.Logout = identityManagementEndpoints.Logout;
+                options.AccessDenied = identityManagementEndpoints.AccessDenied;
+
+                options.Manage = identityManagementEndpoints.Manage;
+
+                options.ConfirmeEmail = identityManagementEndpoints.ConfirmeEmail;
+                options.ResetPassword = identityManagementEndpoints.ResetPassword;
+                options.AcceptInvite = identityManagementEndpoints.AcceptInvite;
+
+                options.RegisterEnabled = identityManagementEndpoints.RegisterEnabled;
+                options.UseEmailSender = identityManagementEndpoints.UseEmailSender;
+                options.InviteValidForTimeSpan = identityManagementEndpoints.InviteValidForTimeSpan;
+            });
 
             IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints);
 
@@ -166,7 +181,13 @@ namespace SSRD.IdentityUI.Core
 
             builder.AddValidators();
             builder.AddRepositories();
+            builder.AddSeeders();
             builder.AddServices();
+
+            builder.Services.AddScoped<IGroupStore, GroupStore>();
+            builder.Services.AddScoped<IGroupUserStore, GroupUserStore>();
+
+            builder.Services.AddScoped<ReleaseManagement>();
 
             builder.Services.Configure<IdentityOptions>(identityOptions);
             builder.Services.Configure<SecurityStampValidatorOptions>(options =>
@@ -269,6 +290,15 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddTransient<IUserRoleRepository, UserRoleRepository>();
 
             builder.Services.AddTransient<ISessionRepository, SessionRepository>();
+
+            builder.Services.AddTransient(typeof(IBaseRepositoryAsync<>), typeof(BaseRepositoryAsync<>));
+        }
+
+        private static void AddSeeders(this IdentityUIServicesBuilder builder)
+        {
+            builder.Services.AddScoped<SystemEntitySeeder>();
+            builder.Services.AddScoped<AdminSeeder>();
+            builder.Services.AddScoped<UserSeeder>();
         }
 
         private static void AddServices(this IdentityUIServicesBuilder builder)
@@ -343,12 +373,14 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Services.Group.Models.EditGroupAttributeRequest>, Services.Group.Models.EditGroupAttributeRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Permission.Models.AddPermissionRequest>, Services.Permission.Models.AddPermissionRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Permission.Models.EditPermissionRequest>, Services.Permission.Models.EditPermissionRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Email.Models.AddEmailRequest>, Services.Email.Models.AddEmailRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.Email.Models.EditEmailRequest>, Services.Email.Models.EditEmailRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.Email.Models.SendTesEmailRequest>, Services.Email.Models.SendTestEmailRequestValidator>();
 
-            builder.Services.AddSingleton<IValidator<Services.InviteRequest>, Services.InviteRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.InviteToGroupRequest>, Services.User.Models.InviteToGroupRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.InviteRequest>, Services.User.Models.InviteRequestValidatior>();
         }
 
         /// <summary>
@@ -356,9 +388,8 @@ namespace SSRD.IdentityUI.Core
         /// </summary>
         /// <param name="app"></param>
         /// <param name="enableMigrations">Flag indicating if migrations should be run</param>
-        /// <param name="roles">Roles that you need for your application to run</param>
         /// <returns></returns>
-        public static IdentityUIAppBuilder UseIdentityUI(this IApplicationBuilder app, bool enableMigrations = false, List<RoleData> roles = null)
+        public static IdentityUIAppBuilder UseIdentityUI(this IApplicationBuilder app, bool enableMigrations = false)
         {
             app.UseAuthentication();
 #if NET_CORE3
@@ -367,10 +398,8 @@ namespace SSRD.IdentityUI.Core
 
             if (enableMigrations)
             {
-                app.ApplyIdentityMigrations();
+                app.RunIdentityMigrations();
             }
-
-            app.SeedIdentityUIEntities(roles);
 
             return new IdentityUIAppBuilder(app); 
         }

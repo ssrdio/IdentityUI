@@ -5,6 +5,10 @@
     SidebarSelection.SelectedOption = SidebarOptions.TwoFactorAuthenticator;
 }
 
+@{
+    ViewData["Title"] = "Profile";
+}
+
 @section script{
     @if (Model.StatusAlert != null)
     {

@@ -5,6 +5,9 @@
         this.successCallback = successCallback;
 
         this.$sendTesEmailModal = $('#send-test-email-modal');
+        this.$sendTesEmailModal.on('hidden.bs.modal', () => {
+            this.hideErrors();
+        });
 
         const $sendTestEmailForm = this.$sendTesEmailModal.find('#send-test-email-form');
         this.emailInputComponent = new InputComponent($sendTestEmailForm, '#email-input');
@@ -40,6 +43,7 @@
     }
 
     sendTestEmail() {
+        this.hideErrors();
         const data = this.getData();
 
         Api.post(`/IdentityAdmin/Setting/Email/SendTest/${this.emailId}`, data)
@@ -50,6 +54,7 @@
                 }
             })
             .fail((resp) => {
+                this.emailInputComponent.value(null);
                 this.showErrors(resp.responseJSON);
             });
     }

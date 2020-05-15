@@ -9,6 +9,7 @@ using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Data.Specifications;
+using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -55,7 +56,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting
 
             paginationSpecification.AddSelect(x => new EmailTableModel(
                 x.Id,
-                x.Type.ToString())); //check this
+                x.Type.GetDescription()));
             paginationSpecification.AppalyPaging(dataTableRequest.Start, dataTableRequest.Length);
 
             PaginatedData<EmailTableModel> paginatedData = _emailRepository.GetPaginated(paginationSpecification);
@@ -73,7 +74,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting
         public EmailIndexViewModel GetIndexViewModel()
         {
             EmailIndexViewModel emailIndex = new EmailIndexViewModel(
-                useEmailSender: _identityUIEndpoint.UseEmailSender);
+                useEmailSender: _identityUIEndpoint.UseEmailSender ?? false);
 
             return emailIndex;
         }
@@ -84,11 +85,11 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting
             selectSpecification.AddFilter(x => x.Id == id);
             selectSpecification.AddSelect(x => new EmailViewModel(
                 x.Id,
-                x.Type.ToString(), //check if this works
+                x.Type.GetDescription(),
                 x.Subject,
                 x.Body));
 
-            EmailViewModel emailView = _emailRepository.Get(selectSpecification);
+            EmailViewModel emailView = _emailRepository.SingleOrDefault(selectSpecification);
             if (emailView == null)
             {
                 _logger.LogError($"No Email. EmailId id");
@@ -99,10 +100,10 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting
             emailSpecification.AddFilter(x => x.Id == userId);
             emailSpecification.AddSelect(X => X.Email);
 
-            string email = _userRepository.Get(emailSpecification);
+            string email = _userRepository.SingleOrDefault(emailSpecification);
 
             emailView.Email = email;
-            emailView.UseEmailSender = _identityUIEndpoint.UseEmailSender;
+            emailView.UseEmailSender = _identityUIEndpoint.UseEmailSender ?? false;
 
             return Result.Ok(emailView);
         }

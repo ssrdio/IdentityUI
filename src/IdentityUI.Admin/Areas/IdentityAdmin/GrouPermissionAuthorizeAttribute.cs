@@ -21,7 +21,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin
 
         private readonly string _requirePermission;
 
-        public GrouPermissionAuthorizeAttribute(string permission)
+        public GrouPermissionAuthorizeAttribute(string permission) : base()
         {
             _requirePermission = permission;
         }
@@ -33,8 +33,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin
             {
                 return;
             }
-
-            string logedInUserId = context.HttpContext.User.GetUserId();
 
             bool isInRequiredRole = context.HttpContext.User.HasGroupPermission(_requirePermission);
             if (!isInRequiredRole)
@@ -50,6 +48,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin
             }
 
             string groupId = (string)groupIdObj;
+            string logedInUserId = context.HttpContext.User.GetUserId();
+
 
             BaseSpecification<GroupUserEntity> baseSpecification = new BaseSpecification<GroupUserEntity>();
             baseSpecification.AddFilter(x => x.UserId == logedInUserId);

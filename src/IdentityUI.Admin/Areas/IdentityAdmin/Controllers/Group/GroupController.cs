@@ -28,10 +28,12 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             _groupService = groupService;
         }
 
+
+        [HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS)]
         [HttpGet]
         public IActionResult Index()
         {
-            if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+            if (User.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
             {
                 return View();
             }
@@ -39,46 +41,68 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return RedirectToAction(nameof(User), new { id = User.GetGroupId() });
         }
 
-        [AllowAnonymous]
+        [HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS)]
+        [HttpGet]
+        public IActionResult Details()
+        {
+            return RedirectToAction(nameof(User), new { id = User.GetGroupId() });
+        }
+
         [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
         [HttpGet("/[area]/[controller]/[action]/{groupId}")]
-
         public IActionResult Users(string groupId)
         {
             if(!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
-            Result<GroupUserViewModel> result = _groupDataService.GetGroupUserViewModel(groupId, User.GetUserId(),
-                User.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS));
+            Result<GroupUserViewModel> result = _groupDataService.GetGroupUserViewModel(groupId);
             if(result.Failure)
             {
-                return NotFound();
+                return NotFoundView();
             }
 
             return View(result.Value);
         }
 
-        [AllowAnonymous]
+        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
+        [HttpGet("/[area]/[controller]/[action]/{groupId}")]
+        public IActionResult Invites(string groupId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return NotFoundView();
+            }
+
+            Result<GroupInviteViewModel> result = _groupDataService.GetInviteViewModel(groupId);
+            if (result.Failure)
+            {
+                return NotFoundView();
+            }
+
+            return View(result.Value);
+        }
+
         [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
         [HttpGet("/[area]/[controller]/[action]/{groupId}")]
         public IActionResult Attributes(string groupId)
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<GroupMenuViewModel> result = _groupDataService.GetMenuViewModel(groupId);
             if (result.Failure)
             {
-                return NotFound();
+                return NotFoundView();
             }
 
             return View(result.Value);
         }
 
+        [HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS)]
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupTableModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -99,6 +123,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return Ok(result.Value);
         }
 
+        [HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS)]
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -111,6 +136,27 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 
             Result result = _groupService.Add(addGroup);
             if(result.Failure)
+            {
+                ModelState.AddErrors(result.Errors);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new EmptyResult());
+        }
+
+        [HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS)]
+        [HttpPost]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult Remove([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Result result = _groupService.Remove(id);
+            if (result.Failure)
             {
                 ModelState.AddErrors(result.Errors);
                 return BadRequest(ModelState);

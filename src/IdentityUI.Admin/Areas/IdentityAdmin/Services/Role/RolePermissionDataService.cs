@@ -52,21 +52,21 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
                 return Result.Fail<DataTableResult<RolePermissionTableModel>>(validationResult.Errors);
             }
 
-            PaginationSpecification<PermissionRoleEntity, RolePermissionTableModel> paginationSpecification =
-                new PaginationSpecification<PermissionRoleEntity, RolePermissionTableModel>();
+            PaginationSpecification<PermissionEntity, RolePermissionTableModel> paginationSpecification =
+                new PaginationSpecification<PermissionEntity, RolePermissionTableModel>();
 
-            paginationSpecification.AddFilter(x => x.RoleId == roleId);
             if(!string.IsNullOrEmpty(dataTableRequest.Search))
             {
-                paginationSpecification.AddFilter(x => x.Role.NormalizedName.Contains(dataTableRequest.Search.ToUpper()));
+                paginationSpecification.AddFilter(x => x.Name.ToUpper().Contains(dataTableRequest.Search.ToUpper()));
             }
 
             paginationSpecification.AddSelect(x => new RolePermissionTableModel(
-                x.Permission.Id,
-                x.Permission.Name));
+                x.Id,
+                x.Name,
+                x.Roles.Any(c => c.RoleId == roleId)));
             paginationSpecification.AppalyPaging(dataTableRequest.Start, dataTableRequest.Length);
 
-            PaginatedData<RolePermissionTableModel> paginatedData = _permissionRoleRepository.GetPaginated(paginationSpecification);
+            PaginatedData<RolePermissionTableModel> paginatedData = _permissionRepository.GetPaginated(paginationSpecification);
 
             DataTableResult<RolePermissionTableModel> dataTableResult = new DataTableResult<RolePermissionTableModel>(
                 draw: dataTableRequest.Draw,

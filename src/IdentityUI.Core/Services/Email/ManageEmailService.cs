@@ -43,7 +43,7 @@ namespace SSRD.IdentityUI.Core.Services
             BaseSpecification<EmailEntity> baseSpecification = new BaseSpecification<EmailEntity>();
             baseSpecification.AddFilter(x => x.Id == id);
 
-            EmailEntity emailEntity = _emailRepository.Get(baseSpecification);
+            EmailEntity emailEntity = _emailRepository.SingleOrDefault(baseSpecification);
             if(emailEntity == null)
             {
                 _logger.LogError($"No email. EmailId {id}");

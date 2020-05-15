@@ -55,7 +55,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
             specification.AddFilter(x => x.Id == request.SessionId);
             specification.AddFilter(x => x.UserId == request.UserId);
 
-            SessionEntity session = _sessionRepository.Get(specification);
+            SessionEntity session = _sessionRepository.SingleOrDefault(specification);
             if (session == null)
             {
                 _logger.LogError($"Sesion does not exist. SessionId {request.SessionId}, Admin {adminId}");
@@ -126,7 +126,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
             specification.AddFilter(x => x.Code == sessionCode);
             specification.AddFilter(x => x.UserId == userId);
 
-            SessionEntity session = _sessionRepository.Get(specification);
+            SessionEntity session = _sessionRepository.SingleOrDefault(specification);
             if (session == null)
             {
                 _logger.LogError($"Sesion does not exist. SessionCode {sessionCode}, userId {userId}");
@@ -153,7 +153,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
             specification.AddFilter(x => x.Code == sessionCode);
             specification.AddFilter(x => x.UserId == userId);
 
-            SessionEntity session = _sessionRepository.Get(specification);
+            SessionEntity session = _sessionRepository.SingleOrDefault(specification);
             if(session == null)
             {
                 return false;

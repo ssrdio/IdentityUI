@@ -3,32 +3,109 @@
 
 @{
     SidebarSelection.SelectedOption = SidebarOptions.Role;
+}
 
-
+@{
+    ViewData["Title"] = "Roles";
 }
 
 @section script{
-    @if (Model.StatusAlert != null)
-    {
-        <script>
+    <script>
             $(document).ready(function () {
                 var x = document.getElementById("snackbar");
                 x.className = "show";
                 setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+
+                new RemoveRole('@Model.Id');
             });
-        </script>
-    }
+
+            class RemoveRole {
+                constructor(roleId) {
+
+                    this.roleId = roleId;
+
+                    this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                    this.confirmationModal = new conformationModal(
+                        $(`#modalContainer`),
+                        onYesClick => {
+                            if (onYesClick === null || onYesClick === undefined) {
+                                return;
+                            }
+
+                            if (onYesClick.key === 'removeRole') {
+                                this.remove();
+                            }
+                        }
+                    );
+
+                    $('#remove-button').on('click', () => {
+                        this.confirmationModal.show({ key: 'removeRole' }, 'Are you sure you want to remove role?');
+                    });
+                }
+
+                remove() {
+                    Api.post(`/IdentityAdmin/Role/Remove/${this.roleId}`)
+                        .done(() => {
+                            window.location.href = `/IdentityAdmin/Role`;
+                        })
+                        .fail((resp) => {
+                            this.statusAlert.showErrors(resp.responseJSON['']);
+                        });
+                }
+        }
+
+        @if (Model.StatusAlert != null)
+            {
+                <text>
+                    $(document).ready(function() {
+                        var x = document.getElementById("snackbar");
+                        x.className = "show";
+                        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+                    });
+
+                </text>
+        }
+    </script>
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
 }
 
 <div>
-    @(await Component.InvokeAsync("RoleMenu", new RoleMenuViewComponent.ViewModel(Model.Id, Model.Name, RoleMenuViewComponent.TabSelected.Details)))
+    @(await Component.InvokeAsync("RoleMenu", new RoleMenuViewComponent.ViewModel(Model.Id, Model.Name, Model.Type, RoleMenuViewComponent.TabSelected.Details)))
 
-    @if (Model.StatusAlert != null)
-    {
-        <div id="snackbar">
-            @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+    <div id="status-alert-container">
+        <div id="snackbar" class="snackbar">
+            <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && Model.StatusAlert.Success) ? "" : "none")">
+                <div class="alertMessage" style="width: 80%;display: inline-block;">
+                    @if ((Model.StatusAlert != null && Model.StatusAlert.Success))
+                    {
+                        @foreach (string message in Model.StatusAlert.Messages)
+                        {
+                            @message <br />
+                        }
+                    }
+                </div>
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+            </div>
+            <div class="alert-danger mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && !Model.StatusAlert.Success) ? "" : "none")">
+                <div class="alertMessage" style="width: 80%;display: inline-block;">
+                    @if ((Model.StatusAlert != null && !Model.StatusAlert.Success))
+                    {
+                        @foreach (string message in Model.StatusAlert.Messages)
+                        {
+                            @message <br />
+                        }
+                    }
+                </div>
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+            </div>
         </div>
-    }
+    </div>
 
     <div class="tab-content">
         <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
@@ -56,6 +133,7 @@
                     </div>
                     <div class="button-holder">
                         <input type="submit" value="Save" class="btn btn-primary custom-submit" />
+                        <button type="button" id="remove-button" class="btn btn-danger remove-button">Remove</button>
                     </div>
                 </form>
             </div>

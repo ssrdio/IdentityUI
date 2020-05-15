@@ -39,7 +39,7 @@ namespace SSRD.IdentityUI.Core.Services.Role
             BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
             baseSpecification.AddFilter(x => x.Id == roleId);
 
-            RoleEntity role = _roleRepository.Get(baseSpecification);
+            RoleEntity role = _roleRepository.SingleOrDefault(baseSpecification);
             if (role == null)
             {
                 _logger.LogError($"No Role. RoleId {roleId}");
@@ -111,7 +111,7 @@ namespace SSRD.IdentityUI.Core.Services.Role
 
         private Result Remove(BaseSpecification<RoleAssignmentEntity> baseSpecification)
         {
-            RoleAssignmentEntity roleAssignment = _groupRoleAssignmentRepository.Get(baseSpecification);
+            RoleAssignmentEntity roleAssignment = _groupRoleAssignmentRepository.SingleOrDefault(baseSpecification);
             if (roleAssignment == null)
             {
                 _logger.LogError($"No RoleAssignment");

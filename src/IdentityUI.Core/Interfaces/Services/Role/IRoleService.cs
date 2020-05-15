@@ -11,5 +11,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
     {
         Task<Result<string>> AddRole(NewRoleRequest newRoleRequest, string adminId);
         Result EditRole(string id, EditRoleRequest editRoleRequest, string adminId);
+
+        Result Remove(string id);
     }
 }

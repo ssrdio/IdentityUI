@@ -11,16 +11,17 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Services.Identity;
+using SSRD.IdentityUI.Core.Services.User.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     //TODO: change this to api controller
-    [AllowAnonymous]
     [Route("[area]/Group/{groupId}/[controller]/[action]")]
     [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
     public class GroupUserController : BaseController
@@ -31,7 +32,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
         public GroupUserController(IGroupUserService groupUserService, IGroupUserDataService groupUserDataService)
         {
             _groupUserService = groupUserService;
-            _groupUserDataService = groupUserDataService;
+             _groupUserDataService = groupUserDataService;
         }
 
         [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
@@ -97,27 +98,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
             return Ok(new EmptyResult());
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)]
-        [HttpPost]
-        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Invite([FromRoute] string groupId, [FromBody] InviteUserToGroupRequest inviteUserToGroup)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Result result = await _groupUserService.Invite(groupId, inviteUserToGroup);
-            if (result.Failure)
-            {
-                ModelState.AddErrors(result);
-                return BadRequest(ModelState);
-            }
-
-            return Ok(new EmptyResult());
-        }
-
         [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)]
         [HttpPost("{groupUserId}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
@@ -129,7 +109,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
                 return BadRequest(ModelState);
             }
 
-            Result result = _groupUserService.Remove(groupUserId, User.GetUserId(), User.GetGroupId(), User.HasPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS));
+            Result result = _groupUserService.Remove(groupUserId);
             if (result.Failure)
             {
                 ModelState.AddErrors(result);
@@ -150,8 +130,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
                 return BadRequest(ModelState);
             }
 
-            Result result = _groupUserService.ChangeRole(groupUserId, roleId, User.GetUserId(), User.GetGroupId(),
-                User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES));
+            Result result = _groupUserService.ChangeRole(groupUserId, roleId, User.GetUserId());
             if (result.Failure)
             {
                 ModelState.AddErrors(result);
@@ -171,7 +150,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
                 return BadRequest(ModelState);
             }
 
-            Result result = _groupUserService.Leave(User.GetUserId(), groupId);
+            Result result = _groupUserService.Leave(User.GetUserId(), User.GetGroupId());
             if (result.Failure)
             {
                 ModelState.AddErrors(result);

@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add Existing User to Group</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="custom-close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
@@ -13,6 +13,11 @@
 
                     <div id="existing-user-select" class="form-group">
                         <label class="control-label">Existing User</label>
+                        <select class="form-control select2-container" style="width:100%"></select>
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div id="group-role-select" class="form-group">
+                        <label class="control-label">Group Role</label>
                         <select class="form-control select2-container" style="width:100%"></select>
                         <span class="error text-danger"></span>
                     </div>

@@ -2,17 +2,36 @@
     SidebarSelection.SelectedOption = SidebarOptions.User;
 }
 
-
 @{
     ViewData["Title"] = "Users";
 }
 
-
 @section script {
+    <script src="~/identityAdmin/app/invite/invite-user-modal.js"></script>
     <script type="text/javascript">
-
         $(document).ready(function () {
-            $('#userTable').DataTable({
+            new UserIndex();
+        });
+
+        class UserIndex {
+            constructor() {
+                this.$usersTable = $('#userTable');
+                this.initTable();
+
+                this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                const inviteUserModal = new InviteUserModal(() => {
+                    this.reloadTable();
+                    this.statusAlert.showSuccess("User was invited");
+                });
+
+                $('#invite-user-button').on('click', () => {
+                    inviteUserModal.showModal();
+                });
+            }
+
+            initTable() {
+                $('#userTable').DataTable({
                 serverSide: true,
                 processing: true,
                 columnDefs: [
@@ -44,30 +63,41 @@
                             return `<div class="text-center pr-2"><a class="btn btn-primary table-button" href="@(string.Format(PagePath.USER_DETAILS, ""))${data.id}">Details</a> </div>`
                         }
                     }
-                ],
-                //language: { //Custom loading indicator
-                //    loadingRecords: "<i class='fa fa-spinner fa-spin'></i>",
-                //    processing: "<div class='loader'></div>"
-                //}
-            })
-        });
+                ]})
+            }
+
+            reloadTable() {
+                this.$usersTable
+                    .DataTable()
+                    .clear()
+                    .draw();
+            }
+        }
 
     </script>
 }
 
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("InviteUserModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
 
 <div class="row">
     <div class="main-card mb-3 card fullWidthCard">
         <div class="card-body">
-            
+
 
             <div class="card-title-space">
                 <h5 class="card-title">
                     Users:
                 </h5>
-                
-                    <a class="header-button" href="@PagePath.USER_NEW">Add User</a>
-                
+                <a class="header-button" href="@PagePath.USER_NEW">Add User</a>
+                <button id="invite-user-button" class="header-button">Invite User</button>
             </div>
 
             <div class="custom_container custom_table">

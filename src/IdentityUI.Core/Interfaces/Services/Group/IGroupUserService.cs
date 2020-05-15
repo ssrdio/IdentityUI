@@ -11,12 +11,9 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.Group
     public interface IGroupUserService
     {
         Result AddExisting(string groupId, AddExistingUserRequest addExistingUserRequest);
-        Task<Result> Invite(string groupId, InviteUserToGroupRequest inviteUserToGroup);
 
-        Result ChangeRole(long groupUserId, string roleId, string logedInUserId, string logedInUserGrroupId, bool hasGlobalPermission);
-        Result Remove(long groupUserId, string loggedInUserId, string loggedInUserGroupId, bool hasGlobalPermissions);
+        Result ChangeRole(long groupUserId, string roleId, string userId);
+        Result Remove(long groupUserId);
         Result Leave(string userId, string groupId);
-
-        List<RoleListData> CanManageRoles(string userId, string groupId, bool isGlobal);
     }
 }

@@ -9,5 +9,6 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.Group
     public interface IGroupService
     {
         Result Add(AddGroupRequest addGroup);
+        Result Remove(string id);
     }
 }

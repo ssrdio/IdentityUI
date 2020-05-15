@@ -22,6 +22,7 @@ using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Repository;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
@@ -34,6 +35,7 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IBaseRepository<InviteEntity> _inviteRepository;
         private readonly IBaseRepository<GroupEntity> _groupRepository; 
         private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
+        private readonly IBaseRepository<RoleEntity> _roleRepository;
 
         private readonly IValidator<NewUserRequest> _newUserValidator;
         private readonly IValidator<RegisterRequest> _registerValidator;
@@ -44,13 +46,15 @@ namespace SSRD.IdentityUI.Core.Services.User
         public AddUserService(UserManager<AppUserEntity> userManager, IValidator<NewUserRequest> newUserValidator,
             IValidator<RegisterRequest> registerValidator, IValidator<AcceptInviteRequest> acceptInviteValidator,
             ILogger<AddUserService> logger, IEmailConfirmationService emailService, IBaseRepository<InviteEntity> inviteRepository,
-            IBaseRepository<GroupEntity> groupRepository, IBaseRepository<GroupUserEntity> groupUserRepository)
+            IBaseRepository<GroupEntity> groupRepository, IBaseRepository<GroupUserEntity> groupUserRepository, 
+            IBaseRepository<RoleEntity> roleRepository)
         {
             _userManager = userManager;
 
             _inviteRepository = inviteRepository;
             _groupRepository = groupRepository;
             _groupUserRepository = groupUserRepository;
+            _roleRepository = roleRepository;
 
             _newUserValidator = newUserValidator;
             _registerValidator = registerValidator;
@@ -145,7 +149,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             getInviteSpecification.AddFilter(x => x.Token == acceptInvite.Code);
             getInviteSpecification.AddFilter(x => x.Status == Data.Enums.Entity.InviteStatuses.Pending);
 
-            InviteEntity inviteEntity = _inviteRepository.Get(getInviteSpecification);
+            InviteEntity inviteEntity = _inviteRepository.SingleOrDefault(getInviteSpecification);
             if(inviteEntity == null)
             {
                 _logger.LogError($"No Invite. Token {acceptInvite.Code}");
@@ -182,14 +186,21 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             if(inviteEntity.GroupId != null)
             {
-                AddToGroup(appUser.Id, inviteEntity.GroupId);
+                AddToGroup(appUser.Id, inviteEntity.GroupId, inviteEntity.GroupRoleId);
+            }
+
+            if(inviteEntity.RoleId != null)
+            {
+                await AddToGlobalRole(appUser, inviteEntity.RoleId);
             }
 
             return Result.Ok();
         }
 
-        private Result AddToGroup(string userId, string groupId)
+        private Result AddToGroup(string userId, string groupId, string groupRoleId)
         {
+            _logger.LogInformation($"Adding user to group. UserId {userId}, GroupId {groupId}");
+
             BaseSpecification<GroupEntity> groupExistsSpecification = new BaseSpecification<GroupEntity>();
             groupExistsSpecification.AddFilter(x => x.Id == groupId);
 
@@ -200,16 +211,52 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("no_group", "No Group");
             }
 
+            BaseSpecification<RoleEntity> groupRoleExistsSpecification = new BaseSpecification<RoleEntity>();
+            groupRoleExistsSpecification.AddFilter(x => x.Id == groupRoleId);
+            groupRoleExistsSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Group);
+
+            bool groupRoleExists = _roleRepository.Exist(groupRoleExistsSpecification);
+            if(!groupRoleExists)
+            {
+                _logger.LogWarning($"No GroupRole, adding GroupUser without GroupRole");
+                groupRoleId = null;
+            }
+
             GroupUserEntity groupUser = new GroupUserEntity(
                 userId: userId,
                 groupId: groupId,
-                roleId: null);
+                roleId: groupRoleId);
 
             bool addGroupUser = _groupUserRepository.Add(groupUser);
             if(!addGroupUser)
             {
                 _logger.LogError($"Failed to add GroupUser. GroupId {groupId}, UserId {userId}");
                 return Result.Fail("failed_to_add_group_user", "Failed to add GroupUser");
+            }
+
+            return Result.Ok();
+        }
+
+        private async Task<Result> AddToGlobalRole(AppUserEntity appUser, string roleId)
+        {
+            _logger.LogInformation($"Adding user to global role. UserId {appUser.Id}, RoleId {roleId}");
+
+            BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
+            baseSpecification.AddFilter(x => x.Id == roleId);
+            baseSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Global);
+
+            RoleEntity role = _roleRepository.SingleOrDefault(baseSpecification);
+            if(role == null)
+            {
+                _logger.LogError($"No GlobalRole. RoleId {roleId}");
+                return Result.Fail("no_role", "No Role");
+            }
+
+            IdentityResult addResult = await _userManager.AddToRoleAsync(appUser, role.Name);
+            if(!addResult.Succeeded)
+            {
+                _logger.LogError($"Failed to add role. UserId {appUser.Id}, RoleId {roleId}");
+                return Result.Fail("failed_to_add_role", "Failed to add role");
             }
 
             return Result.Ok();

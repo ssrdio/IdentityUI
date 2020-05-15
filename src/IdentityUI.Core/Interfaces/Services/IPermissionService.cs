@@ -9,5 +9,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
     public interface IPermissionService
     {
         Result Add(AddPermissionRequest addPermission);
+        Result Edit(string id, EditPermissionRequest editPermission);
+        Result Remove(string id);
     }
 }

@@ -6,54 +6,128 @@
 }
 
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "Roles";
 }
 
 @section script{
     <script>
 
         $(document).ready(function () {
-            $('#userTable').DataTable({
-                serverSide: true,
-                processing: true,
-                columnDefs: [
-                    { "width": "100px", "targets": [2] }
-                ],
-                "targets": 'no-sort',
-                "bSort": false,
-                "order": [],
-                ajax: {
-                    url: '@PagePath.ROLE/GetUsers/@Model.RoleId',
-                    type: 'GET'
-                },
-                columns: [
-                    {
-                        data: "userName",
-                        title: "Username",
-                        render: $.fn.dataTable.render.text()
-                    },
-                    {
-                        data: "email",
-                        title: "Email",
-                        render: $.fn.dataTable.render.text()
-                    },
-                    {
-                        data: null,
-                        defaultContent: '',
-                        render: function (data) {
-                            return `<div class="text-center pr-2"><a class="btn btn-primary table-button" href="@(string.Format(PagePath.USER_DETAILS, ""))${data.id}">Details</a></div>`
-                        }
-                    }
-                ],
-                //language: { //Custom loading indicator
-                //    loadingRecords: "<i class='fa fa-spinner fa-spin'></i>",
-                //    processing: "<div class='loader'></div>"
-                //}
-            })
+            new UserRoleTable('@Model.RoleId');
         });
+
+        class UserRoleTable {
+            constructor(roleId) {
+                this.roleId = roleId;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                this.confirmationModal = new conformationModal(
+                    $('#modal-container'),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeUser') {
+                            this.remove(onYesClick.id);
+                        }
+                    });
+
+                this.$userRoleTable = $('#userTable');
+                this.initTable();
+            }
+
+            initTable() {
+                let usersUrl;
+
+                @if(Model.Type == SSRD.IdentityUI.Core.Data.Enums.Entity.RoleTypes.Global)
+                {
+                    @: usersUrl = `/IdentityAdmin/Role/@Model.RoleId/User/GetGlobal`;
+                }
+                else if(Model.Type == SSRD.IdentityUI.Core.Data.Enums.Entity.RoleTypes.Group)
+                {
+                    @: usersUrl = `/IdentityAdmin/Role/@Model.RoleId/User/GetGroup`;
+                }
+
+                this.$userRoleTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    "targets": 'no-sort',
+                    "bSort": false,
+                    "order": [],
+                    ajax: {
+                        url: usersUrl,
+                        type: 'GET'
+                    },
+                    columns: [
+                        {
+                            data: "userName",
+                            title: "Username",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        @if(Model.Type == SSRD.IdentityUI.Core.Data.Enums.Entity.RoleTypes.Group)
+                        {
+                            <text>
+                            {
+                                data: "groupName",
+                                title: "Group",
+                                render: $.fn.dataTable.render.text()
+                            },
+                            </text>
+                        }
+                        {
+                            data: null,
+                            className: "dt-head-center",
+                            width: "250px",
+                            render: function (data) {
+                                return `
+                                <div">
+                                    <a class="btn btn-primary table-button" href="@(string.Format(PagePath.USER_DETAILS, ""))${data.id}">Details</a>
+                                    <button class="btn btn-danger table-button remove" data-id="${data.id}">Remove</a>
+                                </div>`
+                            }
+                        }
+                    ]});
+
+                this.$userRoleTable.on('click', 'button.remove', (event) => {
+                    let id = $(event.target).data("id");
+                    this.confirmationModal.show({ key: 'removeUser', id: id }, 'Are you sure that you want to remove user from role?');
+                });
+            }
+
+            reloadTable() {
+                this.$userRoleTable
+                    .DataTable()
+                    .clear()
+                    .draw();
+            }
+
+            remove(userId) {
+                Api.post(`/IdentityAdmin/Role/${this.roleId}/User/Remove/${userId}`)
+                    .done(() => {
+                        this.reloadTable();
+                        this.statusAlert.showSuccess('User was removed from role');
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showErrors(resp.responeJSON['']);
+                    })
+            }
+        }
 
     </script>
 }
+
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("InviteUserModal")
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
 
 <div>
     @(await Component.InvokeAsync("RoleMenu", Model.ToComponentViewModel(RoleMenuViewComponent.TabSelected.Users)))

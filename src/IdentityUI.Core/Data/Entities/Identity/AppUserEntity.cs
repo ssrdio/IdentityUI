@@ -29,7 +29,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
         /// </summary>
         public string SessionCode { get; set; }
 
-        public AppUserEntity()
+        protected AppUserEntity()
         {
         }
 

@@ -37,23 +37,16 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                 .Any();
         }
 
-        public virtual TEntity Get(IBaseSpecification<TEntity> specification)
+        public virtual TEntity FirstOrDefault(IBaseSpecification<TEntity> specification)
         {
             return _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplayBaseSpecification(specification)
                 .FirstOrDefault();
         }
 
-        public TData Get<TData>(ISelectSpecification<TEntity, TData> specification)
-        {
-            return _context
-                .Set<TEntity>()
-                .ApplaySelectSpecification(specification)
-                .FirstOrDefault();
-        }
-
-        public TData GetWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification)
+        public TData FirstOrDefault<TData>(ISelectSpecification<TEntity, TData> specification)
         {
             return _context
                 .Set<TEntity>()
@@ -66,6 +59,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             return _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplaySelectSpecification(specification)
                 .ToList();
         }
@@ -74,6 +68,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             List<TData> data = _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplyPaginationSpecification(specification)
                 .ToList();
 
@@ -99,19 +94,12 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             return _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplayBaseSpecification(specification)
                 .SingleOrDefault();
         }
 
         public TData SingleOrDefault<TData>(ISelectSpecification<TEntity, TData> specification)
-        {
-            return _context
-                 .Set<TEntity>()
-                 .ApplaySelectSpecification(specification)
-                 .SingleOrDefault();
-        }
-
-        public TData SingleOrDefaultWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification)
         {
             return _context
                  .Set<TEntity>()

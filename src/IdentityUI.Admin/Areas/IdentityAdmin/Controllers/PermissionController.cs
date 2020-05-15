@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Permission;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -14,6 +18,7 @@ using SSRD.IdentityUI.Core.Services.Permission.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
+    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class PermissionController : BaseController
     {
         private readonly IPermissionDataService _permissionDataService;
@@ -41,6 +46,46 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             return View(result.Value);
+        }
+
+        [HttpGet]
+        public IActionResult Roles(string id)
+        {
+            Result<PermissionMenuViewModel> result = _permissionDataService.GetMenuViewModel(id);
+            if (result.Failure)
+            {
+                return NotFoundView();
+            }
+
+            return View(result.Value);
+
+        }
+
+        [HttpPost]
+        public IActionResult Edit(string id, EditPermissionRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return NotFoundView();
+            }
+
+            Result<PermissionViewModel> role = _permissionDataService.GetViewModel(id);
+            if (role.Failure)
+            {
+                return NotFoundView();
+            }
+
+            Result editResult = _permissionService.Edit(id, request);
+            if (editResult.Failure)
+            {
+                ModelState.AddErrors(editResult.Errors);
+                role.Value.StatusAlert = StatusAlertViewExtension.Get(editResult);
+
+                return View("Details", role.Value);
+            }
+
+            role.Value.StatusAlert = StatusAlertViewExtension.Get("permission updated");
+            return View("Details", role.Value);
         }
 
         [HttpGet]
@@ -81,6 +126,46 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             return Ok(new EmptyResult());
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult Remove([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            Result result = _permissionService.Remove(id);
+            if (result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new EmptyResult());
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(DataTableResult<RoleListViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult GetRoles([FromRoute] string id, DataTableRequest dataTableRequest)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Result<DataTableResult<RoleListViewModel>> result = _permissionDataService.GetRoles(id, dataTableRequest);
+            if(result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(result.Value);
         }
     }
 }

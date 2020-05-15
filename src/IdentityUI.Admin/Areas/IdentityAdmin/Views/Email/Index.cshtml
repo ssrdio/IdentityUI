@@ -5,9 +5,8 @@
 }
 
 @{
-    ViewData["Title"] = "Settings";
+    ViewData["Title"] = "Email";
 }
-
 
 @section script {
     <script>
@@ -40,7 +39,7 @@
                     }
                 ],
             });
-            
+
             const snackbar = document.getElementById("snackbar");
             if (snackbar !== null && snackbar !== undefined) {
                 snackbar.className = "showError";

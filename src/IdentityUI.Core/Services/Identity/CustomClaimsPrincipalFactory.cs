@@ -11,32 +11,21 @@ using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Data.Enums.Entity;
-using System.Security.Cryptography.Xml;
-using SSRD.IdentityUI.Core.Data.Entities.Group;
 
 namespace SSRD.IdentityUI.Core.Services.Identity
 {
     public class CustomClaimsPrincipalFactory : UserClaimsPrincipalFactory<AppUserEntity, RoleEntity>
     {
-        private readonly IBaseRepository<AppUserEntity> _userRepository;
+        private readonly IBaseRepositoryAsync<AppUserEntity> _userRepository;
 
         public CustomClaimsPrincipalFactory(UserManager<AppUserEntity> userManager, RoleManager<RoleEntity> roleManager,
-            IOptions<IdentityOptions> identityOptions, IBaseRepository<AppUserEntity> userRepository) : base(userManager, roleManager, identityOptions)
+            IOptions<IdentityOptions> identityOptions, IBaseRepositoryAsync<AppUserEntity> userRepository) : base(userManager, roleManager, identityOptions)
         {
             _userRepository = userRepository;
         }
 
-        public override Task<ClaimsPrincipal> CreateAsync(AppUserEntity user)
+        public override async Task<ClaimsPrincipal> CreateAsync(AppUserEntity user)
         {
-            //ClaimsPrincipal claimsPrincipal = await base.CreateAsync(user);
-
-            //if (!string.IsNullOrEmpty(user.SessionCode))
-            //{
-            //    ((ClaimsIdentity)claimsPrincipal.Identity).AddClaim(new Claim(IdentityUIClaims.SESSION_CODE, user.SessionCode));
-            //}
-
-            //return claimsPrincipal;
-
             SelectSpecification<AppUserEntity, UserData> userDataSpecification = new SelectSpecification<AppUserEntity, UserData>();
             userDataSpecification.AddFilter(x => x.Id == user.Id);
             userDataSpecification.AddSelect(x => new UserData(
@@ -55,7 +44,7 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                     c.Role.Permissions.Select(v => v.Permission.Name)))
                 ));
 
-            UserData userData = _userRepository.SingleOrDefaultWithNoTracking(userDataSpecification);
+            UserData userData = await _userRepository.SingleOrDefault(userDataSpecification);
 
             if(userData == null)
             {
@@ -71,7 +60,7 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 ((ClaimsIdentity)claimsPrincipal.Identity).AddClaim(new Claim(IdentityUIClaims.SESSION_CODE, user.SessionCode));
             }
 
-            return Task.FromResult(claimsPrincipal);
+            return claimsPrincipal;
         }
 
         public class RoleData
@@ -141,6 +130,7 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 if(group != null)
                 {
                     claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_ID, group.GroupId));
+                    claimsIdentity.AddClaim(new Claim(IdentityUIClaims.GROUP_NAME, group.GroupName));
 
                     if (!string.IsNullOrEmpty(group.RoleName))
                     {
@@ -155,7 +145,7 @@ namespace SSRD.IdentityUI.Core.Services.Identity
 
                 foreach (RoleData role in Roles)
                 {
-                    if (role.Type == RoleTypes.System)
+                    if (role.Type == RoleTypes.Global)
                     {
                         claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role.Name));
 

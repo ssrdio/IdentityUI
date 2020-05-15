@@ -51,7 +51,14 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Email
 
         private async Task<Result> Send(string email, string subject, string body)
         {
-            await _emailSender.SendEmailAsync(email, subject, body);
+            try
+            {
+                await _emailSender.SendEmailAsync(email, subject, body);
+            }
+            catch(Exception)
+            {
+                return Result.Fail("failed_to_send_email", "Failed to send email");
+            }
 
             return Result.Ok();
         }

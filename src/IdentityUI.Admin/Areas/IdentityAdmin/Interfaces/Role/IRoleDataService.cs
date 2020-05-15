@@ -11,7 +11,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role
     {
         Result<DataTableResult<RoleListViewModel>> GetAll(DataTableRequest request);
         Result<RoleDetailViewModel> GetDetails(string id);
-        Result<DataTableResult<UserViewModel>> GetUsers(string roleId, DataTableRequest request);
+        Result<DataTableResult<UserTableModel>> GetGlobalUsers(string roleId, DataTableRequest request);
+        Result<DataTableResult<UserTableModel>> GetGroupUsers(string roleId, DataTableRequest request);
         Result<RoleMenuViewModel> GetRoleMenuViewModel(string id);
         NewRoleViewModel GetNewRoleViewModel(Result result = null);
     }

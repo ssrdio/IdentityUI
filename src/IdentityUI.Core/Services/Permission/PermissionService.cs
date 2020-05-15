@@ -18,14 +18,19 @@ namespace SSRD.IdentityUI.Core.Services.Permission
         private readonly IBaseRepository<PermissionEntity> _permissionRepository;
 
         private readonly IValidator<AddPermissionRequest> _addPermissionValidator;
+        private readonly IValidator<EditPermissionRequest> _editPermissionValidator;
 
         private readonly ILogger<PermissionService> _logger;
 
         public PermissionService(IBaseRepository<PermissionEntity> permissionRepository,
-            IValidator<AddPermissionRequest> addPermissionValidator, ILogger<PermissionService> logger)
+            IValidator<AddPermissionRequest> addPermissionValidator, IValidator<EditPermissionRequest> editPermissionValidator,
+            ILogger<PermissionService> logger)
         {
             _permissionRepository = permissionRepository;
+
             _addPermissionValidator = addPermissionValidator;
+            _editPermissionValidator = editPermissionValidator;
+
             _logger = logger;
         }
 
@@ -57,6 +62,54 @@ namespace SSRD.IdentityUI.Core.Services.Permission
             {
                 _logger.LogError($"Failed to add Permission. PermissionName {permission.Name}");
                 return Result.Fail("failed_to_add_permission", "Failed to add permission");
+            }
+
+            return Result.Ok();
+        }
+
+        public Result Edit(string id, EditPermissionRequest editPermission)
+        {
+            BaseSpecification<PermissionEntity> baseSpecification = new BaseSpecification<PermissionEntity>();
+            baseSpecification.AddFilter(x => x.Id == id);
+
+            PermissionEntity permission = _permissionRepository.SingleOrDefault(baseSpecification);
+            if(permission == null)
+            {
+                _logger.LogError($"No permission. PermissionId {id}");
+                return Result.Fail("no_permission", "No Permission");
+            }
+
+            permission.Update(editPermission.Description);
+
+            bool updateResult = _permissionRepository.Update(permission);
+            if(!updateResult)
+            {
+                _logger.LogError($"Failed to update permission. PermissionId {id}");
+                return Result.Fail("failed_to_update_permission", "Failed to update permission");
+            }
+
+            return Result.Ok();
+        }
+
+        public Result Remove(string id)
+        {
+            BaseSpecification<PermissionEntity> baseSpecification = new BaseSpecification<PermissionEntity>();
+            baseSpecification.AddFilter(x => x.Id == id);
+
+            PermissionEntity permission = _permissionRepository.SingleOrDefault(baseSpecification);
+            if (permission == null)
+            {
+                _logger.LogError($"No permission. PermissionId {id}");
+                return Result.Fail("no_permission", "No Permission");
+            }
+
+            _logger.LogInformation($"Removing permission. PermissionId {id}, Name {permission.Name}");
+
+            bool updateResult = _permissionRepository.Remove(permission);
+            if (!updateResult)
+            {
+                _logger.LogError($"Failed to remove permission. PermissionId {id}");
+                return Result.Fail("failed_to_remove_permission", "Failed to remove permission");
             }
 
             return Result.Ok();

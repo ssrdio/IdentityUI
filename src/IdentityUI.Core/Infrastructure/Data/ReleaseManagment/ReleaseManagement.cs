@@ -18,113 +18,122 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 {
-    internal static class ReleaseManagement
+    internal class ReleaseManagement
     {
+        private readonly IdentityDbContext _context;
+
+#if NET_CORE2
+        private readonly IHostingEnvironment _hostingEnvironment;
+#endif
+#if NET_CORE3
+        private readonly IWebHostEnvironment _hostingEnvironment;
+#endif
+
+        private readonly ILogger<ReleaseManagement> _logger;
+
+        private readonly DatabaseOptions _databaseOptions;
+#if NET_CORE2
+        public ReleaseManagement(IdentityDbContext context, IHostingEnvironment hostingEnvironment, ILogger<ReleaseManagement> logger,
+            IOptionsSnapshot<DatabaseOptions> databaseOptions)
+#elif NET_CORE3
+        public ReleaseManagement(IdentityDbContext context, IWebHostEnvironment hostingEnvironment, ILogger<ReleaseManagement> logger,
+            IOptionsSnapshot<DatabaseOptions> databaseOptions)
+#endif
+        {
+            _context = context;
+            _hostingEnvironment = hostingEnvironment;
+            _logger = logger;
+            _databaseOptions = databaseOptions.Value;
+        }
+
         /// <summary>
         /// Executes pending migrations and update procedures.
         /// </summary>
-        public static void ApplyIdentityMigrations(this IApplicationBuilder app)
+        public void ApplayMigrations()
         {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            if (_databaseOptions.Type == DatabaseTypes.InMemory)
             {
-                ILoggerFactory loggerFactory = serviceScope.ServiceProvider.GetService<ILoggerFactory>();
-                ILogger logger = loggerFactory.CreateLogger(typeof(ReleaseManagement));
-
-                IOptionsSnapshot<DatabaseOptions> databaseOptions = serviceScope.ServiceProvider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>();
-                if(databaseOptions.Value.Type == DatabaseTypes.InMemory)
-                {
-                    return;
-                }
-
-                logger.LogInformation("===== Release Management =====");
-
-                try
-                {
-#if NET_CORE2
-                    IHostingEnvironment hostingEnvironment = serviceScope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
-#endif
-#if NET_CORE3
-                    IWebHostEnvironment hostingEnvironment = serviceScope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-#endif
-                    IConfiguration configuration = serviceScope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    IdentityDbContext context = serviceScope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-                    IRelationalDatabaseCreator databaseCreator = context.Database.GetService<IDatabaseCreator>() as IRelationalDatabaseCreator;
-
-
-                    logger.LogInformation($"Hosting env: {hostingEnvironment}");
-
-                    if(!databaseCreator.Exists())
-                    {
-                        logger.LogInformation($"Creating new Database");
-
-                        databaseCreator.Create();
-
-                        logger.LogInformation($"New Database was created");
-                    }
-
-                    List<IUpdate> updates = AllUpdates();
-                    logger.LogInformation($"All updates(also already applied): {string.Join(", ", updates)}");
-
-                    List<string> applyedMigrations = context.Database
-                        .GetAppliedMigrations()
-                        .ToList();
-
-                    foreach (var update in updates)
-                    {
-                        if (update.ShouldExecute(applyedMigrations))
-                        {
-                            PerformUpdateInTransaction(context, update, logger);
-                        }
-                    }
-
-                    logger.LogInformation("===== Release Management Finished =====");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError($"Error during ReleaseManagment. {ex}");
-                    throw new Exception($"ReleaseManagment Error. {ex.Message}");
-                }
+                return;
             }
 
-            return;
-        }
+            _logger.LogInformation("===== Release Management =====");
 
-        private static void PerformUpdateInTransaction(IdentityDbContext context, IUpdate update, ILogger logger)
+            try
+            {
+
+                _logger.LogInformation($"Hosting env: {_hostingEnvironment}");
+
+                IRelationalDatabaseCreator relationalDatabaseCreator = _context.Database.GetService<IDatabaseCreator>() as IRelationalDatabaseCreator;
+
+                if (!relationalDatabaseCreator.Exists())
+                {
+                    _logger.LogInformation($"Creating new Database");
+                    relationalDatabaseCreator.Create();
+                    _logger.LogInformation($"New Database was created");
+                }
+
+                List<IUpdate> updates = AllUpdates();
+                _logger.LogInformation($"All updates(also already applied): {string.Join(", ", updates)}");
+
+                List<string> applyedMigrations = _context.Database
+                    .GetAppliedMigrations()
+                    .ToList();
+
+                foreach (var update in updates)
+                {
+                    if (update.ShouldExecute(applyedMigrations))
+                    {
+                        PerformUpdateInTransaction(update);
+                    }
+                }
+
+                _logger.LogInformation("===== Release Management Finished =====");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error during ReleaseManagment. {ex}");
+                throw new Exception($"ReleaseManagment Error. {ex.Message}");
+            }
+        }
+        
+
+        private void PerformUpdateInTransaction(IUpdate update)
         {
-            using (var dbContextTransaction = context.Database.BeginTransaction())
+            using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
                 try
                 {
-                    logger.LogInformation($"===== Performing update: {update} =====");
-                    logger.LogInformation($"Before Schema Change: {update}");
+                    _logger.LogInformation($"===== Performing update: {update} =====");
+                    _logger.LogInformation($"Before Schema Change: {update}");
                     update.BeforeSchemaChange();
-                    logger.LogInformation($"Finished Before Schema Change: {update}");
+                    _logger.LogInformation($"Finished Before Schema Change: {update}");
 
-                    logger.LogInformation($"Schema Change: {update}");
-                    update.SchemaChange(context.Database);
-                    logger.LogInformation($"Finished Schema Change: {update}");
+                    _logger.LogInformation($"Schema Change: {update}");
+                    update.SchemaChange(_context.Database);
+                    _logger.LogInformation($"Finished Schema Change: {update}");
 
-                    logger.LogInformation($"After Schema Change: {update}");
+                    _logger.LogInformation($"After Schema Change: {update}");
                     update.AfterSchemaChange();
-                    logger.LogInformation($"Finished After Schema Change: {update}");
-                    logger.LogInformation($"===== Finished update: {update} =====");
+                    _logger.LogInformation($"Finished After Schema Change: {update}");
+                    _logger.LogInformation($"===== Finished update: {update} =====");
 
                     dbContextTransaction.Commit();
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"Release update failed. {e}");
+                    _logger.LogError($"Release update failed. {e}");
                     dbContextTransaction.Rollback();
                     throw e;
                 }
             }
         }
 
-        private static List<IUpdate> AllUpdates()
+        private List<IUpdate> AllUpdates()
         {
             var updates = new List<IUpdate>
             {
                 new Update_01_InitialCreate(),
+                new Update_02_AddPermissionsAddGroups(),
             };
             return updates.OrderBy(m => m.GetVersion()).ToList();
         }

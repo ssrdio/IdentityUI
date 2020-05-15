@@ -8,6 +8,7 @@ using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Data.Specifications;
+using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models;
@@ -25,163 +26,41 @@ namespace SSRD.IdentityUI.Core.Services.Group
 {
     internal class GroupUserService : IGroupUserService
     {
-        private readonly IBaseRepository<GroupEntity> _groupRepository;
         private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
         private readonly IBaseRepository<AppUserEntity> _userRepository;
         private readonly IBaseRepository<RoleEntity> _roleRepository;
-        private readonly IBaseRepository<RoleAssignmentEntity> _roleAssignmenRepository;
+
+        private readonly IGroupUserStore _groupUserStore;
+        private readonly IGroupStore _groupStore;
 
         private readonly IValidator<AddExistingUserRequest> _addExistingUserValidator;
-        private readonly IValidator<InviteUserToGroupRequest> _inviteUserToGroupRequest;
 
         private readonly ILogger<GroupUserService> _logger;
 
-        public GroupUserService(IBaseRepository<GroupEntity> groupRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
-            IBaseRepository<AppUserEntity> userRepository, IBaseRepository<RoleEntity> roleRepository,
-            IBaseRepository<RoleAssignmentEntity> roleAssignmentRepository, IValidator<AddExistingUserRequest> addExistingUserValidator,
-            IValidator<InviteUserToGroupRequest> inviteUserToGroupRequest, ILogger<GroupUserService> logger)
+        public GroupUserService(IBaseRepository<GroupUserEntity> groupUserRepository, IBaseRepository<AppUserEntity> userRepository,
+            IBaseRepository<RoleEntity> roleRepository, IGroupUserStore groupUserStore, IGroupStore groupStore,
+            IValidator<AddExistingUserRequest> addExistingUserValidator, ILogger<GroupUserService> logger)
         {
-            _groupRepository = groupRepository;
             _groupUserRepository = groupUserRepository;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
-            _roleAssignmenRepository = roleAssignmentRepository;
+
+            _groupUserStore = groupUserStore;
+            _groupStore = groupStore;
 
             _addExistingUserValidator = addExistingUserValidator;
-            _inviteUserToGroupRequest = inviteUserToGroupRequest;
 
             _logger = logger;
         }
 
-        private List<RoleListData> GetAllGroupRoles()
-        {
-            SelectSpecification<RoleEntity, RoleListData> selectSpecification = new SelectSpecification<RoleEntity, RoleListData>();
-            selectSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Group);
-
-            selectSpecification.AddSelect(x => new RoleListData(
-                x.Id,
-                x.Name));
-
-            List<RoleListData> roleListData = _roleRepository.GetList(selectSpecification);
-
-            return roleListData;
-        }
-
-        private List<RoleListData> GetRoleAssignmes(string userId, string groupId)
-        {
-            SelectSpecification<GroupUserEntity, RoleListData> getGroupRoleSpecification = new SelectSpecification<GroupUserEntity, RoleListData>();
-            getGroupRoleSpecification.AddFilter(x => x.UserId == userId);
-            getGroupRoleSpecification.AddFilter(x => x.GroupId == groupId);
-
-            getGroupRoleSpecification.AddSelect(x => new RoleListData(
-                x.Role.Id,
-                x.Role.Name));
-
-            RoleListData groupRole = _groupUserRepository.Get(getGroupRoleSpecification);
-            if (groupRole == null)
-            {
-                _logger.LogInformation($"User has no groupRole. UserId {userId}, GroupId {groupId}");
-                return new List<RoleListData>();
-            }
-
-            SelectSpecification<RoleAssignmentEntity, RoleListData> getRoleAssignmesSpecification = new SelectSpecification<RoleAssignmentEntity, RoleListData>();
-            getRoleAssignmesSpecification.AddFilter(x => x.RoleId == groupRole.Id);
-
-            getRoleAssignmesSpecification.AddSelect(x => new RoleListData(
-                x.CanAssigneRole.Id,
-                x.CanAssigneRole.Name));
-
-            List<RoleListData> canAssigneRoles = _roleAssignmenRepository.GetList(getRoleAssignmesSpecification);
-
-            if(!canAssigneRoles.Any(x => x.Id == groupRole.Id))
-            {
-                canAssigneRoles.Add(groupRole);
-            }
-
-            return canAssigneRoles;
-        }
-
-        public List<RoleListData> CanManageRoles(string userId, string groupId, bool isGlobal)
-        {
-            List<RoleListData> roles;
-
-            if (isGlobal)
-            {
-                roles = GetAllGroupRoles();
-            }
-            else
-            {
-                roles = GetRoleAssignmes(userId, groupId);
-            }
-
-            roles.Add(new RoleListData(
-                id: null,
-                name: null));
-
-            return roles;
-        }
-
-        private Result GroupExist(string id)
-        {
-            BaseSpecification<GroupEntity> baseSpecification = new BaseSpecification<GroupEntity>();
-            baseSpecification.AddFilter(x => x.Id == id);
-
-            bool groupExist = _groupRepository.Exist(baseSpecification);
-            if (!groupExist)
-            {
-                _logger.LogError($"No group. GroupId {id}");
-                return Result.Fail("no_group", "No Group");
-            }
-
-            return Result.Ok();
-        }
-
         private Result AddUserToGroup(string userId, string groupId)
         {
-            //SelectSpecification<GroupRoleEntity, string> defaultGroupRoleSpecification = new SelectSpecification<GroupRoleEntity, string>();
-            //defaultGroupRoleSpecification.AddFilter(x => x.Name.ToUpper() == RoleConstats.DEFAULT_GROUP_ROLE.ToUpper());
-            //defaultGroupRoleSpecification.AddSelect(x => x.Id);
-
-            //string defaultGroupRoleId = _groupRoleRepository.Get(defaultGroupRoleSpecification);
-            //if(string.IsNullOrEmpty(defaultGroupRoleId))
-            //{
-            //    _logger.LogError($"No default GroupRole. Default GroupRole name {RoleConstats.DEFAULT_GROUP_ROLE}");
-            //    return Result.Fail("no_default_group_role", "No default GroupRole");
-            //}
-
             return AddUserToGroup(userId, groupId, null);
-        }
-
-        private Result RoleIsValid(string roleId)
-        {
-            if(roleId == null)
-            {
-                _logger.LogInformation($"Adding GroupUser without role");
-                return Result.Ok();
-            }
-
-            BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
-            baseSpecification.AddFilter(x => x.Id == roleId);
-
-            RoleEntity role = _roleRepository.Get(baseSpecification);
-            if(role == null)
-            {
-                _logger.LogError($"No role. RoleId {roleId}");
-                return Result.Fail("no_role", "No Role");
-            }
-
-            if(role.Type != Data.Enums.Entity.RoleTypes.Group)
-            {
-                _logger.LogError($"Invalid RoleType. RoleId {roleId}");
-                return Result.Fail("invalid_role_type", "Invalid RoleType");
-            }
-
-            return Result.Ok();
         }
 
         private Result AddUserToGroup(string userId, string groupId, string roleId)
         {
-            Result groupExist = GroupExist(groupId);
+            Result groupExist = _groupStore.Exists(groupId);
             if (groupExist.Failure)
             {
                 return Result.Fail(groupExist.Errors);
@@ -235,6 +114,35 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return Result.Ok();
         }
 
+        private Result RoleIsValid(string roleId)
+        {
+            if (roleId == null)
+            {
+                _logger.LogInformation($"Adding GroupUser without role");
+                return Result.Ok();
+            }
+
+            BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
+            baseSpecification.AddFilter(x => x.Id == roleId);
+            baseSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Group);
+
+            RoleEntity role = _roleRepository.SingleOrDefault(baseSpecification);
+            if (role == null)
+            {
+                _logger.LogError($"No GroupRole. RoleId {roleId}");
+                return Result.Fail("no_group_role", "No GroupRole");
+            }
+
+            List<RoleListData> canAssigneRoles = _groupUserStore.CanAssigneGroupRoles();
+            if (!canAssigneRoles.Any(x => x.Id == roleId))
+            {
+                _logger.LogError($"User can not assign that GroupRole. GroupRoleId {roleId}");
+                return Result.Fail("no_permission", "No permission");
+            }
+
+            return Result.Ok();
+        }
+
         private Result UserExist(string id)
         {
             BaseSpecification<AppUserEntity> baseSpecification = new BaseSpecification<AppUserEntity>();
@@ -259,76 +167,49 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Result.Fail(validationResult.Errors);
             }
 
-            return AddUserToGroup(addExistingUserRequest.UserId, groupId);
+            return AddUserToGroup(addExistingUserRequest.UserId, groupId, addExistingUserRequest.GroupRoleId);
         }
 
-        public Task<Result> Invite(string groupId, InviteUserToGroupRequest inviteUserToGroup)
-        {
-            //ValidationResult validationResult = _inviteUserToGroupRequest.Validate(inviteUserToGroup);
-            //if(!validationResult.IsValid)
-            //{
-            //    _logger.LogWarning($"Invalid {nameof(InviteUserToGroupRequest)} model");
-            //    return Result.Fail(validationResult.Errors);
-            //}
-
-            throw new NotImplementedException();
-        }
-
-        private Result<GroupUserEntity> GetGroupUser(long id)
-        {
-            BaseSpecification<GroupUserEntity> getGroupUserSpecification = new BaseSpecification<GroupUserEntity>();
-            getGroupUserSpecification.AddFilter(x => x.Id == id);
-
-            GroupUserEntity groupUser = _groupUserRepository.Get(getGroupUserSpecification);
-            if (groupUser == null)
-            {
-                _logger.LogError($"No GroupUser. No GroupUser");
-                return Result.Fail<GroupUserEntity>("no_group_user", "No GroupUser");
-            }
-
-            return Result.Ok(groupUser);
-        }
-
-        private Result<GroupUserEntity> GetGroupUser(string userId, string groupId)
-        {
-            BaseSpecification<GroupUserEntity> getGroupUserSpecification = new BaseSpecification<GroupUserEntity>();
-            getGroupUserSpecification.AddFilter(x => x.UserId == userId);
-            getGroupUserSpecification.AddFilter(x => x.GroupId == groupId);
-
-            GroupUserEntity groupUser = _groupUserRepository.Get(getGroupUserSpecification);
-            if (groupUser == null)
-            {
-                _logger.LogError($"No GroupUser. No GroupUser");
-                return Result.Fail<GroupUserEntity>("no_group_user", "No GroupUser");
-            }
-
-            return Result.Ok(groupUser);
-        }
-
-        public Result ChangeRole(long groupUserId, string roleId, string logedInUserId, string logedInUserGrroupId, bool hasGlobalPermission)
+        public Result ChangeRole(long groupUserId, string roleId, string userId)
         {
             _logger.LogInformation($"Changing GroupUser role. GroupUserId {groupUserId}, roleId {roleId}");
 
-            List<RoleListData> roleLists = CanManageRoles(logedInUserId, logedInUserGrroupId, hasGlobalPermission);
-            if(!roleLists.Any(x => x.Id == roleId))
+            Result roleValidResult = RoleIsValid(roleId);
+            if (roleValidResult.Failure)
+            {
+                return Result.Fail(roleValidResult.Errors);
+            }
+
+            List<RoleListData> canAssigneGroupRoles = _groupUserStore.CanAssigneGroupRoles();
+            if(!canAssigneGroupRoles.Any(x => x.Id == roleId))
             {
                 _logger.LogError($"User does not have permission to assign role. RoleId {roleId}");
                 return Result.Fail("no_permission", "No Permission");
             }
 
-            Result roleValidResult = RoleIsValid(roleId);
-            if(roleValidResult.Failure)
-            {
-                return Result.Fail(roleValidResult.Errors);
-            }
-
-            Result<GroupUserEntity> getGroupUserResult = GetGroupUser(groupUserId);
-            if(getGroupUserResult.Failure)
+            Result<GroupUserEntity> getGroupUserResult = _groupUserStore.Get(groupUserId);
+            if (getGroupUserResult.Failure)
             {
                 return Result.Fail(getGroupUserResult.Errors);
             }
 
             GroupUserEntity groupUser = getGroupUserResult.Value;
+
+            List<RoleListData> canManageGroupRoles = _groupUserStore.CanManageGroupRoles();
+            if (!canManageGroupRoles.Any(x => x.Id != groupUser.RoleId))
+            {
+                _logger.LogError($"User does not have permission to manage role. GroupUserId {groupUserId} RoleId {roleId}");
+                return Result.Fail("no_permission", "No Permission");
+            }
+
+            if(!_groupUserStore.CanChangeOwnRole())
+            {
+                if(groupUser.UserId == userId)
+                {
+                    _logger.LogError($"User can not change his own role");
+                    return Result.Fail("user_can_not_change_his_own_role", "User can not change his own role");
+                }
+            }
 
             groupUser.UpdateRole(roleId);
 
@@ -342,11 +223,11 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return Result.Ok();
         }
 
-        public Result Remove(long groupUserId, string loggedInUserId, string loggedInUserGroupId, bool hasGlobalPermissions)
+        public Result Remove(long groupUserId)
         {
             _logger.LogInformation($"Removing GroupUser. GroupUserId {groupUserId}");
 
-            Result<GroupUserEntity> getGroupUserResult = GetGroupUser(groupUserId);
+            Result<GroupUserEntity> getGroupUserResult = _groupUserStore.Get(groupUserId);
             if (getGroupUserResult.Failure)
             {
                 return Result.Fail(getGroupUserResult.Errors);
@@ -354,7 +235,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
             GroupUserEntity groupUser = getGroupUserResult.Value;
 
-            List<RoleListData> rolesList = CanManageRoles(loggedInUserId, loggedInUserGroupId, hasGlobalPermissions);
+            List<RoleListData> rolesList = _groupUserStore.CanManageGroupRoles();
             if(!rolesList.Any(x => x.Id == groupUser.RoleId))
             {
                 _logger.LogError($"User does not have a permission to remove user. GroupUserId {groupUserId}");
@@ -375,7 +256,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
         {
             _logger.LogInformation($"GroupUser is leaving. UserId {userId}, GroupId {groupId}");
 
-            Result<GroupUserEntity> getGroupUserResult = GetGroupUser(userId, groupId);
+            Result<GroupUserEntity> getGroupUserResult = _groupUserStore.Get(userId, groupId);
             if(getGroupUserResult.Failure)
             {
                 return Result.Fail(getGroupUserResult.Errors);

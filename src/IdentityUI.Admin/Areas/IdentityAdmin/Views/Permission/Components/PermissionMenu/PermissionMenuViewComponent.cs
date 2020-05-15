@@ -32,6 +32,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Permission.Components.
         public enum TabSelected
         {
             Details = 1,
+            Roles = 2,
         }
     }
 }

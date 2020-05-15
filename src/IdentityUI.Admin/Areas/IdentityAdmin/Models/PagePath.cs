@@ -32,10 +32,12 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
 
         public const string PERMISSION = IDENTITY_ADMIN_AREA + "/Permission";
         public const string PERMISSION_DETAILS = PERMISSION + "/Details/{0}";
+        public const string PERMISSION_ROLES = PERMISSION + "/Roles/{0}";
 
         public const string GROUP = IDENTITY_ADMIN_AREA + "/Group";
         public const string GROUP_USERS = GROUP + "/Users/{0}";
         public const string GROUP_ATTRIBUTES = GROUP + "/Attributes/{0}";
+        public const string GROUP_INVITES = GROUP + "/Invites/{0}";
 
         public const string INVITE = IDENTITY_ADMIN_AREA + "/Invite";
 

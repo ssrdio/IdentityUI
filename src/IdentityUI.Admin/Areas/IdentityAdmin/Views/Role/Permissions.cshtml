@@ -4,6 +4,10 @@
     SidebarSelection.SelectedOption = SidebarOptions.Role;
 }
 
+@{
+    ViewData["Title"] = "Roles";
+}
+
 @section script{
     <script src="~/identityAdmin/app/user/roles/permission.js"></script>
 
@@ -12,13 +16,6 @@
             new RolePermission('@Model.RoleId');
         });
     </script>
-}
-
-@section modal{
-    <div id="modal-container">
-        @await Component.InvokeAsync("AddPermissionRoleModal")
-        @await Component.InvokeAsync("IdentityConfirmationModal")
-    </div>
 }
 
 <div id="status-alert-container">
@@ -34,7 +31,6 @@
                 <h5 class="card-title">
                     Permissions:
                 </h5>
-                <button id="add-permission-button" class="header-button">Add Permission</button>
             </div>
             <div class="custom_container custom_table">
                 <table id="permission-table" class="dataTableClass display "></table>

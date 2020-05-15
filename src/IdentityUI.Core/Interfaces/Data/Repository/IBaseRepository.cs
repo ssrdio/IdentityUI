@@ -11,13 +11,11 @@ namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
     {
         bool Exist(IBaseSpecification<TEntity> specification);
 
-        TEntity Get(IBaseSpecification<TEntity> specification);
+        TEntity FirstOrDefault(IBaseSpecification<TEntity> specification);
         TEntity SingleOrDefault(IBaseSpecification<TEntity> specification);
 
-        TData Get<TData>(ISelectSpecification<TEntity, TData> specification);
-        TData GetWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification);
+        TData FirstOrDefault<TData>(ISelectSpecification<TEntity, TData> specification);
         TData SingleOrDefault<TData>(ISelectSpecification<TEntity, TData> specification);
-        TData SingleOrDefaultWithNoTracking<TData>(ISelectSpecification<TEntity, TData> specification);
 
         List<TData> GetList<TData>(ISelectSpecification<TEntity, TData> specification);
         PaginatedData<TData> GetPaginated<TData>(IPaginationSpecification<TEntity, TData> specification);

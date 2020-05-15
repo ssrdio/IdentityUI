@@ -6,7 +6,6 @@
     ViewData["Title"] = "Groups";
 }
 
-
 @section script {
     <script src="~/identityAdmin/app/group/group-index.js"></script>
     <script>
@@ -17,7 +16,10 @@
 }
 
 @section modal{
+<div id="modal-container">
     @await Component.InvokeAsync("AddGroupModal")
+    @await Component.InvokeAsync("IdentityConfirmationModal")
+</div>
 }
 
 <div id="status-alert">

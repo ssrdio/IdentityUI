@@ -1,13 +1,15 @@
 ﻿class GroupUsers {
-    constructor(groupId, userId, canManageRoles, hasRoleManagmentPermission, hasRemovePermission) {
+    constructor(groupId, userId, canManageRoles, canAssigneRoles, hasRoleManagmentPermission, hasRemovePermission, canChangeOwnRole) {
         this.groupId = groupId;
         this.userId = userId;
 
         this.canManageRoles = JSON.parse(canManageRoles);
+        this.canAssigneRoles = JSON.parse(canAssigneRoles);
         this.hasRoleManagmentPermission = hasRoleManagmentPermission;
         this.hasRemovePermission = hasRemovePermission;
+        this.canChangeOwnRole = canChangeOwnRole;
 
-        const addExistingUserModal = new AddExistingUser(groupId, () => {
+        const addExistingUserModal = new AddExistingUser(groupId, this.canAssigneRoles, () => {
             this.reloadTable();
 
             this.statusAlert.showSuccess('Added existing user to group');
@@ -27,6 +29,9 @@
                 if (onYesClick.key === 'removeUser') {
                     this.remove(onYesClick.id);
                 }
+                else if (onYesClick.key === 'leave') {
+                    this.leave();
+                }
             });
 
         this.$usersTable = $('#user-table');
@@ -34,9 +39,9 @@
 
         this.statusAlert = new StatusAlertComponent('#status-alert-container');
 
-        const inviteUserModal = new InviteUserModal(this.groupId, `/IdentityAdmin/Invite/AddToGroup/${this.groupId}`, () => {
+        const inviteUserModal = new InviteToGroupModel(this.groupId, this.canAssigneRoles, () => {
             this.statusAlert.showSuccess("User was invited");
-        })
+        });
 
         $('#invite-user-button').on('click', () => {
             inviteUserModal.showModal();
@@ -66,7 +71,37 @@
                     title: "Group Role",
                     mRender: (data) => {
                         if (this.hasRoleManagmentPermission) {
-                            if (this.canManageRoles.some(x => x.id === data.groupRoleId)){
+                            if (!this.canManageRoles.some(x => x.id === data.groupRoleId) || (this.userId === data.userId && this.canChangeOwnRole === false))
+                            {
+                                let view = `<select class="form-control" data-id={{groupUserId}} disabled>
+                                            {{#groupRoles}}
+                                                {{#selected}}
+                                                    <option value='{{id}}' selected>{{name}}</option>
+                                                {{/selected}}
+                                                {{^selected}}
+                                                    <option value='{{id}}'>{{name}}</option>
+                                                {{/selected}}
+                                            {{/groupRoles}}
+                                        </select>`;
+
+                                let templateData = {
+                                    groupUserId: data.id,
+                                    groupRoles: this.canAssigneRoles.map((obj) => {
+                                        obj.selected = obj.id === data.groupRoleId;
+
+                                        return obj;
+                                    })
+                                }
+
+                                if (!templateData.groupRoles.some(x => x.id === data.groupRoleId)) {
+                                    templateData.groupRoles.push({ id: data.groupRoleId, name: data.groupRoleName, selected: true });
+                                }
+
+                                var output = Mustache.render(view, templateData);
+
+                                return output;
+                            }
+                            else {
 
                                 let view = `<select class="form-control" data-id={{groupUserId}}>
                                             {{#groupRoles}}
@@ -81,37 +116,16 @@
 
                                 let templateData = {
                                     groupUserId: data.id,
-                                    groupRoles: this.canManageRoles.map((obj) => {
+                                    groupRoles: this.canAssigneRoles.map((obj) => {
                                         obj.selected = obj.id === data.groupRoleId;
 
                                         return obj;
                                     })
                                 }
 
-                                var output = Mustache.render(view, templateData);
-
-                                return output;
-                            }
-                            else {
-                                let view = `<select class="form-control" data-id={{groupUserId}} disabled>
-                                            {{#groupRoles}}
-                                                {{#selected}}
-                                                    <option value='{{id}}' selected>{{name}}</option>
-                                                {{/selected}}
-                                                {{^selected}}
-                                                    <option value='{{id}}'>{{name}}</option>
-                                                {{/selected}}
-                                            {{/groupRoles}}
-                                        </select>`;
-
-                                let templateData = {
-                                    groupUserId: data.id,
-                                    groupRoles: this.canManageRoles.map((obj) => {
-                                           return obj;
-                                    })
+                                if (!templateData.groupRoles.some(x => x.id === data.groupRoleId)) {
+                                    templateData.groupRoles.push({ id: data.groupRoleId, name: data.groupRoleName, selected: true });
                                 }
-
-                                templateData.groupRoles.push({ id: data.groupRoleId, name: data.groupRoleName, selected: true });
 
                                 var output = Mustache.render(view, templateData);
 
@@ -120,7 +134,7 @@
                         }
                         else {
                             var view = '<span>{{groupRole}}</span>';
-                            var output = Mustache.render(view, { type: data.groupRole });
+                            var output = Mustache.render(view, { groupRole: data.groupRoleName });
 
                             return output
                         }
@@ -132,7 +146,7 @@
                     width: "160px",
                     mRender: (data) => {
                         if (data.userId === this.userId) {
-                            return `<div><button class="btn btn-danger table-button leave" data-id=${data.id}>Leave</button></div>`
+                            return `<div><button class="btn btn-danger table-button leave">Leave</button></div>`
                         }
 
                         if (this.hasRemovePermission && this.canManageRoles.some(x => x.id === data.groupRoleId)) {
@@ -154,9 +168,8 @@
             this.confirmationModal.show({ key: 'removeUser', id: id }, 'Are you sure that you want to remove User from Group?');
         });
 
-        this.$usersTable.on('click', 'button.leave', (event) => {
-            let id = $(event.target).data("id");
-            this.confirmationModal.show({ key: 'removeUser', id: id }, 'Are you sure that you want to leave the Group?');
+        this.$usersTable.on('click', 'button.leave', () => {
+            this.confirmationModal.show({ key: 'leave' }, 'Are you sure that you want to leave the Group?');
         });
 
         this.$usersTable.on('change', 'select', (event) => {
@@ -203,6 +216,8 @@
     }
 
     changeRole(id, roleId) {
+        this.statusAlert.hide();
+
         Api.post(`/IdentityAdmin/Group/${this.groupId}/GroupUser/ChangeRole/${id}?roleId=${roleId}`)
             .done(() => {
                 this.reloadTable();
@@ -216,13 +231,15 @@
 }
 
 class AddExistingUser {
-    constructor(groupId, successCallback) {
+    constructor(groupId, canAssigneRoles, successCallback) {
         this.groupId = groupId;
+        this.canAssigneRoles = canAssigneRoles;
         this.successCallback = successCallback;
 
         this.$addExisingUserModal = $('#add-existing-user-to-group-modal');
         this.$addExisingUserModal.on('hidden.bs.modal', () => {
             this.userSelectComponent.selectOption(null);
+            this.rolesSelectComponent.selectOption(null);
 
             this.hideErrors();
         });
@@ -234,9 +251,13 @@ class AddExistingUser {
         this.$userSelect = $form.find('#existing-user-select .select2-container')
         this.userSelectComponent = new SelectComponent($form, '#existing-user-select');
 
+        this.$rolesSelect = $form.find('#group-role-select .select2-container')
+        this.rolesSelectComponent = new SelectComponent($form, '#group-role-select');
+
         this.errorAlert = new ErrorAlert($form);
 
         this.initUserSelect();
+        this.initRolesSelct();
     }
 
     initUserSelect() {
@@ -250,6 +271,21 @@ class AddExistingUser {
         });
     }
 
+    initRolesSelct() {
+        let data = this.canAssigneRoles.map((element) => {
+            return {
+                id: element.id,
+                text: element.name
+            }
+        });
+
+        this.$rolesSelect.select2({
+            data: data,
+        });
+
+        this.rolesSelectComponent.selectOption(null);
+    }
+
     showModal() {
         this.$addExisingUserModal.modal('show');
     }
@@ -259,24 +295,29 @@ class AddExistingUser {
             this.errorAlert.showErrors(errors['']);
         }
 
-        this.userSelectComponent.showError(errors.userId);
+        this.userSelectComponent.showError(errors.UserId);
+        this.rolesSelectComponent.showError(errors.GroupRoleId);
     }
 
     hideErrors() {
         this.errorAlert.hide();
 
         this.userSelectComponent.hideError();
+        this.rolesSelectComponent.hideError();
     }
 
     getData() {
         return {
-            userId: this.userSelectComponent.value()
+            userId: this.userSelectComponent.value(),
+            groupRoleId: this.rolesSelectComponent.value(),
         }
     }
 
     add() {
         this.hideErrors();
         const data = this.getData();
+
+        console.log(data);
 
         Api.post(`/IdentityAdmin/Group/${this.groupId}/GroupUser/AddExisting`, data)
             .done(() => {

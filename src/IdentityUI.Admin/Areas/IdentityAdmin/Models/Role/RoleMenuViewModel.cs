@@ -13,16 +13,18 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role
     {
         public string RoleId { get; set; }
         public string Name { get; set; }
+        public RoleTypes Type { get; set; }
 
-        public RoleMenuViewModel(string roleId, string name)
+        public RoleMenuViewModel(string roleId, string name, RoleTypes type)
         {
             RoleId = roleId;
             Name = name;
+            Type = type;
         }
 
         public RoleMenuViewComponent.ViewModel ToComponentViewModel(TabSelected tabSelected)
         {
-            return new ViewModel(RoleId, Name, tabSelected);
+            return new ViewModel(RoleId, Name, Type, tabSelected);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User
         public StatusAlertViewModel StatusAlert { get; set; }
 
         public UserDetailsViewModel(string id, string userName, string email, string firstName, string lastName, bool emailConfirmed, string phoneNumber,
-            bool phoneNumberConfirmed, bool twoFactorEnabled, bool enabled, string lockoutEnd, bool useEmailSender)
+            bool phoneNumberConfirmed, bool twoFactorEnabled, bool enabled, string lockoutEnd)
         {
             Id = id;
             UserName = userName;
@@ -45,7 +45,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User
             TwoFactorEnabled = twoFactorEnabled;
             Enabled = enabled;
             LockoutEnd = lockoutEnd;
-            UseEmailSender = useEmailSender;
         }
 
         public UserDetailsViewModel(StatusAlertViewModel statusAlert)

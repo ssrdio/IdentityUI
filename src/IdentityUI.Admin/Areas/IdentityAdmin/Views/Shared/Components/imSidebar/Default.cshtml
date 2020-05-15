@@ -33,15 +33,15 @@
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Permission ? "active" : "")">
                 <a class="nav-link" href="@PagePath.PERMISSION">
-                    <i class="fas fa-stop"></i>
+                    <i class="fas fa-lock"></i>
                     <span class="menu-title i-mar">Permission</span>
                 </a>
             </li>
         }
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS) || User.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Group ? "active" : "")">
-                @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+                @if (User.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
                 {
                     <a class="nav-link" href="@PagePath.GROUP">
                         <i class="fas fa-user-friends"></i>
@@ -57,7 +57,7 @@
                 }
             </li>
         }
-        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE) && SidebarSelection.UseEmailSender)
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Invite ? "active" : "")">
                 <a class="nav-link" href="@PagePath.INVITE">
@@ -71,7 +71,7 @@
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Setting ? "active" : "")">
                 <a class="nav-link" href="@PagePath.SETTING">
                     <i class="fas fa-cogs"></i>
-                    <span class="menu-title i-mar">Setting</span>
+                    <span class="menu-title i-mar">Settings</span>
                 </a>
             </li>
         }

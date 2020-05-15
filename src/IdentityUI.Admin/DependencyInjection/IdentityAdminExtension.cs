@@ -19,6 +19,7 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -45,13 +46,23 @@ namespace SSRD.IdentityUI.Admin
             builder.Services.AddScoped<IRoleDataService, RoleDataService>();
 
             builder.Services.AddScoped<IRoleAssignmentDataService, RoleAssignmentDataService>();
-            builder.Services.AddScoped<IGroupDataService, GroupDataService>();
             builder.Services.AddScoped<IRolePermissionsDataService, RolePermissionDataService>();
-            builder.Services.AddScoped<IGroupUserDataService, GroupUserDataService>();
-            builder.Services.AddScoped<IGroupAttributeDataService, GroupAttributeDataService>();
+
             builder.Services.AddScoped<IPermissionDataService, PermissionDataService>();
+
+            builder.Services.AddScoped<IGroupDataService, GroupDataService>();
+            builder.Services.AddScoped<IGroupUserDataService, GroupUserDataService>();
+            builder.Services.AddScoped<IGroupInviteDataService, GroupInviteDataService>();
+            builder.Services.AddScoped<IGroupAttributeDataService, GroupAttributeDataService>();
+
             builder.Services.AddScoped<IInviteDataService, InviteDataService>();
+
             builder.Services.AddScoped<IEmailDataService, EmailDataService>();
+
+            if(builder.IdentityManagementEndpoints.UseEmailSender.HasValue && builder.IdentityManagementEndpoints.UseEmailSender.Value == true)
+            {
+                SidebarSelection.UseEmailSender = true;
+            }
 
             return builder;
         }

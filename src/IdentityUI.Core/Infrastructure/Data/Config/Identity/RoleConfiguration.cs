@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SSRD.IdentityUI.Core.Data.Enums.Entity;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity
 {
@@ -25,6 +26,10 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity
 
             builder.Property(x => x.Description)
                 .HasMaxLength(256);
+
+            builder
+                .Property(x => x.Type)
+                .HasDefaultValue(RoleTypes.Global);
 
             builder.ToTable("Roles");
         }

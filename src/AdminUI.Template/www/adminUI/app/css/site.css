@@ -9,3 +9,89 @@
 .btn-danger:hover, .btn-danger:active {
     color: white !important;
 }
+
+table.dataTableClass > tbody > tr > td {
+    background-clip: padding-box !important;
+}
+
+.remove-button {
+    color: white !important
+}
+
+.remove-button:hover, .remove-button:active {
+    background-color: #e20000 !important;
+    border-color: #e20000 !important;
+}
+
+.styled-checkbox {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+    left: calc(50% - 15px);
+}
+
+    .styled-checkbox + label {
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+        left: calc(50% - 15px);
+        margin: 0px;
+    }
+
+        .styled-checkbox + label:before {
+            content: '';
+            display: inline-block;
+            vertical-align: middle;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border: solid 2px #ababab;
+            border-radius: 2px;
+            margin-right: 15px;
+        }
+
+    .styled-checkbox:hover + label:before {
+        color: #008fef;
+        border-color: #008fef;
+    }
+
+    .styled-checkbox:focus + label:before {
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .styled-checkbox:checked + label:before {
+        color: #008fef;
+        border-color: #008fef;
+    }
+
+    .styled-checkbox:disabled + label {
+        color: #b8b8b8;
+        cursor: auto;
+    }
+
+        .styled-checkbox:disabled + label:before {
+            box-shadow: none;
+            background: #ddd;
+        }
+
+    .styled-checkbox:checked + label:after {
+        content: '';
+        position: absolute;
+        left: 11px;
+        top: 5px;
+        background: transparent;
+        width: 8px;
+        height: 16px;
+        border: solid #008fef;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+
+.checkbox-holder {
+    position: relative;
+    padding: 0px !important;
+    width: 120px;
+}

@@ -25,5 +25,10 @@ namespace SSRD.IdentityUI.Core.Data.Entities
             Name = name;
             Description = description;
         }
+
+        public void Update(string description)
+        {
+            Description = description;
+        }
     }
 }

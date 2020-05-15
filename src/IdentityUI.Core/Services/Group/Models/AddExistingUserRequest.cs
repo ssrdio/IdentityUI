@@ -8,6 +8,7 @@ namespace SSRD.IdentityUI.Core.Services.Group.Models
     public class AddExistingUserRequest
     {
         public string UserId { get; set; }
+        public string GroupRoleId { get; set; }
     }
 
     internal class AddExisingUserRequestValidator : AbstractValidator<AddExistingUserRequest>
@@ -15,6 +16,9 @@ namespace SSRD.IdentityUI.Core.Services.Group.Models
         public AddExisingUserRequestValidator()
         {
             RuleFor(x => x.UserId)
+                .NotEmpty();
+
+            RuleFor(x => x.GroupRoleId)
                 .NotEmpty();
         }
     }

@@ -13,6 +13,9 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group
         public string GroupName { get; set; }
 
         public List<RoleListData> CanMangeGroupRoles { get; set; }
+        public List<RoleListData> CanAssigneGroupRoles { get; set; }
+
+        public bool CanChangeOwnRole { get; set; }
 
         public GroupUserViewModel(string groupId, string groupName)
         {

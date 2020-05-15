@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.AdminUI.Template.Models.Select2;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Invite;
@@ -8,7 +9,7 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Result;
-using SSRD.IdentityUI.Core.Services;
+using SSRD.IdentityUI.Core.Services.User.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
+    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class InviteController : BaseController
     {
         private readonly IInviteService _inviteService;
@@ -33,7 +35,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(DataTableResult<>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DataTableResult<InviteTableModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public IActionResult Get([FromQuery] DataTableRequest dataTableRequest)
         {
@@ -72,28 +74,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return Ok(new EmptyResult());
         }
 
-        [HttpPost("/[area]/[controller]/[action]/{groupId}")]
-        [AllowAnonymous]
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)]
-        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddToGroup([FromRoute] string groupId, [FromBody] InviteRequest inviteRequest)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            Result result = await _inviteService.Invite(inviteRequest);
-            if (result.Failure)
-            {
-                ModelState.AddErrors(result);
-                return BadRequest(ModelState);
-            }
-
-            return Ok(new EmptyResult());
-        }
-
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -112,6 +92,66 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             return Ok(new EmptyResult());
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(Select2Result<Select2ItemBase>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult GetRoles([FromQuery] Select2Request select2Request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            Result<Select2Result<Select2ItemBase>> result = _inviteDataService.GetGlobalRoles(select2Request);
+            if (result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(Select2Result<Select2ItemBase>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult GetGroups([FromQuery] Select2Request select2Request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            Result<Select2Result<Select2ItemBase>> result = _inviteDataService.GetGroups(select2Request);
+            if(result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(Select2Result<Select2ItemBase>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult GetGroupRoles([FromQuery] Select2Request select2Request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            Result<Select2Result<Select2ItemBase>> result = _inviteDataService.GetGroupRoles(select2Request);
+            if (result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(result.Value);
         }
     }
 }

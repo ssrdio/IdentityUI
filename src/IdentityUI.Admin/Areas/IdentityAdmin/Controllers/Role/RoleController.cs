@@ -12,9 +12,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
+using Microsoft.AspNetCore.Http;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
 {
+    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class RoleController : BaseController
     {
         private readonly IRoleDataService _roleDataService;
@@ -55,14 +58,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<RoleDetailViewModel> result = _roleDataService.GetDetails(id);
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             return View(result.Value);
@@ -73,13 +75,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<RoleDetailViewModel> role = _roleDataService.GetDetails(id);
             if (role.Failure)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result editResult = _roleService.EditRole(id, request, GetUserId());
@@ -100,35 +102,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<RoleMenuViewModel> result = _roleDataService.GetRoleMenuViewModel(id);
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             return View(result.Value);
-        }
-
-        [HttpGet]
-        public IActionResult GetUsers([FromRoute] string id, [FromQuery] DataTableRequest dataTableRequest)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Result<DataTableResult<UserViewModel>> result = _roleDataService.GetUsers(id, dataTableRequest);
-            if (result.Failure)
-            {
-                ModelState.AddErrors(result.Errors);
-                return BadRequest(ModelState);
-            }
-
-            return Ok(result.Value);
         }
 
         [HttpGet]
@@ -172,7 +155,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
             Result<RoleMenuViewModel> result = _roleDataService.GetRoleMenuViewModel(id);
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
                 return NotFoundView();
             }
 
@@ -190,11 +172,30 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
             Result<RoleMenuViewModel> result = _roleDataService.GetRoleMenuViewModel(id);
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
                 return NotFoundView();
             }
 
             return View(result.Value);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(DataTableResult<RolePermissionTableModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public IActionResult Remove([FromRoute] string id)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Result result = _roleService.Remove(id);
+            if(result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new EmptyResult());
         }
     }
 }

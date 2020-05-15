@@ -9,6 +9,7 @@ using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Data.Specifications;
+using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -25,18 +26,20 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
     {
         private readonly IBaseRepository<GroupEntity> _groupRepository;
 
-        private readonly IGroupUserService _groupUserService;
+        private readonly IGroupStore _groupStore;
+        private readonly IGroupUserStore _groupUserStore;
 
         private readonly IValidator<DataTableRequest> _dataTableValidator;
 
         private readonly ILogger<GroupDataService> _logger;
 
-        public GroupDataService(IBaseRepository<GroupEntity> groupRepository, IGroupUserService groupUserService,
+        public GroupDataService(IBaseRepository<GroupEntity> groupRepository, IGroupStore groupStore, IGroupUserStore groupUserStore,
             IValidator<DataTableRequest> dataTableValidator, ILogger<GroupDataService> logger)
         {
             _groupRepository = groupRepository;
 
-            _groupUserService = groupUserService;
+            _groupUserStore = groupUserStore;
+            _groupStore = groupStore;
 
             _dataTableValidator = dataTableValidator;
 
@@ -85,10 +88,17 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
                 x.Id,
                 x.Name));
 
-            return Get(selectSpecification);
+            GroupMenuViewModel groupMenuView = _groupStore.Get(selectSpecification);
+            if(groupMenuView == null)
+            {
+                _logger.LogError($"No Group. GroupId {id}");
+                return Result.Fail<GroupMenuViewModel>("no_group", "No Group");
+            }
+
+            return Result.Ok(groupMenuView);
         }
 
-        public Result<GroupUserViewModel> GetGroupUserViewModel(string groupId, string userId, bool hasGlobalPermission)
+        public Result<GroupUserViewModel> GetGroupUserViewModel(string groupId)
         {
             _logger.LogInformation($"Getting Group. GroupId {groupId}");
 
@@ -98,42 +108,40 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
                 x.Id,
                 x.Name));
 
-            Result<GroupUserViewModel> getGroupUserResult = Get(selectSpecification);
-            if(getGroupUserResult.Failure)
+            GroupUserViewModel groupUserViewModel = _groupStore.Get(selectSpecification);
+            if(groupUserViewModel == null)
             {
-                return getGroupUserResult;
+                _logger.LogError($"No Group. GroupId {groupId}");
+                return Result.Fail<GroupUserViewModel>("no_group", "No Group");
             }
 
-            getGroupUserResult.Value.CanMangeGroupRoles = _groupUserService.CanManageRoles(userId, groupId, hasGlobalPermission);
+            groupUserViewModel.CanAssigneGroupRoles = _groupUserStore.CanAssigneGroupRoles();
+            groupUserViewModel.CanMangeGroupRoles = _groupUserStore.CanManageGroupRoles();
+            groupUserViewModel.CanChangeOwnRole = _groupUserStore.CanChangeOwnRole();
 
-            return Result.Ok(getGroupUserResult.Value);
+            return Result.Ok(groupUserViewModel);
         }
 
-        private Result<T> Get<T>(SelectSpecification<GroupEntity, T> selectSpecification)
+        public Result<GroupInviteViewModel> GetInviteViewModel(string groupId)
         {
-            T group = _groupRepository.Get(selectSpecification);
-            if (group == null)
+            _logger.LogInformation($"Getting Group. GroupId {groupId}");
+
+            SelectSpecification<GroupEntity, GroupInviteViewModel> selectSpecification = new SelectSpecification<GroupEntity, GroupInviteViewModel>();
+            selectSpecification.AddFilter(x => x.Id == groupId);
+            selectSpecification.AddSelect(x => new GroupInviteViewModel(
+                x.Id,
+                x.Name));
+
+            GroupInviteViewModel groupInviteView = _groupStore.Get(selectSpecification);
+            if (groupInviteView == null)
             {
-                _logger.LogError($"No group.");
-                return Result.Fail<T>("no_group", "No group");
+                _logger.LogError($"No Group. GroupId {groupId}");
+                return Result.Fail<GroupInviteViewModel>("no_group", "No Group");
             }
 
-            return Result.Ok(group);
-        }
+            groupInviteView.CanAssignRoles = _groupUserStore.CanAssigneGroupRoles();
 
-        private Result GroupExist(string id)
-        {
-            BaseSpecification<GroupEntity> baseSpecification = new BaseSpecification<GroupEntity>();
-            baseSpecification.AddFilter(x => x.Id == id);
-
-            bool groupExist = _groupRepository.Exist(baseSpecification);
-            if (!groupExist)
-            {
-                _logger.LogError($"No group. GroupId {id}");
-                return Result.Fail("no_group", "No Group");
-            }
-
-            return Result.Ok();
+            return Result.Ok(groupInviteView);
         }
     }
 }

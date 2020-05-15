@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.AdminUI.Template.Models.Select2;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services.Role;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -15,6 +17,7 @@ using System.Text;
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     //TODO: change this to api controller
+    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     [Route("[area]/Role/{roleId:required}/[controller]/[action]")]
     public class PermissionController : BaseController
     {

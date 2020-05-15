@@ -29,6 +29,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.Group
         public enum TabSelected
         {
             Users,
+            Invites,
             Attributes,
         }
     }

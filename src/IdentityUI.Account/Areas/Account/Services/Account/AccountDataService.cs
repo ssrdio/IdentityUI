@@ -21,7 +21,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services.Account
             LoginViewModel loginViewModel = new LoginViewModel(
                 returnUrl: returnUrl,
                 registrationEnabled: _identityUIEndpoints.RegisterEnabled,
-                passwordRecoveryEnabled: _identityUIEndpoints.UseEmailSender);
+                passwordRecoveryEnabled: _identityUIEndpoints.UseEmailSender ?? false);
 
             return loginViewModel;
         }
@@ -29,7 +29,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services.Account
         public RegisterSuccessViewModel GetRegisterSuccessViewModel()
         {
             RegisterSuccessViewModel registerSuccessViewModel = new RegisterSuccessViewModel(
-                useEmailSender: _identityUIEndpoints.UseEmailSender);
+                useEmailSender: _identityUIEndpoints.UseEmailSender ?? false);
 
             return registerSuccessViewModel;
         }
@@ -37,7 +37,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services.Account
         public RegisterViewModel GetRegisterViewModel()
         {
             RegisterViewModel registerViewModel = new RegisterViewModel(
-                recoverPasswordEnabled: _identityUIEndpoints.UseEmailSender);
+                recoverPasswordEnabled: _identityUIEndpoints.UseEmailSender ?? false);
 
             return registerViewModel;
         }

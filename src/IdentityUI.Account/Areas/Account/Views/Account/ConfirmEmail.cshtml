@@ -1,4 +1,8 @@
-﻿@section script {
+﻿@{
+    ViewData["Title"] = "ConfirmEmail";
+}
+
+@section script {
     <script type="text/javascript">
         document.getElementById("toLogin").onclick = function () {
             window.location.href = "@PagePath.LOGIN";

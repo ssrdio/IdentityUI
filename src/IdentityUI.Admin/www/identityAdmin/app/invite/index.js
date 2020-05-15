@@ -5,7 +5,7 @@
 
         this.statusAlert = new StatusAlertComponent('#status-alert-container');
 
-        const inviteUserModal = new InviteUserModal(this.groupId, `/IdentityAdmin/Invite/Add/`, () => {
+        const inviteUserModal = new InviteUserModal(() => {
             this.reloadTable();
             this.statusAlert.showSuccess("User was invited");
         });
@@ -50,8 +50,23 @@
                     render: $.fn.dataTable.render.text()
                 },
                 {
+                    data: "role",
+                    title: "Role",
+                    render: $.fn.dataTable.render.text()
+                },
+                {
+                    data: "group",
+                    title: "Group",
+                    render: $.fn.dataTable.render.text()
+                },
+                {
+                    data: "groupRole",
+                    title: "Group Role",
+                    render: $.fn.dataTable.render.text()
+                },
+                {
                     data: "expiresAt",
-                    title: "expiresAt",
+                    title: "Expires At",
                     render: $.fn.dataTable.render.text()
                 },
                 {

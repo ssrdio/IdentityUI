@@ -31,7 +31,7 @@
                 }
 
                 if (onYesClick.key === 'removeAttribute') {
-                    this.remove(onYesClick.attributeKey);
+                    this.remove(onYesClick.id);
                 }
             });
 
@@ -63,8 +63,8 @@
                     title: "Value",
                     className: "table-input",
                     mRender: (data) => {
-                        let view = `<input class="form-control mr-1 attribute-{{key}}" value="{{value}}"/>`
-                        let output = Mustache.render(view, { key: data.key, value: data.value });
+                        let view = `<input class="form-control mr-1 attribute-{{id}}" value="{{value}}"/>`
+                        let output = Mustache.render(view, { id: data.id, value: data.value });
 
                         return output;
                     }
@@ -75,8 +75,8 @@
 
                     mRender: function (data) {
                         return `<div>
-                                    <button class='btn btn-primary table-button edit' data-key='${data.key}'">Edit</button>
-                                    <button class='btn btn-danger table-button remove' data-key='${data.key}'">Remove</button>
+                                    <button class='btn btn-primary table-button edit' data-id='${data.id}'">Edit</button>
+                                    <button class='btn btn-danger table-button remove' data-id='${data.id}'">Remove</button>
                                 </div>`;
                     }
                 }
@@ -84,13 +84,13 @@
         });
 
         this.$attributeTable.on('click', 'button.edit', (event) => {
-            let key = $(event.target).data('key');
-            this.editAttribute(key);
+            let id = $(event.target).data('id');
+            this.editAttribute(id);
         });
 
         this.$attributeTable.on('click', 'button.remove', (event) => {
-            let key = $(event.target).data('key');
-            this.confirmationModal.show({ key: 'removeAttribute', attributeKey: key }, 'Are you sure that you want to remove Attribute?');
+            let id = $(event.target).data('id');
+            this.confirmationModal.show({ key: 'removeAttribute', id: id }, 'Are you sure that you want to remove Attribute?');
         });
     }
 
@@ -139,20 +139,20 @@
             })
     }
 
-    getEditData(key) {
-        let value = this.$attributeTable.find(`input.attribute-${key}`).val();
+    getEditData(id) {
+        let value = this.$attributeTable.find(`input.attribute-${id}`).val();
 
         return {
             value: value,
         }
     }
 
-    editAttribute(key) {
+    editAttribute(id) {
         this.statusAlert.hide();
 
-        let data = this.getEditData(key);
+        let data = this.getEditData(id);
 
-        Api.post(`/IdentityAdmin/Group/${this.groupId}/GroupAttribute/Edit/${key}`, data)
+        Api.post(`/IdentityAdmin/Group/${this.groupId}/GroupAttribute/Edit/${id}`, data)
             .done(() => {
                 this.statusAlert.showSuccess('Attribute was updated');
                 this.reloadAttributeTable();
@@ -162,10 +162,10 @@
             })
     }
 
-    remove(key) {
+    remove(id) {
         this.statusAlert.hide();
 
-        Api.post(`/IdentityAdmin/Group/${this.groupId}/GroupAttribute/Remove/${key}`)
+        Api.post(`/IdentityAdmin/Group/${this.groupId}/GroupAttribute/Remove/${id}`)
             .done(() => {
                 this.statusAlert.showSuccess('Attribute was deleted');
                 this.reloadAttributeTable();

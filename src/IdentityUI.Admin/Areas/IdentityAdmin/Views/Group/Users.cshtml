@@ -4,12 +4,19 @@
     SidebarSelection.SelectedOption = SidebarOptions.Group;
 }
 
+@{
+    ViewData["Title"] = "Groups";
+}
+
 @section script{
     <script src="~/identityAdmin/app/group/group-users.js"></script>
-    <script src="~/identityAdmin/app/invite/invite-user-modal.js"></script>
+    <script src="~/identityAdmin/app/group/group-invite-modal.js"></script>
     <script>
         $(document).ready(function () {
-            new GroupUsers('@Model.GroupId', '@User.GetUserId()', '@Json.Serialize(Model.CanMangeGroupRoles)', '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True', '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True')
+            new GroupUsers('@Model.GroupId', '@User.GetUserId()', '@Json.Serialize(Model.CanMangeGroupRoles)', '@Json.Serialize(Model.CanAssigneGroupRoles)',
+                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True',
+                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True',
+                '@Model.CanChangeOwnRole' === 'True')
         });
     </script>
 }
@@ -21,9 +28,9 @@
             @await Component.InvokeAsync("AddExistingUserToGroupModal")
         }
 
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS) && SidebarSelection.UseEmailSender)
         {
-            @await Component.InvokeAsync("InviteUserModal")
+            @await Component.InvokeAsync("InviteToGroupModal")
         }
 
         @await Component.InvokeAsync("IdentityConfirmationModal")
@@ -48,7 +55,7 @@
                     {
                         <button id="add-existing-user-button" class="header-button">Add Existing User</button>
                     }
-                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
+                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS) && SidebarSelection.UseEmailSender)
                     {
                         <button id="invite-user-button" class="header-button">Invite User</button>
                     }

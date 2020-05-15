@@ -50,15 +50,23 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
                 return Result.Fail<DataTableResult<RoleAssignmentTableModel>>(validationResult.Errors);
             }
 
-            PaginationSpecification<RoleAssignmentEntity, RoleAssignmentTableModel> paginationSpecification =
-                new PaginationSpecification<RoleAssignmentEntity, RoleAssignmentTableModel>();
-            paginationSpecification.AddFilter(x => x.RoleId == roleId);
+            PaginationSpecification<RoleEntity, RoleAssignmentTableModel> paginationSpecification =
+                new PaginationSpecification<RoleEntity, RoleAssignmentTableModel>();
+            paginationSpecification.AddFilter(x => x.Id != roleId);
+            paginationSpecification.AddFilter(x => x.Type == Core.Data.Enums.Entity.RoleTypes.Group);
+            if(!string.IsNullOrEmpty(dataTableRequest.Search))
+            {
+                paginationSpecification.AddFilter(x => x.NormalizedName.Contains(dataTableRequest.Search.ToUpper()));
+            }
+
             paginationSpecification.AddSelect(x => new RoleAssignmentTableModel(
-                x.CanAssigneRole.Id,
-                x.CanAssigneRole.Name));
+                x.Id,
+                x.Name,
+                x.CanBeAssignedBy.Any(c => c.RoleId == roleId)));
+
             paginationSpecification.AppalyPaging(dataTableRequest.Start, dataTableRequest.Length);
 
-            PaginatedData<RoleAssignmentTableModel> paginatedResult = _roleAssignmentRepository.GetPaginated(paginationSpecification);
+            PaginatedData<RoleAssignmentTableModel> paginatedResult = _roleRepository.GetPaginated(paginationSpecification);
 
             DataTableResult<RoleAssignmentTableModel> dataTableResult = new DataTableResult<RoleAssignmentTableModel>(
                 draw: dataTableRequest.Draw,

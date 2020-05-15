@@ -11,7 +11,7 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
+    [Authorize]
     [Area(PagePath.IDENTITY_ADMIN_AREA_NAME)]
     public class BaseController : Controller
     {

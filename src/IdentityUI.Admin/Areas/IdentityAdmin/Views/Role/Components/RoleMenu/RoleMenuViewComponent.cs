@@ -17,14 +17,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Role.Components.RoleMe
         {
             public string RoleId { get; set; }
             public string RoleName { get; set; }
+            public RoleTypes RoleType { get; set; }
 
             public TabSelected TabSelected { get; set; }
 
 
-            public ViewModel(string roleId, string roleName, TabSelected tabSelected)
+            public ViewModel(string roleId, string roleName, RoleTypes roleType, TabSelected tabSelected)
             {
                 RoleId = roleId;
                 RoleName = roleName;
+                RoleType = roleType;
 
                 TabSelected = tabSelected;
             }

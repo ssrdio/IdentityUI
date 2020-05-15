@@ -37,7 +37,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Group
                 .HasOne(x => x.Role)
                 .WithMany()
                 .HasForeignKey(x => x.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

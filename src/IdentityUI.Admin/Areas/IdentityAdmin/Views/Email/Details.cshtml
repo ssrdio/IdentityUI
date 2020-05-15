@@ -1,10 +1,12 @@
 ﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.SettingMenu
-@model             SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Setting.Email.EmailViewModel
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Setting.Email.EmailViewModel
 
 @{
     SidebarSelection.SelectedOption = SidebarOptions.Setting;
+}
 
-
+@{
+    ViewData["Title"] = "Email";
 }
 
 @section script{
@@ -23,11 +25,11 @@
     @if (Model.StatusAlert != null)
     {
         <script>
-                $(document).ready(function () {
-                    var x = document.getElementById("snackbar");
-                    x.className = "show";
-                    setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-                });
+            $(document).ready(function () {
+                var x = document.getElementById("snackbar");
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+            });
         </script>
     }
 }

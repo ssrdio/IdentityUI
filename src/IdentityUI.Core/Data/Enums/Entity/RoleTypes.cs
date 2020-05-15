@@ -6,7 +6,7 @@ namespace SSRD.IdentityUI.Core.Data.Enums.Entity
 {
     public enum RoleTypes
     {
-        System = 1,
+        Global = 1,
         Group = 2,
     }
 }
