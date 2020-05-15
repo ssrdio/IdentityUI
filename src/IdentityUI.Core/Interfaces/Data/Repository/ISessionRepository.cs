@@ -8,7 +8,6 @@ namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
 {
     public interface ISessionRepository : IBaseRepository<SessionEntity>
     {
-        bool Remove(SessionEntity session);
         Task<bool> Remove(List<SessionEntity> sessions);
     }
 }

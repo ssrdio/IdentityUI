@@ -24,17 +24,18 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
     {
         private readonly ILoginService _loginService;
         private readonly IAddUserService _addUserService;
-        private readonly IEmailService _emailService;
+        private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ICredentialsService _credentialsService;
         private readonly IAccountDataService _accountDataService;
 
         private readonly IdentityUIEndpoints _identityUIEndpoints;
 
-        public AccountController(ILoginService loginService, IEmailService emailService, IAddUserService addUserService, ICredentialsService credentialsService,
-            IAccountDataService accountDataService, IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
+        public AccountController(ILoginService loginService, IEmailConfirmationService emailConfirmationService,
+            IAddUserService addUserService, ICredentialsService credentialsService, IAccountDataService accountDataService,
+            IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
         {
             _loginService = loginService;
-            _emailService = emailService;
+            _emailConfirmationService = emailConfirmationService;
             _addUserService = addUserService;
             _credentialsService = credentialsService;
             _accountDataService = accountDataService;
@@ -204,7 +205,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult ResetPassword(string code = null)
         {
-            if(!_identityUIEndpoints.UseEmailSender)
+            if(!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -219,7 +220,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -245,7 +246,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult ResetPasswordSuccess()
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -257,7 +258,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RecoverPassword()
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -269,7 +270,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost]
         public async Task<IActionResult> RecoverPassword(RecoverPasswordRequest request)
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -293,7 +294,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet]
         public IActionResult RecoverPasswordSuccess()
         {
-            if (!_identityUIEndpoints.UseEmailSender)
+            if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
             {
                 return NotFound();
             }
@@ -310,7 +311,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
                 return View();
             }
 
-            Result result = await _emailService.ConfirmEmail(id, code);
+            Result result = await _emailConfirmationService.ConfirmEmail(id, code);
             if(result.Failure)
             {
                 ModelState.AddErrors(result.Errors);
@@ -318,6 +319,35 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             }
 
             return View();
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AcceptInvite(string code = null)
+        {
+            AcceptInviteViewModel viewModel = new AcceptInviteViewModel(
+                code: code);
+
+            return View(viewModel);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> AcceptInvite(AcceptInviteRequest acceptInvite)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            Result result = await _addUserService.AcceptInvite(acceptInvite);
+            if (result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return View();
+            }
+
+            return RedirectToAction(nameof(RegisterSuccess));
         }
     }
 }

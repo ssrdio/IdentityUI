@@ -5,15 +5,19 @@
     SidebarSelection.SelectedOption = SidebarOptions.Profile;
 }
 
+@{
+    ViewData["Title"] = "Profile";
+}
+
 @section script{
     @if (Model.StatusAlert != null)
     {
         <script>
-        $(document).ready(function () {
-            var x = document.getElementById("snackbar");
-            x.className = "show";
-            setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-        });
+            $(document).ready(function () {
+                var x = document.getElementById("snackbar");
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+            });
         </script>
     }
 }

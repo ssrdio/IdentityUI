@@ -1,5 +1,9 @@
 ﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.LoginWith2faViewModel
 
+@{
+    ViewData["Title"] = "Login";
+}
+
 @section script {
 
     <script type="text/javascript" src="~/account/app/components/twoFactor/2faFormScript.js"></script>
@@ -39,13 +43,13 @@
                                 </div>
                                 <div asp-validation-summary="All" class="text-danger"></div>
                             </div>
-                                <div class="modal-footer clearfix">
-                                    @* TO DO: add link to recover 2fa *@
-                                    <div class="float-right">
-                                        <button class="btn btn-primary btn-lg">Login</button>
-                                    </div>
+                            <div class="modal-footer clearfix">
+                                @* TO DO: add link to recover 2fa *@
+                                <div class="float-right">
+                                    <button class="btn btn-primary btn-lg">Login</button>
                                 </div>
-</form>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="text-center text-white opacity-8 mt-3">Copyright © @CopyRightModel.NAME @CopyRightModel.YEAR </div>

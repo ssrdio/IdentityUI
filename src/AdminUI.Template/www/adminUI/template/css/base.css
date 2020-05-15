@@ -185,7 +185,7 @@ body {
 .header-button {
     margin-right: 8px;
     margin-top: 8px;
-    height: 43px;
+    height: 30px;
     display: flex;
     padding: 0px 2rem;
     align-items: center;
@@ -194,6 +194,7 @@ body {
     font-size: 1rem;
     font-weight: bold;
     color: white;
+    font-size: 14px;
 }
 
     .header-button:hover,
@@ -257,7 +258,7 @@ body {
     background: white;
     color: #0270ec;
     margin: 10px;
-    padding: 10px 25px;
+    padding: 6px 25px;
 }
 
 .table-button-red {
@@ -317,7 +318,7 @@ body {
 .custom-header {
     background-color: #fdfdfd;
     margin: -1.5rem -2.5rem;
-    padding: 1.5rem 2.5rem;
+    padding: 0px 30px;
     padding-bottom: 0px;
     -webkit-box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.25);
     -moz-box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.25);
@@ -326,9 +327,9 @@ body {
 }
 
 .page-title-heading {
-    font-size: 3rem;
     color: rgb(0, 148, 234);
-    margin-bottom: 25px;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
 }
 
 .tab-content {
@@ -813,4 +814,114 @@ a.navbar-brand {
   white-space: normal;
   text-align: center;
   word-break: break-all;
+}
+
+
+
+.body-tabs .nav-item a {
+    padding: 10px 35px;
+}
+
+.remove-button {
+    font-weight: bold;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    color: black !important;
+}
+
+
+.footer a {
+    color: #5a5a5a;
+}
+
+.footer a:hover, .footer a:active, .footer a:focus {
+    text-decoration: none
+}
+
+.custom-close {
+    border: 0;
+    background: transparent;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.header-button {
+    border: 0 !important;
+    height: 35px !important;
+    margin-top: 12px !important;
+}
+
+.dt-head-center {
+    padding: 0px;
+    text-align: center;
+    padding-left: 0px !important;
+}
+
+.attributes-center {
+    padding 0px;
+    padding-left: 0px !important;
+    text-align: center;
+}
+
+    .attributes-center div {
+        min-width: 230px;
+        text-align: center;
+    }
+
+select.form-control {
+    color: black !important;
+}
+
+
+.table-input {
+    padding: 10px;
+}
+
+
+.holder-not-found {
+    text-align: center;
+}
+
+.image-not-found {
+    width: 20%;
+    margin-top: 10%;
+}
+
+.text-not-found {
+    color: black;
+    text-transform: uppercase;
+    padding-top: 6%;
+}
+
+.table-button {
+    padding: 6px 25px;
+    margin: 5px;
+}
+
+.page-title-heading {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    padding-top: 10px;
+}
+
+.custom-header {
+    padding: 0px 30px;
+}
+
+.main-card {
+    padding: 0px;
+}
+
+.custom-submit {
+    min-width: 20%;
+}
+
+.dataTableClass thead tr th {
+    padding: 10px 15px;
+}
+
+table.dataTableClass > tbody > tr > td.checkbox-holder {
+    padding: 5px 0px !important;
+    background: transparent !important;
 }

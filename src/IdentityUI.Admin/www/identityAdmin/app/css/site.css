@@ -1,0 +1,32 @@
+﻿
+
+
+
+.table-input input {
+    padding: 5px !important;
+    height: 38px;
+}
+
+.table-input select {
+    padding: 1px !important;
+    height: 25px;
+}
+
+
+.modal-body .select2-selection {
+    border: 1px solid #c9ccd7 !important;
+    font-weight: 400;
+    height: 46px;
+    font-size: 0.875rem !important;
+}
+
+.modal-body .select2-selection__arrow{
+    height: 46px !important;
+}
+
+.modal-body .select2-selection__rendered {
+    line-height: 46px !important;
+}
+
+
+

@@ -1,0 +1,47 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.Invite;
+}
+
+@{
+    ViewData["Title"] = "Invites";
+}
+
+@section script {
+    <script src="~/identityAdmin/app/invite/index.js"></script>
+    <script src="~/identityAdmin/app/invite/invite-user-modal.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            new InviteIndex();
+        });
+
+    </script>
+}
+
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("InviteUserModal")
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="row">
+    <div class="main-card card fullWidthCard">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Invites:
+                </h5>
+                <button id="invite-user-button" class="header-button">Invite User</button>
+            </div>
+            <div class="custom_container custom_table">
+                <table id="invite-table" class="dataTableClass display "></table>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
+@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu.GroupMenuViewComponent.ViewModel
+
+<div class="custom-header">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div>
+                @Model.Name
+            </div>
+        </div>
+    </div>
+    <ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+        {
+            <li class="nav-item">
+                <a role="tab" class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Users ? "active" : "") show" href="@(string.Format(PagePath.GROUP_USERS, Model.Id))" aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Users ? "true" : "false")">
+                    <span>Users</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES) && SidebarSelection.UseEmailSender)
+        {
+            <li class="nav-item">
+                <a role="tab" class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Invites ? "active" : "") show" href="@(string.Format(PagePath.GROUP_INVITES, Model.Id))" aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Invites ? "true" : "false")">
+                    <span>Invites</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES))
+        {
+            <li class="nav-item">
+                <a role="tab" class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Attributes ? "active" : "") show" href="@(string.Format(PagePath.GROUP_ATTRIBUTES, Model.Id))" aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Attributes ? "true" : "false")">
+                    <span>Attributes</span>
+                </a>
+            </li>
+        }
+    </ul>
+</div>

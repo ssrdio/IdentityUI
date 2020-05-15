@@ -5,6 +5,9 @@
     SidebarSelection.SelectedOption = SidebarOptions.TwoFactorAuthenticator;
 }
 
+@{
+    ViewData["Title"] = "Profile";
+}
 
 @section style{
     <style>
@@ -33,9 +36,9 @@
             new code2fa('@Model.AuthenticatorUri');
         });
     </script>
-        @if (Model.StatusAlert != null)
-        {
-            <script>
+    @if (Model.StatusAlert != null)
+    {
+        <script>
                 $(document).ready(function () {
                     var x = document.getElementById("snackbar");
 
@@ -49,8 +52,8 @@
                         x.className = "showError";
                     }
                 });
-            </script>
-        }
+        </script>
+    }
 }
 
 @if (Model.StatusAlert != null)

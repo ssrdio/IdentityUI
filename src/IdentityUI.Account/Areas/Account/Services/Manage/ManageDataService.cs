@@ -54,7 +54,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services.Manage
                 x.LastName,
                 x.PhoneNumber));
 
-            ProfileViewModel profile = _userRepository.Get(selectSpecification);
+            ProfileViewModel profile = _userRepository.SingleOrDefault(selectSpecification);
             if(profile == null)
             {
                 _logger.LogWarning($"No user. UserId {userId}");
@@ -71,7 +71,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services.Manage
             selectSpecification.AddSelect(x => new TwoFactorAuthenticatorViewModel(
                 x.TwoFactorEnabled));
 
-            TwoFactorAuthenticatorViewModel twoFactorAuthenticatorViewModel = _userRepository.Get(selectSpecification);
+            TwoFactorAuthenticatorViewModel twoFactorAuthenticatorViewModel = _userRepository.SingleOrDefault(selectSpecification);
             if(twoFactorAuthenticatorViewModel == null)
             {
                 _logger.LogWarning($"No user. UserId {userId}");

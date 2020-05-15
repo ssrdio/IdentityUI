@@ -1,0 +1,25 @@
+﻿<div id="add-permission-modal" class="modal fade" role="dialog" aria-labelledby="add-permission-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Permission</h5>
+                <button type="button" class="custom-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> 
+            </div>
+            <div class="modal-body">
+                <div id="add-permission-form">
+                    @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                    <div id="name-input" class="form-group">
+                        <label class="control-label">Name</label>
+                        <input class="form-control" type="text" />
+                        <span class="error text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer custom-modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary confirm">Add</button>
+            </div>
+        </div>
+    </div>
+</div>

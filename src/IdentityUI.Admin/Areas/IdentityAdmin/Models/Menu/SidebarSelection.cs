@@ -7,6 +7,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu
     public static class SidebarSelection
     {
         public static SidebarOptions SelectedOption { get; set; }
+
+        public static bool UseEmailSender { get; set; } = false;
     }
 
     public enum SidebarOptions
@@ -14,5 +16,9 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu
         Dashboard = 1,
         User = 2,
         Role = 3,
+        Permission = 4,
+        Group = 5,
+        Invite = 6,
+        Setting = 7,
     }
 }

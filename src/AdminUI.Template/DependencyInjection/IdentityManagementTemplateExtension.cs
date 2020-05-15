@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using SSRD.AdminUI.Template.DependencyInjection;
+using SSRD.AdminUI.Template.Models.Select2;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +17,8 @@ namespace SSRD.AdminUI.Template
         public static void AddAdminTemplate(this IServiceCollection services)
         {
             services.ConfigureOptions(typeof(UIConfigureOptions));
+
+            services.AddSingleton<IValidator<Select2Request>, Select2RequestValidator>();
         }
     }
 }

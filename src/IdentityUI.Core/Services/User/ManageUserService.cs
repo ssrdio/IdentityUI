@@ -15,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using SSRD.IdentityUI.Core.Data.Entities.Group;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
@@ -23,8 +25,11 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly UserManager<AppUserEntity> _userManager;
 
         private readonly IUserRepository _userRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IBaseRepository<UserRoleEntity> _userRoleRepository;
+        private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
 
-        private readonly IEmailService _emailService;
+        private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ISessionService _sessionService;
 
         private readonly IValidator<EditUserRequest> _editUserValidator;
@@ -35,16 +40,21 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         private readonly ILogger<ManageUserService> _logger;
 
-        public ManageUserService(UserManager<AppUserEntity> userManager, IUserRepository userRepository, IEmailService emailService,
-            ISessionService sessionService, IValidator<EditUserRequest> editUserValidator, IValidator<SetNewPasswordRequest> setNewPasswordValidator,
+        public ManageUserService(UserManager<AppUserEntity> userManager, IUserRepository userRepository, IRoleRepository roleRepository,
+            IBaseRepository<UserRoleEntity> userRoleRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
+            IEmailConfirmationService emailConfirmationService, ISessionService sessionService,
+            IValidator<EditUserRequest> editUserValidator, IValidator<SetNewPasswordRequest> setNewPasswordValidator,
             IValidator<EditProfileRequest> editRequestValidator, IValidator<UnlockUserRequest> unlockUserValidator,
             IValidator<SendEmailVerificationMailRequest> sendEmailVerificationMailValidator, ILogger<ManageUserService> logger)
         {
             _userManager = userManager;
 
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
+            _userRoleRepository = userRoleRepository;
+            _groupUserRepository = groupUserRepository;
 
-            _emailService = emailService;
+            _emailConfirmationService = emailConfirmationService;
             _sessionService = sessionService;
 
             _editUserValidator = editUserValidator;
@@ -69,7 +79,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
             userSpecification.AddFilter(x => x.Id == id);
 
-            AppUserEntity appUser = _userRepository.Get(userSpecification);
+            AppUserEntity appUser = _userRepository.SingleOrDefault(userSpecification);
             if(appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {id}. Admin {adminId}");
@@ -122,7 +132,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             bool result = _userRepository.Update(appUser);
             if(!result)
             {
-                _logger.LogError($"Faild to save edited user data. Admin {adminId}");
+                _logger.LogError($"Failed to save edited user data. Admin {adminId}");
                 return Result.Fail("error", "error");
             }
 
@@ -185,14 +195,35 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("no_user", "No User");
             }
 
-            IdentityResult result = await _userManager.RemoveFromRolesAsync(appUser, roles);
-            if (!result.Succeeded)
+            roles = roles.Select(x => x.ToUpper()).ToList();
+
+            SelectSpecification<RoleEntity, string> roleSpecification = new SelectSpecification<RoleEntity, string>();
+            roleSpecification.AddFilter(x => roles.Contains(x.NormalizedName));
+            roleSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Global);
+            roleSpecification.AddSelect(x => x.NormalizedName);
+
+            List<string> existingRoles = _roleRepository.GetList(roleSpecification);
+            if(roles.Count != existingRoles.Count)
             {
-                _logger.LogError($"Admin with id {adminId} faild to remove roles to user with id {userId}");
-                return Result.Fail(ResultUtils.ToResultError(result.Errors));
+                _logger.LogError($"Some roles does not exists. Missing roles {Newtonsoft.Json.JsonConvert.SerializeObject(roles.Except(existingRoles))}");
             }
 
-            _logger.LogInformation($"Admin with id {adminId} removed roles to user with id {userId}. Role ids: {Newtonsoft.Json.JsonConvert.SerializeObject(roles)}");
+            SelectSpecification<UserRoleEntity, UserRoleEntity> getUserRolesSpecification = new SelectSpecification<UserRoleEntity, UserRoleEntity>();
+            getUserRolesSpecification.AddFilter(x => x.UserId == userId);
+            getUserRolesSpecification.AddFilter(x => x.Role.Type == Data.Enums.Entity.RoleTypes.Global);
+            getUserRolesSpecification.AddFilter(x => existingRoles.Contains(x.Role.NormalizedName));
+            getUserRolesSpecification.AddSelect(x => x);
+
+            List<UserRoleEntity> userRoles = _userRoleRepository.GetList(getUserRolesSpecification);
+
+            bool removeResult = _userRoleRepository.RemoveRange(userRoles);
+            if(!removeResult)
+            {
+                _logger.LogError($"Failed to remove user roles. UserId {userId}. RoleNames {Newtonsoft.Json.JsonConvert.SerializeObject(roles)}");
+                return Result.Fail("failed_to_remove_user_roles", "Failed to remove user roles");
+            }
+
+            _logger.LogInformation($"Removed roles form user {userId}. Role names: {Newtonsoft.Json.JsonConvert.SerializeObject(existingRoles)}");
             return Result.Ok();
         }
 
@@ -205,14 +236,36 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("no_user", "No User");
             }
 
-            IdentityResult result = await _userManager.AddToRolesAsync(appUser, roles);
-            if (!result.Succeeded)
+            roles = roles.Select(x => x.ToUpper()).ToList();
+
+            SelectSpecification<RoleEntity, RoleEntity> getRoleSpecification = new SelectSpecification<RoleEntity, RoleEntity>();
+            getRoleSpecification.AddFilter(x => roles.Contains(x.NormalizedName));
+            getRoleSpecification.AddSelect(x => x);
+
+            List<RoleEntity> roleEntites = _roleRepository.GetList(getRoleSpecification);
+            List<UserRoleEntity> userRoles = new List<UserRoleEntity>();
+
+            foreach(RoleEntity role in roleEntites)
             {
-                _logger.LogError($"Admin with id {adminId} faild to add roles to user with id {userId}");
-                return Result.Fail(ResultUtils.ToResultError(result.Errors));
+                if(role.Type != Data.Enums.Entity.RoleTypes.Global)
+                {
+                    _logger.LogError($"Invalid role type. RoleId {role.Id}");
+                    continue;
+                }
+
+                userRoles.Add(new UserRoleEntity(
+                    userId: appUser.Id,
+                    roleId: role.Id));
             }
 
-            _logger.LogInformation($"Admin with id {adminId} added roles to user with id {userId}. Role ids: {Newtonsoft.Json.JsonConvert.SerializeObject(roles)}");
+            bool addRoles = _userRoleRepository.AddRange(userRoles);
+            if(!addRoles)
+            {
+                _logger.LogError($"Failed to add user roles");
+                return Result.Fail("failed_to_add_user_roles", "Failed to add UserRoles");
+            }
+
+            _logger.LogInformation($"Added roles to user. UserId {userId}, Role ids: {Newtonsoft.Json.JsonConvert.SerializeObject(userRoles.Select(x => x.RoleId))}");
             return Result.Ok();
         }
 
@@ -228,7 +281,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
             userSpecification.AddFilter(x => x.Id == id);
 
-            AppUserEntity appUser = _userRepository.Get(userSpecification);
+            AppUserEntity appUser = _userRepository.SingleOrDefault(userSpecification);
             if(appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {id}");
@@ -266,7 +319,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
             userSpecification.AddFilter(x => x.Id == request.UserId);
 
-            AppUserEntity appUser = _userRepository.Get(userSpecification);
+            AppUserEntity appUser = _userRepository.SingleOrDefault(userSpecification);
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {request.UserId}, AdminId {adminId}");
@@ -298,7 +351,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
             userSpecification.AddFilter(x => x.Id == request.UserId);
 
-            AppUserEntity appUser = _userRepository.Get(userSpecification);
+            AppUserEntity appUser = _userRepository.SingleOrDefault(userSpecification);
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {request.UserId}, AdminId {adminId}");
@@ -307,7 +360,81 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
 
-            await _emailService.SendVerificationMail(appUser, code);
+            await _emailConfirmationService.SendVerificationMail(appUser, code);
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> RemoveRole(string userId, string roleId)
+        {
+            BaseSpecification<RoleEntity> getRoleSpecification = new BaseSpecification<RoleEntity>();
+            getRoleSpecification.AddFilter(x => x.Id == roleId);
+
+            RoleEntity role = _roleRepository.SingleOrDefault(getRoleSpecification);
+            if(role == null)
+            {
+                _logger.LogError($"No role. RoleId {roleId}");
+                return Result.Fail("no_role", "No Role");
+            }
+
+            switch (role.Type)
+            {
+                case Data.Enums.Entity.RoleTypes.Global:
+                    {
+                        return await RemoveGlobalRole(userId, role.Name);
+                    }
+                case Data.Enums.Entity.RoleTypes.Group:
+                    {
+                        return RemoveGroupRole(userId, roleId);
+                    }
+                default:
+                    {
+                        _logger.LogError($"Invalid Role type. RoleId {roleId}");
+                        return Result.Fail("invalid_role_type", "Invalid role type");
+                    }
+            }
+        }
+
+        private async Task<Result> RemoveGlobalRole(string userId, string roleName)
+        {
+            AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
+            if(appUser == null)
+            {
+                _logger.LogWarning($"No User. UserId {userId}.");
+                return Result.Fail("no_user", "No User");
+            }
+
+            IdentityResult removeRoleResult = await _userManager.RemoveFromRoleAsync(appUser, roleName);
+            if(!removeRoleResult.Succeeded)
+            {
+                _logger.LogError($"Failed to remove global role. UserId {userId}, RoleName {roleName}");
+                return Result.Fail("failed_to_remove_role", "Failed to remove role");
+            }
+
+            return Result.Ok();
+        }
+
+        private Result RemoveGroupRole(string userId, string roleId)
+        {
+            BaseSpecification<GroupUserEntity> baseSpecification = new BaseSpecification<GroupUserEntity>();
+            baseSpecification.AddFilter(x => x.UserId == userId);
+            baseSpecification.AddFilter(x => x.RoleId == roleId);
+
+            GroupUserEntity groupUser = _groupUserRepository.SingleOrDefault(baseSpecification);
+            if(groupUser == null)
+            {
+                _logger.LogError($"No GroupUser. UserId {userId}, roleId {roleId}");
+                return Result.Fail("no_group_user", "No GroupUser");
+            }
+
+            groupUser.UpdateRole(null);
+
+            bool updateResult = _groupUserRepository.Update(groupUser);
+            if(!updateResult)
+            {
+                _logger.LogError($"Failed to update GroupUser. UserId {userId}, roleId {roleId}");
+                return Result.Fail("failed_to_update_group_user", "Failed to update GroupUser");
+            }
 
             return Result.Ok();
         }

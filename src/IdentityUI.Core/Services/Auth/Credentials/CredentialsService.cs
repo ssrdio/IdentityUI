@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
 {
@@ -23,7 +24,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
     {
         private readonly UserManager<AppUserEntity> _userManager;
 
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailService;
         private readonly ILoginService _loginService;
 
         private readonly IValidator<RecoverPasswordRequest> _forgotPasswordValidator;
@@ -35,14 +36,14 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
         private readonly IdentityUIOptions _identityManagementOptions;
         private readonly IdentityUIEndpoints _identityManagementEndpoints;
 
-        public CredentialsService(UserManager<AppUserEntity> userManager, IEmailSender emailSender, ILoginService loginService,
+        public CredentialsService(UserManager<AppUserEntity> userManager, IEmailService emailService, ILoginService loginService,
             IValidator<RecoverPasswordRequest> forgotPasswordValidator, IValidator<ResetPasswordRequest> recoverPasswordValidator,
             IValidator<ChangePasswordRequest> changePasswordValidator, ILogger<CredentialsService> logger,
             IOptionsSnapshot<IdentityUIOptions> identityManagementOptions, IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
         {
             _userManager = userManager;
 
-            _emailSender = emailSender;
+            _emailService = emailService;
             _loginService = loginService;
 
             _forgotPasswordValidator = forgotPasswordValidator;
@@ -101,7 +102,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
             AppUserEntity appUser = await _userManager.FindByEmailAsync(request.Email);
             if(appUser == null)
             {
-                _logger.LogWarning($"No user. User emil {request.Email}");
+                _logger.LogWarning($"No user. User email {request.Email}");
                 return Result.Ok();
             }
 
@@ -117,8 +118,11 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
 
             string calbackUrl = QueryHelpers.AddQueryString($"{_identityManagementOptions.BasePath}{_identityManagementEndpoints.ResetPassword}", "code", code);
 
-            await _emailSender.SendEmailAsync(appUser.Email, "Reset Password",
-                $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(calbackUrl)}'>clicking here</a>");
+            Result sendMail = await _emailService.SendPasswordRecovery(appUser.Email, calbackUrl);
+            if(sendMail.Failure)
+            {
+                return Result.Fail(sendMail.Errors);
+            }
 
             _logger.LogInformation($"Password recovery email send. UserId {appUser.Id}");
 
@@ -152,11 +156,15 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
             IdentityResult identityResult = await _userManager.ResetPasswordAsync(appUser, code, request.Password);
             if(!identityResult.Succeeded)
             {
-                _logger.LogWarning($"Faild to reset password for user. User {appUser.Id}");
+                _logger.LogWarning($"Failed to reset password for user. User {appUser.Id}");
                 return Result.Fail(identityResult.Errors);
             }
 
-            await _emailSender.SendEmailAsync(appUser.Email, "Password changed", $"Your password has been changed");
+            Result sendMail = await _emailService.SendPasswordWasReset(appUser.Email);
+            if (sendMail.Failure)
+            {
+                //return Result.Fail(sendMail.Errors);
+            }
 
             _logger.LogInformation($"Password reset. UserId {appUser.Id}");
 

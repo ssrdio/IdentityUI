@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ namespace SSRD.IdentityUI.Core.Services.Role.Models
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public RoleTypes? Type { get; set; }
     }
 
     internal class NewRoleValidator : AbstractValidator<NewRoleRequest>
@@ -20,6 +22,10 @@ namespace SSRD.IdentityUI.Core.Services.Role.Models
 
             RuleFor(x => x.Description)
                 .MaximumLength(256);
+
+            RuleFor(x => x.Type)
+                .NotNull()
+                .IsInEnum();
         }
     }
 }

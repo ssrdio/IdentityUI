@@ -1,5 +1,9 @@
 ﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.RegisterSuccessViewModel
 
+@{
+    ViewData["Title"] = "Register";
+}
+
 @section script {
     <script type="text/javascript">
         document.getElementById("toDashboard").onclick = function () {
@@ -25,12 +29,12 @@
                                     </div>
                                 </div>
                             </div>
-                           
-                            @if(Model.UseEmailSender)
+
+                            @if (Model.UseEmailSender)
                             {
                                 <span>Registration link has been sent to your email</span>
                             }
-                            else 
+                            else
                             {
                                 <span>Registration was successful</span>
                             }

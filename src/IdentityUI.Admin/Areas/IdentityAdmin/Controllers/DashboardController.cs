@@ -4,14 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Dashboard;
-using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Models.Result;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
+    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     [Route(PagePath.DASHBOARD)]
     public class DashboardController : BaseController
     {

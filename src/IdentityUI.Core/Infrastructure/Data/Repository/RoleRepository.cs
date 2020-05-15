@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SSRD.IdentityUI.Core.Data.Enums.Entity;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
 {
@@ -20,6 +21,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             return _context.UserRoles
                 .Where(x => x.UserId == userId)
+                .Where(x => x.Role.Type == RoleTypes.Global)
                 .Select(x => x.Role)
                 .ToList();
         }
@@ -28,11 +30,13 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             List<string> assingedRoles = _context.UserRoles
                 .Where(x => x.UserId == userId)
+                .Where(x => x.Role.Type == RoleTypes.Global)
                 .Select(x => x.RoleId)
                 .ToList();
 
             List<RoleEntity> roles = _context.Roles
                 .Where(x => !assingedRoles.Contains(x.Id))
+                .Where(x => x.Type == RoleTypes.Global)
                 .ToList();
 
             return roles;

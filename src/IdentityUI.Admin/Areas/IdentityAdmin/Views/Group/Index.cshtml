@@ -1,0 +1,41 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.Group;
+}
+
+@{
+    ViewData["Title"] = "Groups";
+}
+
+@section script {
+    <script src="~/identityAdmin/app/group/group-index.js"></script>
+    <script>
+        $(document).ready(function () {
+            new GroupIndex();
+        });
+    </script>
+}
+
+@section modal{
+<div id="modal-container">
+    @await Component.InvokeAsync("AddGroupModal")
+    @await Component.InvokeAsync("IdentityConfirmationModal")
+</div>
+}
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Groups:
+            </h5>
+            <button id="add-group-button" class="header-button">Add Group</button>
+        </div>
+        <div class="custom_container custom_table">
+            <table id="group-table" class="dataTableClass display "></table>
+        </div>
+    </div>
+</div>

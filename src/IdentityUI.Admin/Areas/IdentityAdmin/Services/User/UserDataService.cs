@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
 using Microsoft.Extensions.Options;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
 {
@@ -99,7 +100,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 x.Id,
                 x.UserName));
 
-            UserCredentialsViewModel userCredentials = _userRepository.Get(userSpecification);
+            UserCredentialsViewModel userCredentials = _userRepository.SingleOrDefault(userSpecification);
             if (userCredentials == null)
             {
                 return Result.Fail<UserCredentialsViewModel>("no_user", "No user");
@@ -123,14 +124,15 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 /*phoneNumberConfirmed:*/ x.PhoneNumberConfirmed,
                 /*twoFactorEnabled:*/ x.TwoFactorEnabled,
                 /*enabled:*/ x.Enabled,
-                /*LockoutEnd:*/ x.LockoutEnd.HasValue ? x.LockoutEnd.Value.ToString("d.M.yyyy HH:mm:ss") : null,
-                /*UseEmailSender*/ _identityUIEndpoints.UseEmailSender));
+                /*LockoutEnd:*/ x.LockoutEnd.HasValue ? x.LockoutEnd.Value.ToString("d.M.yyyy HH:mm:ss") : null));
 
-            UserDetailsViewModel userDetails = _userRepository.Get(userSpecification);
+            UserDetailsViewModel userDetails = _userRepository.SingleOrDefault(userSpecification);
             if (userDetails == null)
             {
                 return Result.Fail<UserDetailsViewModel>("no_user", "No user");
             }
+
+            userDetails.UseEmailSender = _identityUIEndpoints.UseEmailSender ?? false;
 
             return Result.Ok(userDetails);
         }
@@ -143,7 +145,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 x.Id,
                 x.UserName));
 
-            UserRolesViewModel userRoles = _userRepository.Get(userSpecification);
+            UserRolesViewModel userRoles = _userRepository.SingleOrDefault(userSpecification);
             if (userRoles == null)
             {
                 _logger.LogWarning($"No user. UserId {id}");
@@ -255,7 +257,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 x.Id,
                 x.UserName));
 
-            UserSessionViewModel userRoles = _userRepository.Get(userSpecification);
+            UserSessionViewModel userRoles = _userRepository.SingleOrDefault(userSpecification);
             if (userRoles == null)
             {
                 _logger.LogWarning($"No user. UserId {userId}");

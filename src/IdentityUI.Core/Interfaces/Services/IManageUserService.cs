@@ -18,5 +18,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
         Result UnlockUser(UnlockUserRequest request, string adminId);
 
         Task<Result> SendEmilVerificationMail(SendEmailVerificationMailRequest request, string adminId);
+
+        Task<Result> RemoveRole(string userId, string roleId);
     }
 }

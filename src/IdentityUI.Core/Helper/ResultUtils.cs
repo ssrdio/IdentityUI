@@ -57,5 +57,27 @@ namespace SSRD.IdentityUI.Core.Helper
 
             return modelState;
         }
+
+        public static ModelStateDictionary AddErrors(this ModelStateDictionary modelState, Result result, bool includePropertyNames = true)
+        {
+            if (!result.Failure)
+            {
+                return modelState;
+            }
+
+            foreach (var error in result.Errors)
+            {
+                if (!string.IsNullOrEmpty(error.PropertyName) && includePropertyNames)
+                {
+                    modelState.AddModelError(error.PropertyName, error.Message);
+                }
+                else
+                {
+                    modelState.AddModelError(string.Empty, error.Message);
+                }
+            }
+
+            return modelState;
+        }
     }
 }

@@ -1,0 +1,40 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role.RoleMenuViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Role;
+}
+
+@{
+    ViewData["Title"] = "Roles";
+}
+
+@section script{
+    <script src="~/identityAdmin/app/user/roles/assignment.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            new RoleAssignment('@Model.RoleId');
+        });
+    </script>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div>
+    @(await Component.InvokeAsync("RoleMenu", Model.ToComponentViewModel(RoleMenuViewComponent.TabSelected.Assignments)))
+
+    <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Assignments:
+                </h5>
+            </div>
+            <div class="custom_container custom_table">
+                <table id="assignment-table" class="dataTableClass display "></table>
+            </div>
+        </div>
+    </div>
+</div>

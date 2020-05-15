@@ -1,0 +1,49 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group.GroupMenuViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Group;
+}
+
+@{
+    ViewData["Title"] = "Groups";
+}
+
+@section script{
+    <script src="~/identityAdmin/app/group/attribute.js"></script>
+    <script>
+        $(document).ready(() => {
+            new GroupAttributes('@Model.Id')
+        });
+    </script>
+}
+
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("AddGroupAttributeModal")
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+<div>
+    @(await Component.InvokeAsync("GroupMenu", Model.ToViewComponent(GroupMenuViewComponent.TabSelected.Attributes)))
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Attributes
+                    </h5>
+                    <button id="add-attribute-button" class="header-button">Add Attribute</button>
+                </div>
+                <div class="custom_container custom_table">
+                    <table id="attribute-table" class="dataTableClass display "></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

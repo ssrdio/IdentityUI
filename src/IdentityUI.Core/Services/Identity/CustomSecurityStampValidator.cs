@@ -1,6 +1,5 @@
 ﻿using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
-using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using Microsoft.AspNetCore.Authentication;
@@ -13,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Core.Services.Identity
 {
@@ -55,7 +55,7 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 AppUserEntity val = await VerifySecurityStamp(context.Principal);
                 if (val != null)
                 {
-                    string sessionCode = context.Principal.FindFirstValue(IdentityManagementClaims.SESSION_CODE);
+                    string sessionCode = context.Principal.FindFirstValue(IdentityUIClaims.SESSION_CODE);
                     string userId = context.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
                     string ip = context.HttpContext.Request.HttpContext.Connection.RemoteIpAddress.ToString();
 

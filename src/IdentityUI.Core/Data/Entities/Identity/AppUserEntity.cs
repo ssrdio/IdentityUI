@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SSRD.IdentityUI.Core.Data.Entities.Group;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,16 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
         public virtual ICollection<UserLoginEntity> Logins { get; set; }
         public virtual ICollection<UserTokenEntity> Tokens { get; set; }
         public virtual ICollection<UserRoleEntity> UserRoles { get; set; }
+        public virtual ICollection<SessionEntity> Sessions { get; set; }
+
+        public virtual ICollection<GroupUserEntity> Groups { get; set; }
 
         /// <summary>
         /// This column does not exist in database. It is only used for login
         /// </summary>
         public string SessionCode { get; set; }
 
-        public AppUserEntity()
+        protected AppUserEntity()
         {
         }
 

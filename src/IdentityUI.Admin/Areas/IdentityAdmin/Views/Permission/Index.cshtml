@@ -1,0 +1,38 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.Permission;
+}
+
+@{
+    ViewData["Title"] = "Permissions";
+}
+
+@section script {
+    <script src="~/identityAdmin/app/permission/index.js"></script>
+    <script>
+        $(document).ready(() => {
+            new PermissionIndex();
+        });
+    </script>
+}
+
+@section modal{
+    @await Component.InvokeAsync("AddPermissionModal")
+}
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Permissions:
+            </h5>
+            <button id="add-group-button" class="header-button">Add Permission</button>
+        </div>
+        <div class="custom_container custom_table">
+            <table id="permission-table" class="dataTableClass display"></table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Permission.Components.PermissionMenu
+@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Permission.Components.PermissionMenu.PermissionMenuViewComponent.ViewModel
+
+<div class="custom-header">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div>
+                @Model.Name
+            </div>
+        </div>
+    </div>
+    <ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == PermissionMenuViewComponent.TabSelected.Details ? "active" : "") show" href="@(string.Format(PagePath.PERMISSION_DETAILS, Model.Id))" aria-selected="@(Model.TabSelected == PermissionMenuViewComponent.TabSelected.Details ? "true" : "false")">
+                <span>Details</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == PermissionMenuViewComponent.TabSelected.Roles ? "active" : "") show" href="@(string.Format(PagePath.PERMISSION_ROLES, Model.Id))" aria-selected="@(Model.TabSelected == PermissionMenuViewComponent.TabSelected.Roles ? "true" : "false")">
+                <span>Roles</span>
+            </a>
+        </li>
+    </ul>
+</div>

@@ -1,0 +1,27 @@
+﻿<div id="send-test-email-modal" class="modal fade" role="dialog" aria-labelledby="send-test-email-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Test Email</h5>
+                <button type="button" class="custom-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="send-test-email-form">
+                    @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                    <div id="email-input" class="form-group">
+                        <label class="control-label">Email</label>
+                        <input class="form-control" type="text" />
+                        <span class="error text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer custom-modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary confirm">Send</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -21,5 +21,18 @@
                 <span>Users</span>
             </a>
         </li>
+        @if (Model.RoleType == SSRD.IdentityUI.Core.Data.Enums.Entity.RoleTypes.Group)
+        {
+            <li class="nav-item">
+                <a role="tab" class="nav-link @(Model.TabSelected == RoleMenuViewComponent.TabSelected.Assignments ? "active" : "") show" href="@(string.Format(PagePath.ROLE_ASSIGNMENTS, Model.RoleId))" aria-selected="@(Model.TabSelected == RoleMenuViewComponent.TabSelected.Users ? "true" : "false")">
+                    <span>Assignments</span>
+                </a>
+            </li>
+        }
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == RoleMenuViewComponent.TabSelected.Permissions ? "active" : "") show" href="@(string.Format(PagePath.ROLE_PERMISSIONS, Model.RoleId))" aria-selected="@(Model.TabSelected == RoleMenuViewComponent.TabSelected.Users ? "true" : "false")">
+                <span>Permissions</span>
+            </a>
+        </li>
     </ul>
 </div>

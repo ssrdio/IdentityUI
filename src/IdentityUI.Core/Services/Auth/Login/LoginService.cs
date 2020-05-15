@@ -70,7 +70,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
             if (!appUser.CanLogin())
             {
-                _logger.LogInformation($"User is not allowd to login. User {appUser.Id}");
+                _logger.LogInformation($"User is not allowed to login. User {appUser.Id}");
                 return SignInResult.Failed;
             }
 
@@ -93,14 +93,14 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
                 if (!result.IsLockedOut)
                 {
-                    _logger.LogInformation($"Faild to log in user. User {appUser.Id}");
+                    _logger.LogInformation($"Failed to log in user. User {appUser.Id}");
                     _sessionService.Logout(appUser.SessionCode, appUser.Id, SessionEndTypes.InvalidLogin);
                 }
 
                 return result;
             }
 
-            _logger.LogInformation($"User loged in. UserId {appUser.Id}");
+            _logger.LogInformation($"User id loged in. UserId {appUser.Id}");
 
             return result;
         }

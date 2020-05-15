@@ -6,11 +6,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using System.Diagnostics;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(Roles = SSRD.IdentityUI.Core.Models.RoleConstats.IDENTITY_MANAGMENT_ROLE)]
+    [Authorize]
     [Area(PagePath.IDENTITY_ADMIN_AREA_NAME)]
     public class BaseController : Controller
     {
@@ -25,6 +26,11 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             //return (User.Identity as ClaimsIdentity)?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+
+        protected IActionResult NotFoundView()
+        {
+            return View("NotFound");
         }
     }
 }

@@ -52,19 +52,20 @@ namespace SSRD.IdentityUI.Core.Services.Role
 
             RoleEntity role = new RoleEntity( 
                 name: newRoleRequest.Name,
-                description: newRoleRequest.Description);
+                description: newRoleRequest.Description,
+                type: newRoleRequest.Type.Value);
 
             IdentityResult result = await _roleManager.CreateAsync(role);
             if (!result.Succeeded)
             {
-                _logger.LogError($"Faild to add new role. Admin with id {adminId}");
+                _logger.LogError($"Failed to add new role. Admin with id {adminId}");
                 return Result.Fail<string>(ResultUtils.ToResultError(result.Errors));
             }
 
             role = await _roleManager.FindByNameAsync(newRoleRequest.Name);
             if (role == null)
             {
-                _logger.LogError($"Faild to find new role with name {newRoleRequest.Name}. Admin with id {adminId}");
+                _logger.LogError($"Failed to find new role with name {newRoleRequest.Name}. Admin with id {adminId}");
                 return Result.Fail<string>("no_role", "No role");
             }
 
@@ -76,14 +77,14 @@ namespace SSRD.IdentityUI.Core.Services.Role
             ValidationResult validationResult = _editRoleValidator.Validate(editRoleRequest);
             if(!validationResult.IsValid)
             {
-                _logger.LogError($"Invlid EditRoleRequest. admin {adminId}");
+                _logger.LogError($"Invalid EditRoleRequest. admin {adminId}");
                 return Result.Fail(ResultUtils.ToResultError(validationResult.Errors));
             }
 
             BaseSpecification<RoleEntity> roleSpecification = new BaseSpecification<RoleEntity>();
             roleSpecification.AddFilter(x => x.Id == id);
 
-            RoleEntity role = _roleRepository.Get(roleSpecification);
+            RoleEntity role = _roleRepository.SingleOrDefault(roleSpecification);
             if(role == null)
             {
                 _logger.LogError($"No role. Admin id {adminId}");
@@ -95,8 +96,32 @@ namespace SSRD.IdentityUI.Core.Services.Role
             bool result = _roleRepository.Update(role);
             if(!result)
             {
-                _logger.LogError($"Faild to update role with id {id}. Admin {adminId}");
+                _logger.LogError($"Failed to update role with id {id}. Admin {adminId}");
                 return Result.Fail("error", "Error");
+            }
+
+            return Result.Ok();
+        }
+
+        public Result Remove(string id)
+        {
+            BaseSpecification<RoleEntity> roleSpecification = new BaseSpecification<RoleEntity>();
+            roleSpecification.AddFilter(x => x.Id == id);
+
+            RoleEntity role = _roleRepository.SingleOrDefault(roleSpecification);
+            if (role == null)
+            {
+                _logger.LogError($"No role");
+                return Result.Fail("no_role", "No Role");
+            }
+
+            _logger.LogInformation($"Removing Role. RoleId {id}, Name {role.Name}");
+
+            bool removeResult = _roleRepository.Remove(role);
+            if(!removeResult)
+            {
+                _logger.LogError($"Failed to remove Role. RoleId {id}, Name {role.Name}");
+                return Result.Fail("failed_to_remove_role", "Failed to remove role");
             }
 
             return Result.Ok();

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User;
-using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
@@ -14,9 +13,12 @@ using SSRD.IdentityUI.Core.Services.Auth.Session.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
+    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class UserController : BaseController
     {
         private readonly IUserDataService _userDataService;
@@ -61,14 +63,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if(!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<UserDetailsViewModel> result = _userDataService.GetDetailsViewModel(id);
             if(result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             return View(result.Value);
@@ -79,15 +80,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result editResult = await _manageUserService.EditUser(id, model, GetUserId());
             Result<UserDetailsViewModel> userResult = _userDataService.GetDetailsViewModel(id);
             if (userResult.Failure)
             {
-                ModelState.AddErrors(userResult.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             if (editResult.Failure)
@@ -108,15 +108,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result result = await _manageUserService.SendEmilVerificationMail(new SendEmailVerificationMailRequest(id), GetUserId());
             Result<UserDetailsViewModel> userResult = _userDataService.GetDetailsViewModel(id);
             if (userResult.Failure)
             {
-                ModelState.AddErrors(userResult.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             if (result.Failure)
@@ -137,15 +136,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result result = _manageUserService.UnlockUser(new UnlockUserRequest(id), GetUserId());
             Result<UserDetailsViewModel> userResult = _userDataService.GetDetailsViewModel(id);
             if (userResult.Failure)
             {
-                ModelState.AddErrors(userResult.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             if (result.Failure)
@@ -166,14 +164,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if(!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<UserCredentialsViewModel> result = _userDataService.GetCredetialsViewModel(id);
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             return View(result.Value);
@@ -202,14 +199,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             Result<UserRolesViewModel> result = _userDataService.GetRolesViewModel(id);
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return RedirectToAction(nameof(Index));
+                return NotFoundView();
             }
 
             return View(result.Value);
@@ -298,14 +294,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return NotFoundView();
             }
 
             Result<UserSessionViewModel> result = _userDataService.GetUserSessionViewModel(id);
             if(result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-                return View();
+                return NotFoundView();
             }
 
             return View(result.Value);

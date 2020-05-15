@@ -1,0 +1,130 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Permission.PermissionMenuViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Permission;
+}
+
+@{
+    ViewData["Title"] = "Permissions";
+}
+
+@section script {
+    <script src="~/identityAdmin/app/permission/index.js"></script>
+    <script>
+        $(document).ready(() => {
+            new PermissionIndex();
+            new RolePermissionTable('@Model.Id')
+        });
+
+        class RolePermissionTable {
+            constructor(permissionId) {
+                this.permissionId = permissionId;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                this.confirmationModal = new conformationModal(
+                    $('#modal-container'),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeRole') {
+                            this.remove(onYesClick.id);
+                        }
+                    });
+
+                this.$roleTable = $('#permission-role-table');
+                this.initTable();
+            }
+
+            initTable() {
+                this.$roleTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    "targets": 'no-sort',
+                    "bSort": false,
+                    "order": [],
+                    ajax: {
+                        url: `/IdentityAdmin/Permission/GetRoles/${this.permissionId}`,
+                        type: 'GET'
+                    },
+                    columns: [
+                        {
+                            data: "name",
+                            title: "Name",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: "type",
+                            title: "Type",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            className: "dt-head-center",
+                            width: "250px",
+                            mRender: function (data) {
+                                return `
+                                        <div>
+                                            <a class="btn btn-primary table-button" href="/IdentityAdmin/Role/Details/${data.id}">Details</a>
+                                            <button class="btn btn-danger table-button remove" data-id="${data.id}">Remove</a>
+                                        </div>
+                                    `;
+                            }
+                        },
+                    ],
+                });
+
+                this.$roleTable.on('click', 'button.remove', (event) => {
+                    let id = $(event.target).data("id");
+                    this.confirmationModal.show({ key: 'removeRole', id: id }, 'Are you sure that you want to remove permission from role?');
+                });
+            }
+
+            reloadTable() {
+                this.$roleTable
+                    .DataTable()
+                    .clear()
+                    .draw();
+            }
+
+            remove(roleId) {
+                Api.post(`/IdentityAdmin/Role/${roleId}/Permission/Remove/${this.permissionId}`)
+                    .done(() => {
+                        this.reloadTable();
+                        this.statusAlert.showSuccess('Permission was removed from role');
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showErrors(resp.responeJSON['']);
+                    })
+            }
+        }
+    </script>
+}
+
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("InviteUserModal")
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+@(await Component.InvokeAsync("PermissionMenu", Model.ToMenuViewComponent(SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Permission.Components.PermissionMenu.PermissionMenuViewComponent.TabSelected.Roles)))
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Roles:
+            </h5>
+        </div>
+        <div class="custom_container custom_table">
+            <table id="permission-role-table" class="dataTableClass display"></table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Setting.Email.EmailIndexViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Setting;
+}
+
+@{
+    ViewData["Title"] = "Email";
+}
+
+@section script {
+    <script>
+
+        $(document).ready(function () {
+            $('#email-table').DataTable({
+                serverSide: true,
+                processing: true,
+                "targets": 'no-sort',
+                "bSort": false,
+                "searching": false,
+                "order": [],
+                ajax: {
+                    url: '@PagePath.SETTING_EMAIL/Get',
+                    type: 'GET'
+                },
+                columns: [
+                    {
+                        data: "type",
+                        title: "Type",
+                        render: $.fn.dataTable.render.text()
+                    },
+                    {
+                        data: null,
+                        className: "dt-head-center",
+                        width: "160px",
+                        render: function (data) {
+                            return `<div class="text-center pr-2"><a class="btn btn-primary table-button" href="@(string.Format(PagePath.SETTING_EMAIL_DETAILS, ""))${data.id}">Edit</a></div>`
+                        }
+                    }
+                ],
+            });
+
+            const snackbar = document.getElementById("snackbar");
+            if (snackbar !== null && snackbar !== undefined) {
+                snackbar.className = "showError";
+            }
+        });
+
+    </script>
+}
+
+<div>
+    @if (!Model.UseEmailSender)
+    {
+        <div id="snackbar">
+            @await Component.InvokeAsync("IdentityStatusAlertRazor", new StatusAlertViewModel("Email sender is not used", false))
+        </div>
+    }
+    <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Emails:
+                </h5>
+            </div>
+            <div class="custom_container custom_table">
+                <table id="email-table" class="dataTableClass display "></table>
+            </div>
+
+        </div>
+    </div>
+</div>

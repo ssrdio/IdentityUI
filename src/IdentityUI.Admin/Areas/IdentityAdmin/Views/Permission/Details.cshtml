@@ -1,0 +1,137 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Permission.Components.PermissionMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Permission.PermissionViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Permission;
+}
+
+@{
+    ViewData["Title"] = "Permissions";
+}
+
+@section script{
+    <script>
+            $(document).ready(function () {
+                var x = document.getElementById("snackbar");
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+
+                new RemovePermission('@Model.Id');
+            });
+
+            class RemovePermission {
+                constructor(permissionId) {
+                    this.permissionId = permissionId;
+
+                    this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                    this.confirmationModal = new conformationModal(
+                        $(`#modalContainer`),
+                        onYesClick => {
+                            if (onYesClick === null || onYesClick === undefined) {
+                                return;
+                            }
+
+                            if (onYesClick.key === 'removePermission') {
+                                this.remove();
+                            }
+                        }
+                    );
+
+                    $('#remove-button').on('click', () => {
+
+                        this.confirmationModal.show({ key: 'removePermission' }, 'Are you sure you want to remove permission?');
+                    });
+                }
+
+                remove() {
+                    Api.post(`/IdentityAdmin/Permission/Remove/${this.permissionId}`)
+                        .done(() => {
+                            window.location.href = `/IdentityAdmin/Permission`;
+                        })
+                        .fail((resp) => {
+                            this.statusAlert.showErrors(resp.responseJSON['']);
+                        });
+                }
+        }
+
+        @if (Model.StatusAlert != null)
+            {
+                <text>
+                    $(document).ready(function() {
+                        var x = document.getElementById("snackbar");
+                        x.className = "show";
+                        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+                    });
+
+                </text>
+        }
+    </script>
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div>
+    @(await Component.InvokeAsync("PermissionMenu", Model.ToMenuViewComponent(PermissionMenuViewComponent.TabSelected.Details)))
+
+    <div id="status-alert-container">
+        <div id="snackbar" class="snackbar">
+            <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && Model.StatusAlert.Success) ? "" : "none")">
+                <div class="alertMessage" style="width: 80%;display: inline-block;">
+                    @if ((Model.StatusAlert != null && Model.StatusAlert.Success))
+                    {
+                        @foreach (string message in Model.StatusAlert.Messages)
+                        {
+                            @message <br />
+                        }
+                    }
+                </div>
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+            </div>
+            <div class="alert-danger mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && !Model.StatusAlert.Success) ? "" : "none")">
+                <div class="alertMessage" style="width: 80%;display: inline-block;">
+                    @if ((Model.StatusAlert != null && !Model.StatusAlert.Success))
+                    {
+                        @foreach (string message in Model.StatusAlert.Messages)
+                        {
+                            @message <br />
+                        }
+                    }
+                </div>
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Details
+                    </h5>
+                </div>
+                <form asp-controller="Permission" asp-action="Edit" asp-route-id="@Model.Id" method="post" class="custom-form">
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control disabled" disabled />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="button-holder">
+                        <input type="submit" value="Save" class="btn btn-primary custom-submit" />
+                        <button type="button" id="remove-button" class="btn btn-danger remove-button">Remove</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

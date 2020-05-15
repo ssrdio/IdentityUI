@@ -1,6 +1,11 @@
 # IdentityUI
 [![stable](https://img.shields.io/nuget/v/SSRD.IdentityUI.Core.svg?label=stable)](https://www.nuget.org/packages/SSRD.IdentityUI.Core/)
 
+[![](https://sonarcloud.io/api/project_badges/measure?project=ssrdio_IdentityUI&branch=master&metric=vulnerabilities)](https://sonarcloud.io/dashboard/?id=ssrdio_IdentityUI&branch=master) 
+[![](https://sonarcloud.io/api/project_badges/measure?project=ssrdio_IdentityUI&branch=master&metric=bugs)](https://sonarcloud.io/dashboard/?id=ssrdio_IdentityUI&branch=master) 
+[![](https://sonarcloud.io/api/project_badges/measure?project=ssrdio_IdentityUI&branch=master&metric=code_smells)](https://sonarcloud.io/dashboard/?id=ssrdio_IdentityUI&branch=master) 
+
+
 IdentityUI is a simple platform for administrative management of users and admins with a graphical interface. It is easy to set up, has a clean API, and runs on all recent .NET Core releases.
 
 
@@ -70,6 +75,21 @@ For adding admin `app.SeedIdentityAdmin("admin", "Password");`
 IdentityAdmin Dashboard: `{server}:{port}/IdentityAdmin/`  
 Account managment: `{server}:{port}/Account/Manage/`
 
+# Groups
+From version 2.0 we are supporting a group/multi-tenant management. For this purpose, we created multiple group roles that are linked to permission inside group/tenant management. 
+
+| Permission   |      Description     | 
+|----------|:-------------:|
+| group_can_manage_attributes |  Can mamange group attributes |
+| group_can_remove_users |  Can remoce users from group |
+| group_can_manage_roles |  User can assign roles inside the group |
+| group_can_invite_users |  Can invite new users to this group |
+| group_can_manage_invites |  Can see and edit invites |
+| group_can_see_users |  User can see other members in group |
+| identity_ui_can_manage_groups |  Can add new groups and can edit existing groups |
+| group_can_add_existing_users |  Can add existing users. **Note**: This will expose all users from Identity server! |
+
+
 # Advanced configuration
 
 ## IdentityUI options 
@@ -124,6 +144,8 @@ AddAuth(options =>
     options.LogoutPath = "/Account/Logout/";
 }) // These are the default cookie options.
 ```
+# Support
+For custom feature request or technical support contact us at [identity[at]ssrd.io](identity@ssrd.io)
 
 ## Credits
 

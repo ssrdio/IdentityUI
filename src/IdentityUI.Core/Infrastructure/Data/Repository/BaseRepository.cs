@@ -37,18 +37,20 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                 .Any();
         }
 
-        public virtual TEntity Get(IBaseSpecification<TEntity> specification)
+        public virtual TEntity FirstOrDefault(IBaseSpecification<TEntity> specification)
         {
             return _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplayBaseSpecification(specification)
                 .FirstOrDefault();
         }
 
-        public TData Get<TData>(ISelectSpecification<TEntity, TData> specification)
+        public TData FirstOrDefault<TData>(ISelectSpecification<TEntity, TData> specification)
         {
             return _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplaySelectSpecification(specification)
                 .FirstOrDefault();
         }
@@ -57,6 +59,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             return _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplaySelectSpecification(specification)
                 .ToList();
         }
@@ -65,6 +68,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
             List<TData> data = _context
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplyPaginationSpecification(specification)
                 .ToList();
 
@@ -78,12 +82,58 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                 count: count);
         }
 
+        public bool Remove(TEntity entity)
+        {
+            _context.Entry(entity).State = EntityState.Deleted;
+
+            int changes = _context.SaveChanges();
+            return changes > 0;
+        }
+
+        public TEntity SingleOrDefault(IBaseSpecification<TEntity> specification)
+        {
+            return _context
+                .Set<TEntity>()
+                .AsNoTracking()
+                .ApplayBaseSpecification(specification)
+                .SingleOrDefault();
+        }
+
+        public TData SingleOrDefault<TData>(ISelectSpecification<TEntity, TData> specification)
+        {
+            return _context
+                 .Set<TEntity>()
+                 .AsNoTracking()
+                 .ApplaySelectSpecification(specification)
+                 .SingleOrDefault();
+        }
+
         public bool Update(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
             int changes = _context.SaveChanges();
 
             return changes > 0;
+        }
+
+        public bool AddRange(IEnumerable<TEntity> entities)
+        {
+            _context
+                .Set<TEntity>()
+                .AddRange(entities);
+
+            int changes = _context.SaveChanges();
+            return changes == entities.Count();
+        }
+
+        public bool RemoveRange(IEnumerable<TEntity> entities)
+        {
+            _context
+                .Set<TEntity>()
+                .RemoveRange(entities);
+
+            int changes = _context.SaveChanges();
+            return changes == entities.Count();
         }
     }
 }

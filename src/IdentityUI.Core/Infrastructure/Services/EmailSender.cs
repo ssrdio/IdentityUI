@@ -8,6 +8,12 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.AspNetCore.Hosting;
+
+#if NET_CORE3
+using Microsoft.Extensions.Hosting;
+#endif
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Services
 {
@@ -18,22 +24,32 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
 
         private readonly ILogger<EmailSender> _logger;
 
-        public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, ILogger<EmailSender> logger)
+#if NET_CORE2
+        public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, IHostingEnvironment hostingEnvironment, ILogger<EmailSender> logger)
+#elif NET_CORE3
+        public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, IWebHostEnvironment hostingEnvironment, ILogger<EmailSender> logger)
+#endif
         {
             _logger = logger;
 
             if (options.Value == null)
             {
                 _logger.LogError($"EmailSender options are null");
-                throw new Exception($"EmailSender options are null");
+                throw new ArgumentNullException($"EmailSender options are null");
             }
 
             EmailSenderOptions emailSender = options.Value;
 
+            bool enambleSsl = true;
+            if (hostingEnvironment.IsDevelopment())
+            {
+                enambleSsl = false;
+            }
+
             _smtpClient = new SmtpClient(emailSender.Ip, emailSender.Port)
             {
                 DeliveryFormat = SmtpDeliveryFormat.International,
-                EnableSsl = true,
+                EnableSsl = enambleSsl,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(emailSender.UserName, emailSender.Password)
             };
@@ -59,6 +75,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
             catch(Exception ex)
             {
                 _logger.LogError($"Error during sending email. {ex}");
+                throw ex;
             }
 
             return Task.CompletedTask;

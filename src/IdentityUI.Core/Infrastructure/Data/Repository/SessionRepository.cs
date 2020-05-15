@@ -14,14 +14,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
         {
         }
 
-        public bool Remove(SessionEntity session)
-        {
-            _context.Remove(session);
-
-            int changes = _context.SaveChanges();
-            return changes > 0;
-        }
-
         public async Task<bool> Remove(List<SessionEntity> sessions)
         {
             _context.RemoveRange(sessions);

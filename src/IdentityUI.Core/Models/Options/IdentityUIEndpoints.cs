@@ -16,13 +16,16 @@ namespace SSRD.IdentityUI.Core.Models.Options
 
         public string ConfirmeEmail { get; set; } = "/Account/ConfirmEmail";
         public string ResetPassword { get; set; } = "/Account/ResetPassword";
+        public string AcceptInvite { get; set; } = "/Account/AcceptInvite";
 
         public bool RegisterEnabled { get; set; } = true;
 
         /// <summary>
-        /// If you set IdentityUI.EmailSender in the appsettings this will automaticly change to true if not it will change to false. If you are using your
+        /// If you set IdentityUI.EmailSender in the appsettings this will automatically change to true if not it will change to false. If you are using your
         /// own implementation of <see cref="Microsoft.AspNetCore.Identity.UI.Services.IEmailSender"/> you need to set this to true.
         /// </summary>
-        public bool UseEmailSender { get; set; } = false;
+        public bool? UseEmailSender { get; set; } = null;
+
+        public TimeSpan InviteValidForTimeSpan { get; set; } = TimeSpan.FromDays(7);
     }
 }
