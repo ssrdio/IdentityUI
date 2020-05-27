@@ -152,13 +152,14 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 scope.ServiceProvider.SeedIdentityAdmin(userName, password);
             }
         }
-    /// <summary>
+
+        /// <summary>
         /// Seeds identityAdmin
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="userName"></param>
         /// <param name="password"></param>
-        private static void SeedIdentityAdmin(this IServiceProvider serviceProvider, string userName, string password)
+        public static void SeedIdentityAdmin(this IServiceProvider serviceProvider, string userName, string password)
         {
             AdminSeeder adminSeeder = serviceProvider.GetRequiredService<AdminSeeder>();
 

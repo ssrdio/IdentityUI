@@ -24,11 +24,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
 
         private readonly ILogger<EmailSender> _logger;
 
-#if NET_CORE2
-        public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, IHostingEnvironment hostingEnvironment, ILogger<EmailSender> logger)
-#elif NET_CORE3
-        public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, IWebHostEnvironment hostingEnvironment, ILogger<EmailSender> logger)
-#endif
+        public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, ILogger<EmailSender> logger)
         {
             _logger = logger;
 
@@ -40,17 +36,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
 
             EmailSenderOptions emailSender = options.Value;
 
-            bool enambleSsl = true;
-            if (hostingEnvironment.IsDevelopment())
-            {
-                enambleSsl = false;
-            }
-
             _smtpClient = new SmtpClient(emailSender.Ip, emailSender.Port)
             {
                 DeliveryFormat = SmtpDeliveryFormat.International,
-                EnableSsl = enambleSsl,
-                UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(emailSender.UserName, emailSender.Password)
             };
 
