@@ -1,5 +1,5 @@
 # IdentityUI
-[![stable](https://img.shields.io/nuget/v/SSRD.IdentityUI.Core.svg?label=stable)](https://www.nuget.org/packages/SSRD.IdentityUI.Core/)
+[![stable](https://img.shields.io/nuget/v/SSRD.IdentityUI.svg?label=stable)](https://www.nuget.org/packages/SSRD.IdentityUI/)
 
 [![](https://sonarcloud.io/api/project_badges/measure?project=ssrdio_IdentityUI&branch=master&metric=vulnerabilities)](https://sonarcloud.io/dashboard/?id=ssrdio_IdentityUI&branch=master) 
 [![](https://sonarcloud.io/api/project_badges/measure?project=ssrdio_IdentityUI&branch=master&metric=bugs)](https://sonarcloud.io/dashboard/?id=ssrdio_IdentityUI&branch=master) 
