@@ -159,7 +159,7 @@ AddAuth(options =>
 ## Configuring SMS gateway
 To be able to use SMS sending functionality within `IdentityUI` you fill first need to configure the system to communication with your SMS gateway. In this example we will show how the Twilio API can be configured.
 
-First you will need to create a Twilio account. You can do that [here](https://www.twilio.com/try-twilio). When your account is ready, you will need update the `appsettings.json` file wiith API access token. For example:
+First you will need to create a Twilio account. You can do that [here](https://www.twilio.com/try-twilio). When your account is ready, you will need update the `appsettings.json` file with API access token. For example:
 ```json
 "IdentityUI": {
   "SmsGateway": {
@@ -215,7 +215,7 @@ services.AddScoped<ISmsSender, TwilioSmsSender>(options =>
 });
 ```
 
-Finally, you need to tell the system that the mail server is configured. To do that, you need to update the configuration in the `Setup.cs` file and adding the following line:
+Finally, you need to tell the system that the sms gateway is configured. To do that, you need to update the configuration in the `Setup.cs` file and adding the following line:
 
 ```c#
 services.ConfigureIdentityUI(Configuration, endpoints =>
