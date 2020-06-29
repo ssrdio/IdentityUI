@@ -8,6 +8,8 @@ using SSRD.IdentityUI.Account.Areas.Account.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using Newtonsoft.Json;
+using SSRD.IdentityUI.Core.Services.Identity;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -34,6 +36,22 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         protected string GetIp()
         {
             return Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        }
+
+        protected void SaveTempData<T>(string key, T data)
+        {
+            TempData[key] = JsonConvert.SerializeObject(data);
+        }
+
+        protected T GetTempData<T>(string key)
+        {
+            bool exists = TempData.TryGetValue(key, out object obj);
+            if (!exists)
+            {
+                return default;
+            }
+
+            return JsonConvert.DeserializeObject<T>((string)obj);
         }
     }
 }

@@ -20,12 +20,17 @@ namespace SSRD.IdentityUI.Core.Models.Options
 
         public bool RegisterEnabled { get; set; } = true;
 
+        public string AuthenticatorIssuer { get; set; } = "IdentityUI";
+
         /// <summary>
         /// If you set IdentityUI.EmailSender in the appsettings this will automatically change to true if not it will change to false. If you are using your
         /// own implementation of <see cref="Microsoft.AspNetCore.Identity.UI.Services.IEmailSender"/> you need to set this to true.
         /// </summary>
         public bool? UseEmailSender { get; set; } = null;
 
+        public bool UseSmsGateway { get; set; } = false;
+
+        public int NumberOfRecoveryCodes { get; set; } = 6;
         public TimeSpan InviteValidForTimeSpan { get; set; } = TimeSpan.FromDays(7);
     }
 }

@@ -18,8 +18,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
 
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            _logger.LogInformation($"NullEmailSender logging mail");
-            _logger.LogDebug($"Send email. To {email}, {htmlMessage}");
+            _logger.LogWarning($"NullEmailSender. Mail not sent");
 
             return Task.CompletedTask;
         }

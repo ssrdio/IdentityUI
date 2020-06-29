@@ -9,22 +9,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment.Updates
     {
         protected override string migrationId => "20200512083339_AddPermissionsAddGroups";
 
-        public override void AfterSchemaChange()
-        {
-        }
-
-        public override void BeforeSchemaChange()
-        {
-        }
-
         public override int GetVersion()
         {
             return 2;
-        }
-
-        public override void SchemaChange(DatabaseFacade database)
-        {
-            ExecuteMigrationSql(database, migrationId);
         }
     }
 }

@@ -1,0 +1,105 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.AddTwoFactorAuthenticatorViewModel
+@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.TwoFactorAuthenticator;
+}
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+@section style{
+    <style>
+        .code {
+            display: none;
+        }
+
+        .showCode {
+            display: block;
+        }
+
+        .linkCode {
+            color: #3f6ad8;
+            cursor: pointer;
+        }
+    </style>
+}
+
+
+@section script {
+
+    <script type="text/javascript" src="~/account/app/lib/qrcodejs/qrcode.min.js"></script>
+    <script type="text/javascript" src="~/account/app/components/twoFactor/2faFormScript.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            new code2fa('@Model.AuthenticatorUri');
+        });
+    </script>
+    @if (Model.StatusAlert != null)
+    {
+        <script>
+                $(document).ready(function () {
+                    var x = document.getElementById("snackbar");
+
+                    if ('@Model.StatusAlert.Success' === 'True')
+                    {
+                        x.className = "show";
+                        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+                    }
+                    else
+                    {
+                        x.className = "showError";
+                    }
+                });
+        </script>
+    }
+}
+
+@if (Model.StatusAlert != null)
+{
+    <div id="snackbar">
+        @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+    </div>
+}
+
+
+<div class="main-card mb-3 card col-xl-6 col-lg-12 offset-xl-3">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Two Factor Authentication
+            </h5>
+        </div>
+
+        <div class="custom-form">
+            <ol>
+                <li class="list2fa mb-3">
+                    Install Authenticator application on your device (<a href="https://www.microsoft.com/en-us/account/authenticator">Microsoft Authenticator</a>, <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=sl">Google Authenticator</a>).
+                </li>
+                <li class="list2fa mb-3">
+                    Use your Authenticator application to scan this QR code or click on show code and input that code into your Authenticator application.
+
+                    <div id="qrCode" class="listContent qr mt-2 mb-2"></div>
+
+                    <div class="listContent linkCode mb-2 text-primary">Show code.</div>
+
+                    <div class="listContent code"><b>Code:</b> @Model.SharedKey</div>
+                </li>
+                <li class="list2fa mb-3">Please input verification code and click Verify to finish the setup.</li>
+            </ol>
+            <div id="form2fa">
+                <form asp-controller="TwoFactorAuthentication" asp-action="AddTwoFactorAuthenticator" method="post">
+                    <div class="mb-3">
+                        <label asp-for="@Model.VereficationCode" class="control-label">Verification Code:</label>
+                        <input asp-for="@Model.VereficationCode" class="verefication-code form-control" autocomplete="off" maxlength="7" />
+                        <span asp-validation-for="@Model.VereficationCode" class="text-danger error-alert-custom"></span>
+                    </div>
+                    <div class="button-holder">
+                        <button type="submit" class="btn btn-primary verify custom-submit">Verify</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

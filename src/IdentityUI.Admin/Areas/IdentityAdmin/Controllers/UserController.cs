@@ -15,12 +15,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using Newtonsoft.Json;
+using SSRD.AdminUI.Template.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
     [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class UserController : BaseController
     {
+        private const string TEMP_DATA_STATUS_ALERT_KEY = "UserStatusAlert";
+
         private readonly IUserDataService _userDataService;
         private readonly IManageUserService _manageUserService;
         private readonly IAddUserService _addUserService;
@@ -72,7 +76,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
                 return NotFoundView();
             }
 
-            return View(result.Value);
+            UserDetailsViewModel userDetails = result.Value;
+
+            StatusAlertViewModel statusAlertView = GetTempData<StatusAlertViewModel>(TEMP_DATA_STATUS_ALERT_KEY);
+            if(statusAlertView != null)
+            {
+                userDetails.StatusAlert = statusAlertView;
+                ModelState.AddErrors(statusAlertView.ValidationErrors);
+            }
+
+            return View(userDetails);
         }
 
         [HttpPost]
@@ -84,23 +97,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             Result editResult = await _manageUserService.EditUser(id, model, GetUserId());
-            Result<UserDetailsViewModel> userResult = _userDataService.GetDetailsViewModel(id);
-            if (userResult.Failure)
-            {
-                return NotFoundView();
-            }
-
             if (editResult.Failure)
             {
-                ModelState.AddErrors(editResult.Errors);
-
-                userResult.Value.StatusAlert = StatusAlertViewExtension.Get(editResult);
-                return View("Details", userResult.Value);
+                SaveTempData(TEMP_DATA_STATUS_ALERT_KEY, StatusAlertViewExtension.Get(editResult));
+            }
+            else
+            {
+                SaveTempData(TEMP_DATA_STATUS_ALERT_KEY, StatusAlertViewExtension.Get("User updated"));
             }
 
-            userResult.Value.StatusAlert = StatusAlertViewExtension.Get("User updated");
-
-            return View("Details", userResult.Value);
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
         [HttpPost]
@@ -112,23 +118,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             Result result = await _manageUserService.SendEmilVerificationMail(new SendEmailVerificationMailRequest(id), GetUserId());
-            Result<UserDetailsViewModel> userResult = _userDataService.GetDetailsViewModel(id);
-            if (userResult.Failure)
-            {
-                return NotFoundView();
-            }
-
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-
-                userResult.Value.StatusAlert = StatusAlertViewExtension.Get(result);
-                return View("Details", userResult.Value);
+                SaveTempData(TEMP_DATA_STATUS_ALERT_KEY, StatusAlertViewExtension.Get(result));
+            }
+            else
+            {
+                SaveTempData(TEMP_DATA_STATUS_ALERT_KEY, StatusAlertViewExtension.Get("Verify Email mail sent"));
             }
 
-            userResult.Value.StatusAlert = StatusAlertViewExtension.Get("Verify Email mail sent");
-
-            return View("Details", userResult.Value);
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
         [HttpPost]
@@ -140,23 +139,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             Result result = _manageUserService.UnlockUser(new UnlockUserRequest(id), GetUserId());
-            Result<UserDetailsViewModel> userResult = _userDataService.GetDetailsViewModel(id);
-            if (userResult.Failure)
-            {
-                return NotFoundView();
-            }
-
             if (result.Failure)
             {
-                ModelState.AddErrors(result.Errors);
-
-                userResult.Value.StatusAlert = StatusAlertViewExtension.Get(result);
-                return View("Details", userResult.Value);
+                SaveTempData(TEMP_DATA_STATUS_ALERT_KEY, StatusAlertViewExtension.Get(result));
+            }
+            else
+            {
+                SaveTempData(TEMP_DATA_STATUS_ALERT_KEY, StatusAlertViewExtension.Get("User unlocked"));
             }
 
-            userResult.Value.StatusAlert = StatusAlertViewExtension.Get("User unlocked");
-
-            return View("Details", userResult.Value);
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
         [HttpGet]

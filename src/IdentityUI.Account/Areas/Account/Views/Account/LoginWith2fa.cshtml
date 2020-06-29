@@ -21,7 +21,7 @@
                                 <div class="h5 modal-title text-center">
                                     <h4 class="mt-2 modal-header-custom">
                                         <div>Welcome,</div>
-                                        <span>Please write the code you recived in the form below.</span>
+                                        <span>Please write the code you revived in the form below.</span>
                                     </h4>
                                 </div>
                                 <input asp-for="RememberMe" type="hidden" />
@@ -44,7 +44,7 @@
                                 <div asp-validation-summary="All" class="text-danger"></div>
                             </div>
                             <div class="modal-footer clearfix">
-                                @* TO DO: add link to recover 2fa *@
+                                <h6 class="mb-0">Can't get code? <a href="@PagePath.LOGIN_WITH_RECOVERY_CODE" class="text-primary">Login with recovery code</a> </h6>
                                 <div class="float-right">
                                     <button class="btn btn-primary btn-lg">Login</button>
                                 </div>

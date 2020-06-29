@@ -62,7 +62,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(string id, EditPermissionRequest request)
+        public IActionResult Details(string id, EditPermissionRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -81,11 +81,11 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
                 ModelState.AddErrors(editResult.Errors);
                 role.Value.StatusAlert = StatusAlertViewExtension.Get(editResult);
 
-                return View("Details", role.Value);
+                return View(role.Value);
             }
 
-            role.Value.StatusAlert = StatusAlertViewExtension.Get("permission updated");
-            return View("Details", role.Value);
+            role.Value.StatusAlert = StatusAlertViewExtension.Get("Permission updated");
+            return View(role.Value);
         }
 
         [HttpGet]

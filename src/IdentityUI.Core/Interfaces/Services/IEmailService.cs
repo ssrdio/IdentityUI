@@ -15,5 +15,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
         Task<Result> SendConfirmation(string email, string token);
         Task<Result> SendPasswordRecovery(string email, string token);
         Task<Result> SendPasswordWasReset(string email);
+
+        Task<Result> Send2faToken(string email, string token);
     }
 }

@@ -1,20 +1,4 @@
 ﻿using FluentValidation;
-using SSRD.IdentityUI.Core.Data.Entities.Identity;
-using SSRD.IdentityUI.Core.Infrastructure.Data;
-using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment;
-using SSRD.IdentityUI.Core.Infrastructure.Data.Repository;
-using SSRD.IdentityUI.Core.Interfaces.Data;
-using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
-using SSRD.IdentityUI.Core.Interfaces.Services;
-using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
-using SSRD.IdentityUI.Core.Models;
-using SSRD.IdentityUI.Core.Models.Options;
-using SSRD.IdentityUI.Core.Services;
-using SSRD.IdentityUI.Core.Services.Auth;
-using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth;
-using SSRD.IdentityUI.Core.Services.Identity;
-using SSRD.IdentityUI.Core.Services.Role;
-using SSRD.IdentityUI.Core.Services.User;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -23,25 +7,36 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Data.Entities.Identity;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.DependencyInjection;
+using SSRD.IdentityUI.Core.Infrastructure.Data;
+using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Repository;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Seeders;
 using SSRD.IdentityUI.Core.Infrastructure.Services;
-using SSRD.IdentityUI.Core.Services.Group;
+using SSRD.IdentityUI.Core.Interfaces;
+using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Interfaces.Services;
+using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Interfaces.Services.Role;
-using SSRD.IdentityUI.Core.Services.Role.Models;
-using SSRD.IdentityUI.Core.Services.Permission;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
-using SSRD.IdentityUI.Core.Services.Email;
+using SSRD.IdentityUI.Core.Models.Options;
+using SSRD.IdentityUI.Core.Services;
+using SSRD.IdentityUI.Core.Services.Auth;
 using SSRD.IdentityUI.Core.Services.Auth.Email;
-using SSRD.IdentityUI.Core.Data.Models;
-using SSRD.IdentityUI.Core.Infrastructure.Data.Seeders;
-using SSRD.IdentityUI.Core.Interfaces;
+using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth;
+using SSRD.IdentityUI.Core.Services.Email;
+using SSRD.IdentityUI.Core.Services.Group;
+using SSRD.IdentityUI.Core.Services.Identity;
+using SSRD.IdentityUI.Core.Services.Permission;
+using SSRD.IdentityUI.Core.Services.Role;
+using SSRD.IdentityUI.Core.Services.Role.Models;
+using SSRD.IdentityUI.Core.Services.User;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -70,25 +65,25 @@ namespace SSRD.IdentityUI.Core
         {
             IdentityUIOptions identityUIOptions = configuration.GetSection("IdentityUI").Get<IdentityUIOptions>();
 
-            if(identityUIOptions == null)
+            if (identityUIOptions == null)
             {
                 identityUIOptions = new IdentityUIOptions();
             }
 
-            services.Configure<IdentityUIOptions>(options => 
+            services.Configure<IdentityUIOptions>(options =>
             {
                 options.BasePath = identityUIOptions.BasePath;
                 options.Database = identityUIOptions.Database;
                 options.EmailSender = identityUIOptions.EmailSender;
             });
 
-            services.Configure<DatabaseOptions>(options => 
+            services.Configure<DatabaseOptions>(options =>
             {
                 options.Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory;
                 options.ConnectionString = identityUIOptions.Database?.ConnectionString;
             });
 
-            services.Configure<EmailSenderOptions>(options => 
+            services.Configure<EmailSenderOptions>(options =>
             {
                 options.Ip = identityUIOptions.EmailSender?.Ip;
                 options.Port = identityUIOptions.EmailSender?.Port ?? -1;
@@ -128,12 +123,14 @@ namespace SSRD.IdentityUI.Core
 
                 options.RegisterEnabled = identityManagementEndpoints.RegisterEnabled;
                 options.UseEmailSender = identityManagementEndpoints.UseEmailSender;
+                options.UseSmsGateway = identityManagementEndpoints.UseSmsGateway;
                 options.InviteValidForTimeSpan = identityManagementEndpoints.InviteValidForTimeSpan;
             });
 
             IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints);
 
             builder.Services.AddScoped<IEmailSender, NullEmailSender>();
+            builder.Services.AddScoped<ISmsSender, NullSmsSender>();
 
             return builder;
         }
@@ -150,12 +147,12 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddDbContext<IdentityDbContext>((provider, options) =>
             {
                 DatabaseOptions databaseOptions = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value;
-                if(databaseOptions == null)
+                if (databaseOptions == null)
                 {
                     throw new Exception("No DatabaseOptions");
                 }
-                
-                switch(databaseOptions.Type)
+
+                switch (databaseOptions.Type)
                 {
                     case DatabaseTypes.PostgreSql:
                         {
@@ -236,6 +233,11 @@ namespace SSRD.IdentityUI.Core
             return builder.AddIdentityUI(identityOptions);
         }
 
+        class Config
+        {
+            public bool IsEmailConfigured { get; set; }
+        }
+
         /// <summary>
         /// Registers EmailSender
         /// </summary>
@@ -244,7 +246,6 @@ namespace SSRD.IdentityUI.Core
         public static IdentityUIServicesBuilder AddEmailSender(this IdentityUIServicesBuilder builder)
         {
             builder.Services.AddScoped<IEmailSender, EmailSender>();
-
             return builder;
         }
 
@@ -342,8 +343,11 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginRequest>, Core.Services.Auth.Login.Models.LoginRequestValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginWith2faRequest>, Core.Services.Auth.Login.Models.LoginWith2faRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Auth.Login.Models.LoginWithRecoveryCodeRequest>, Services.Auth.Login.Models.LoginWithRecoveryCodeRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.TwoFactorAuth.Models.AddTwoFactorAuthenticatorRequest>, Core.Services.Auth.TwoFactorAuth.Models.AddTwoFactorAuthicatorValidator>();
+            builder.Services.AddSingleton<IValidator<Core.Services.Auth.TwoFactorAuth.Models.AddTwoFactorPhoneAuthenticationRequest>, Core.Services.Auth.TwoFactorAuth.Models.AddTwoFactorPhoneAuthenticationRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Core.Services.Auth.TwoFactorAuth.Models.AddTwoFactorEmailAuthenticationRequest>, Core.Services.Auth.TwoFactorAuth.Models.AddTwoFactorEmailAuthenticationRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Core.Services.Role.Models.NewRoleRequest>, Core.Services.Role.Models.NewRoleValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Role.Models.EditRoleRequest>, Core.Services.Role.Models.EditRoleValidator>();
@@ -401,7 +405,7 @@ namespace SSRD.IdentityUI.Core
                 app.RunIdentityMigrations();
             }
 
-            return new IdentityUIAppBuilder(app); 
+            return new IdentityUIAppBuilder(app);
         }
     }
 }

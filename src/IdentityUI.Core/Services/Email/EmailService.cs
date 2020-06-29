@@ -122,5 +122,19 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Email
 
             return Send(email, mail.Subject, mail.Body);
         }
+
+        public Task<Result> Send2faToken(string email, string token)
+        {
+            Result<EmailEntity> mailResult = GetMail(EmailTypes.TwoFactorAuthenticationToken);
+            if (mailResult.Failure)
+            {
+                return Task.FromResult(Result.Fail(mailResult.Errors));
+            }
+
+            EmailEntity mail = mailResult.Value;
+            string body = _stubble.Render(mail.Body, new { token = token });
+
+            return Send(email, mail.Subject, body);
+        }
     }
 }

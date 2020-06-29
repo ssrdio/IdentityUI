@@ -1,0 +1,24 @@
+﻿@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu
+
+<nav class="sidebar sidebar-offcanvas menu-line-color" id="sidebar">
+    <ul class="nav">
+        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Profile ? "active": "")">
+            <a class="nav-link" href="@PagePath.MANAGE_ACCOUNT">
+                <i class="fas fa-user"></i>
+                <span class="menu-title i-mar">Profile</span>
+            </a>
+        </li>
+        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.ChangePassword ? "active": "")">
+            <a class="nav-link" href="@PagePath.MANAGE_CHANGE_PASSWORD">
+                <i class="fas fa-unlock "></i>
+                <span class="menu-title i-mar">Change Password</span>
+            </a>
+        </li>
+        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.TwoFactorAuthenticator ? "active": "")">
+            <a class="nav-link" href="@PagePath.TWO_FACTOR_AUTHENTICATION">
+                <i class="fas fa-mobile-alt"></i>
+                <span class="menu-title i-mar">Two Factor Authentication</span>
+            </a>
+        </li>
+    </ul>
+</nav>

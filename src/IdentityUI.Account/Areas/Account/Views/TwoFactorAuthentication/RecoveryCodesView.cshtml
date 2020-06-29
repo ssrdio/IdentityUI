@@ -1,0 +1,31 @@
+﻿
+@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.TwoFactorRecoverCodesViewModel
+
+@{
+    ViewData["Title"] = "Recovery Codes";
+}
+
+<div class="main-card mb-3 card col-xl-6 col-lg-12 offset-xl-3">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Recovery codes:
+            </h5>
+        </div>
+        <div class="custom-form custom-spacing">
+            <p>The following codes can be used in case of a lost device: </p>
+
+            @foreach (string code in Model.RecoverCodes)
+            {
+                <p><b>@code</b></p>
+            }
+
+            <div class="recovery-codes-options-holder">
+                    <a class="settings-option" href="@PagePath.TWO_FACTOR_AUTHENTICATION">Go Back</a>             
+            </div>
+
+        </div>
+    </div>
+</div>
+

@@ -14,22 +14,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment.Updates
         {
         }
 
-        public override void AfterSchemaChange()
-        {
-        }
-
-        public override void BeforeSchemaChange()
-        {
-        }
-
         public override int GetVersion()
         {
             return 1;
-        }
-
-        public override void SchemaChange(DatabaseFacade database)
-        {
-            ExecuteMigrationSql(database, migrationId);
         }
     }
 }

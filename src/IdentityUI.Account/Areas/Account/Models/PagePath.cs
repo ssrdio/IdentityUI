@@ -14,6 +14,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models
         public const string LOGIN = AUTH + "/Login";
         public const string LOGOUT = AUTH + "/Logout";
         public const string LOGIN_2FA = AUTH + "/LoginWith2fa";
+        public const string LOGIN_WITH_RECOVERY_CODE = AUTH + "/LoginWithRecoveryCode";
         public const string LOCKOUT = AUTH + "/Lockout";
 
         public const string REGISTER = AUTH + "/Register";
@@ -32,11 +33,13 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models
         public const string MANAGE = ACCOUNT_AREA + "/Manage";
 
         public const string MANAGE_ACCOUNT = MANAGE + "/";
-        
-        public const string MANAGE_TWO_FACTOR_AUTHENTICATOR = MANAGE + "/TwoFactorAuthenticator";
-        public const string MANAGE_ADD_TWO_FACTOR_AUTHENTICATOR = MANAGE + "/AddTwoFactorAuthenticator";
-        public const string MANAGE_DISABLE_TWO_FACTOR_AUTHENTICATOR = MANAGE + "/DisableTwoFactorAuthenticator";
-        public const string MANAGE_RESET_TWO_FACTOR_AUTHENTICATOR = MANAGE + "/ResetTwoFactorAuthenticator";
+
+        public const string TWO_FACTOR_AUTHENTICATION = "/" + ACCOUNT_AREA_NAME + "/TwoFactorAuthentication";
+        public const string ADD_TWO_FACTOR_AUTHENTICATOR = TWO_FACTOR_AUTHENTICATION + "/AddTwoFactorAuthenticator";
+        public const string ADD_PHONE_TWO_FACTOR_AUTHENTICATION = TWO_FACTOR_AUTHENTICATION + "/AddTwoFactorPhoneAuthentication";
+        public const string ADD_EMAIL_TWO_FACTOR_AUTHENTICATION = TWO_FACTOR_AUTHENTICATION + "/AddTwoFactorEmailAuthentication";
+        public const string DISABLE_TWO_FACTOR_AUTHENTICATION = TWO_FACTOR_AUTHENTICATION + "/DisableTwoFactorAuthentication";
+        public const string GENERATE_RECOVERY_CODES = TWO_FACTOR_AUTHENTICATION + "/RecoveryCodesView";
 
         public const string MANAGE_CHANGE_PASSWORD = MANAGE + "/ChangePassword";
 

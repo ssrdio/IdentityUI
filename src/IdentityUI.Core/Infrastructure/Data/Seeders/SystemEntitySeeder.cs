@@ -52,6 +52,12 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
                 body: "Your password has been reset",
                 type: EmailTypes.PasswordWasReset);
             _allEmails.Add(passwordWasReset);
+
+            EmailEntity twoFactorToken = new EmailEntity(
+                subject: "Two Factor Authentication",
+                body: "Authentication code: {{token}}",
+                type: EmailTypes.TwoFactorAuthenticationToken);
+            _allEmails.Add(twoFactorToken);
         }
 
         public Task SeedIdentityUI()
@@ -244,7 +250,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
                 .Select(x => x.Type)
                 .ToList();
 
-            IEnumerable<EmailEntity> missingEmails = _allEmails.Where(x => !emailTypes.Contains(x.Type));
+            IEnumerable<EmailEntity> missingEmails = _allEmails
+                .Where(x => !emailTypes.Contains(x.Type));
 
             _context.Emails.AddRange(missingEmails);
             int changes = _context.SaveChanges();

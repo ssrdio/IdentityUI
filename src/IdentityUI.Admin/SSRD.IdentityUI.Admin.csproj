@@ -35,12 +35,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AdminUI.Template\SSRD.AdminUI.Template.csproj" />
-    <ProjectReference Include="..\IdentityUI.Core\SSRD.IdentityUI.Core.csproj" />
+    <Folder Include="www\identityAdmin\app\js\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="www\identityAdmin\app\js\" />
+    <ProjectReference Include="..\AdminUI.Template\SSRD.AdminUI.Template.csproj" />
+    <ProjectReference Include="..\IdentityUI.Core\SSRD.IdentityUI.Core.csproj" />
   </ItemGroup>
   
 </Project>

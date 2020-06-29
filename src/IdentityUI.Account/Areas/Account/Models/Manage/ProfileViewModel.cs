@@ -1,8 +1,5 @@
 ﻿using SSRD.AdminUI.Template.Models;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Models.Manage
 {
@@ -16,15 +13,17 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Manage
         public string LastName { get; set; }
         [DisplayName("Phone number")]
         public string PhoneNumber { get; set; }
+        public bool IsPhoneNumberConfirmed { get; set; }
 
         public StatusAlertViewModel StatusAlert { get; set; }
 
-        public ProfileViewModel(string userName, string firstName, string lastName, string phoneNumber)
+        public ProfileViewModel(string userName, string firstName, string lastName, string phoneNumber, bool isPhoneNumberConfirmed)
         {
             UserName = userName;
             FirstName = firstName;
             LastName = lastName;
             PhoneNumber = phoneNumber;
+            IsPhoneNumberConfirmed = isPhoneNumberConfirmed;
         }
 
         public ProfileViewModel(StatusAlertViewModel statusAlert)

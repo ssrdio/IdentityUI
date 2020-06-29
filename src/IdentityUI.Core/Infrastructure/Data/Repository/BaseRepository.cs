@@ -113,6 +113,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
             _context.Entry(entity).State = EntityState.Modified;
             int changes = _context.SaveChanges();
 
+            _context.Entry(entity).State = EntityState.Detached;
+
             return changes > 0;
         }
 

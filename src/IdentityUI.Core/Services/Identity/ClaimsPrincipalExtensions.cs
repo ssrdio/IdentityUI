@@ -66,5 +66,10 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 .Where(x => x.Value == permission)
                 .Any();
         }
+
+        public static string GetSessionCode(this ClaimsPrincipal claimsPrincipal)
+        {
+            return claimsPrincipal.FindFirstValue(IdentityUIClaims.SESSION_CODE);
+        }
     }
 }

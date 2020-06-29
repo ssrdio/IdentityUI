@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityUI.Sample.Services;
@@ -43,7 +44,9 @@ namespace IdentityUI.Sample
                 endpoints.ResetPassword = "/Account/ResetPassword";
 
                 endpoints.RegisterEnabled = true;
-                endpoints.UseEmailSender = false;
+
+                endpoints.UseEmailSender = true;
+                endpoints.UseSmsGateway = true;
             })
             .AddIdentityUI(options =>
             {
@@ -74,8 +77,6 @@ namespace IdentityUI.Sample
 
             services.ConfigureRevisionLogger(options =>
             {
-                options.UserIdentityClaimType = System.Security.Claims.ClaimTypes.NameIdentifier;
-
                 options.LogQueryData = false;
                 options.LogBodyData = false;
 
@@ -89,7 +90,7 @@ namespace IdentityUI.Sample
                 options.UserIdentityClaimType = ClaimTypes.NameIdentifier;
                 options.UseXForwardedForIp = true;
 
-                options.Version = "1.0.0";
+                options.Version = Assembly.GetExecutingAssembly().GetName()?.Version?.ToString();
             });
 
             services.AddControllersWithViews();

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity
 {
@@ -44,6 +45,10 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity
             builder.Property(x => x.Enabled)
                 .IsRequired()
                 .HasDefaultValue(false);
+
+            builder.Property(x => x.TwoFactor)
+                .IsRequired()
+                .HasDefaultValue(TwoFactorAuthenticationType.None);
 
             builder.Ignore(x => x.SessionCode);
 

@@ -15,7 +15,7 @@ using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using SSRD.IdentityUI.Account.Areas.Account.Services.Account;
+using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -23,6 +23,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
     public class AccountController : BaseController
     {
         private readonly ILoginService _loginService;
+        private readonly ITwoFactorAuthService _twoFactorAuthService;
         private readonly IAddUserService _addUserService;
         private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ICredentialsService _credentialsService;
@@ -32,13 +33,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         public AccountController(ILoginService loginService, IEmailConfirmationService emailConfirmationService,
             IAddUserService addUserService, ICredentialsService credentialsService, IAccountDataService accountDataService,
-            IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
+            ITwoFactorAuthService twoFactorAuthService, IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
         {
             _loginService = loginService;
             _emailConfirmationService = emailConfirmationService;
             _addUserService = addUserService;
             _credentialsService = credentialsService;
             _accountDataService = accountDataService;
+            _twoFactorAuthService = twoFactorAuthService;
 
             _identityUIEndpoints = identityUIEndpoints.Value;
         }
@@ -67,7 +69,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             Microsoft.AspNetCore.Identity.SignInResult result = await _loginService.Login(GetIp(), GetSessionCode(), loginRequest);
             if(result.Succeeded)
             {
-                return Redirect(returnUrl);
+                return LocalRedirect(returnUrl);
             }
             else if(result.RequiresTwoFactor)
             {
@@ -75,7 +77,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             }
             else if(result.IsLockedOut)
             {
-                return Redirect(PagePath.LOCKOUT);
+                return LocalRedirect(PagePath.LOCKOUT);
             }
             else
             {
@@ -89,12 +91,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult LoginWith2fa(bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
         {
             ViewBag.RetunrUrl = returnUrl;
 
             LoginWith2faViewModel loginWith2FaViewModel = new LoginWith2faViewModel(
                 rememberMe: rememberMe);
+
+            await _twoFactorAuthService.TrySend2faCode(GetUserId());
 
             return View(loginWith2FaViewModel);
         }
@@ -113,11 +117,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             Microsoft.AspNetCore.Identity.SignInResult result = await _loginService.LoginWith2fa(GetIp(), loginWith2FaRequest);
             if(result.Succeeded)
             {
-                return Redirect(returnUrl);
+                return LocalRedirect(returnUrl);
             }
             else if(result.IsLockedOut)
             {
-                return Redirect(PagePath.LOCKOUT);
+                return LocalRedirect(PagePath.LOCKOUT);
             }
             else
             {
@@ -126,6 +130,34 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
                 return View();
             }
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult LoginWithRecoveryCode(string returnUrl = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            return View(new LoginWithRecoveryCodeViewModel(returnUrl));
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeRequest loginWithRecoveryCode, string returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(new LoginWithRecoveryCodeViewModel(returnUrl));
+            }
+
+            Result result = await _loginService.LoginWithRecoveryCode(loginWithRecoveryCode);
+            if (result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return View(new LoginWithRecoveryCodeViewModel(returnUrl));
+            }
+
+            return LocalRedirect(returnUrl);
         }
 
         [AllowAnonymous]

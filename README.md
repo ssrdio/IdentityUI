@@ -12,7 +12,7 @@ IdentityUI is a simple platform for administrative management of users and admin
 ![](images/example.gif)
 
 ## Nuget
-Install SSRD.IdentityUI package [NuGet](https://www.nuget.org/packages/SSRD.IdentityUI/)
+Install SSRD.IdentityUI [NuGet](https://www.nuget.org/packages/SSRD.IdentityUI/) package.
 
 ## AppSettings:
 
@@ -32,8 +32,7 @@ Install SSRD.IdentityUI package [NuGet](https://www.nuget.org/packages/SSRD.Iden
   }
 }
 ```
-Supported databases: PostgreSQL, InMemory (only for testing)  
-EmailSender options are optional if you provide custom implementation of IEmailSender
+EmailSender options are optional if you provide custom implementation of IEmailSender or don't want to use an EmailSender.
 
 ## Startup
 
@@ -44,12 +43,12 @@ services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pa
     .AddAuth() // Adds Authentication. You can pass in your own CookieAuthenticationOptions.
     .AddEmailSender() // Optional if you provide  custom implementation of IEmailSender
     .AddIdentityAdmin() // Adds services for IdentityAdminUI
-    .AddAccountManagement(); // Adds services for AccountManagment.
+    .AddAccountManagement(); // Adds services for AccountManagement.
 ```
 
 In Configure add:
 ```c#
-app.UseIdentityUI(enableMigrations: false) // Adds IdentityUI   
+app.UseIdentityUI(); // Adds IdentityUI   
 ```
 
 .NET Core 2:  
@@ -59,29 +58,41 @@ routes.MapAccountManagement(); // Adds AccountManagement UI
 routes.MapIdentityAdmin(); // Adds IdentityAdmin UI
 ```
 
-.NET Core 3:  
-In `app.UseEndpoints()` add
-```c#
-endpoints.MapAccountManagement(); // Adds AccountManagement UI
-endpoints.MapIdentityAdmin(); // Adds IdentityAdmin UI
-```
-
-You can create Database with migrations or without migrations `app.CreateIdentityDatabase();`
-
 For adding admin `app.SeedIdentityAdmin("admin", "Password");`
 
 **Important: If you are using .NET Core 3 remove `app.UseAuthorization()`;**
 
 IdentityAdmin Dashboard: `{server}:{port}/IdentityAdmin/`  
-Account managment: `{server}:{port}/Account/Manage/`
+Account management: `{server}:{port}/Account/Manage/`
+
+## Database
+Supported databases: PostgreSQL, InMemory (only for testing).
+
+InMemory database provider for .NetCore3+ may not be able translate all the queries and cause exceptions.
+
+To create database:
+```c#
+serviceProvider.RunIdentityMigrations();
+```
+
+To seed IdentityUI required entities:
+```c#
+serviceProvider.SeedSystemEntities();
+```
+or 
+```c#
+serviceProvider.SeedMissingSystemEntities();
+```
+
+All of this functions are available as extensions on `IServiceProvider`, `IHost`, `IWebHost` or `IApplicationBuilder`
 
 # Groups
-From version 2.0 we are supporting a group/multi-tenant management. For this purpose, we created multiple group roles that are linked to permission inside group/tenant management. 
+From version 2.0, we are supporting a group/multi-tenant management. For this purpose, we created multiple group roles that are linked to permission inside group/tenant management. 
 
 | Permission   |      Description     | 
 |----------|:-------------:|
-| group_can_manage_attributes |  Can mamange group attributes |
-| group_can_remove_users |  Can remoce users from group |
+| group_can_manage_attributes |  Can manage group attributes |
+| group_can_remove_users |  Can remove users from group |
 | group_can_manage_roles |  User can assign roles inside the group |
 | group_can_invite_users |  Can invite new users to this group |
 | group_can_manage_invites |  Can see and edit invites |
@@ -92,7 +103,7 @@ From version 2.0 we are supporting a group/multi-tenant management. For this pur
 
 # Advanced configuration
 
-## IdentityUI options 
+## Configure IdentityUI 
 
 ```c#
 ConfigureIdentityUI(Configuration, endpoints => 
@@ -132,7 +143,7 @@ AddIdentityUI(options =>
 }) // These are the default identity options.
 ```
 
-## IdentityUI options 
+## Identity options 
 
 ```c#
 AddAuth(options => 
@@ -144,6 +155,79 @@ AddAuth(options =>
     options.LogoutPath = "/Account/Logout/";
 }) // These are the default cookie options.
 ```
+
+## Configuring SMS gateway
+To be able to use SMS sending functionality within `IdentityUI` you fill first need to configure the system to communication with your SMS gateway. In this example we will show how the Twilio API can be configured.
+
+First you will need to create a Twilio account. You can do that [here](https://www.twilio.com/try-twilio). When your account is ready, you will need update the `appsettings.json` file wiith API access token. For example:
+```json
+"IdentityUI": {
+  "SmsGateway": {
+    "Sid": "",
+    "Token": "",
+    "FromNumber": ""
+  }
+}
+```
+The names of the property can differ from provider to provider, but in general:
+* `Sid` should contain the username/account ID 
+* `Token` should contain the password/API access token 
+* `FromNumber` should contain the phone number, which is used to send the SMS messages
+
+After updating the `appsettings.json` file, you need to add and implementation of the `ISmsSender` interface to your project. A simple Twilio implementation can look something like this:
+```c#
+public class TwilioSmsSender : ISmsSender
+{
+    private readonly PhoneNumber _from;
+
+    public TwilioSmsSender(string sid, string token, string from)
+    {
+        TwilioClient.Init(sid, token);
+        _from = new PhoneNumber(from);
+    }
+
+    public Task<Result> Send(string to, string message)
+    {
+        try
+        {
+            MessageResource result = MessageResource.Create(
+                from: _from,
+                to: new PhoneNumber(to),
+                body: message);
+
+            return Task.FromResult(Result.Ok());
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(Result.Fail("twilio_error", "Sending SMS failed"));
+        }
+    }
+}
+
+// add the class to the DI container
+services.AddScoped<ISmsSender, TwilioSmsSender>(options =>
+{
+    string sid = Configuration["IdentityUI:SmsGateway:Sid"];
+    string token = Configuration["IdentityUI:SmsGateway:Token"];
+    string from = Configuration["IdentityUI:SmsGateway:FromNumber"];
+
+    return new TwilioSmsSender(sid, token, from);
+});
+```
+
+Finally, you need to tell the system that the mail server is configured. To do that, you need to update the configuration in the `Setup.cs` file and adding the following line:
+
+```c#
+services.ConfigureIdentityUI(Configuration, endpoints =>
+{
+  endpoints.UseSmsGateway = true;
+})
+```
+
+With that, you should have SMS sending functionality available in your system. 
+
+Setting up an SMS gateway also enables SMS two-factor authentication for the users of your system.
+
 # Support
 For custom feature request or technical support contact us at [identity[at]ssrd.io](identity@ssrd.io)
 

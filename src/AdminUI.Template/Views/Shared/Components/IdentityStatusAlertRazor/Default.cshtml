@@ -1,21 +1,30 @@
 ﻿@model SSRD.AdminUI.Template.Models.StatusAlertViewModel
 
-@if (Model.Success)
+@if (Model != null)
 {
-    <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin">
-        <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
-        @foreach (string message in Model.Messages)
+    <div id="snackbar" class="@if (Model.Success) { @Html.Raw("show") } else { @Html.Raw("showError") }">
+        @if (Model.Success)
         {
-            @message <br />
+            <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin">
+                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+                @foreach (string message in Model.Messages)
+                {
+                    @message <br />
+                }
+            </div>
+        }
+        else
+        {
+            if (Model.Messages.Count > 0)
+            {
+                <div class="alert-danger mb-3 pl-3 pb-2 pt-2 no-margin">
+                    <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    @foreach (string message in Model.Messages)
+                    {
+                        @message <br />
+                    }
+                </div>
+            }
         }
     </div>
-} else
-{
-<div class="alert-danger mb-3 pl-3 pb-2 pt-2 no-margin">
-    <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
-    @foreach (string message in Model.Messages)
-    {
-        @message <br />
-    }
-</div>
 }

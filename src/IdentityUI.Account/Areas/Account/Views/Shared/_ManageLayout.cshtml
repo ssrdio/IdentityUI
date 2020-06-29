@@ -1,0 +1,28 @@
+﻿
+@{
+    Layout = "/Areas/Account/Views/Shared/_Layout.cshtml";
+}
+
+@section style {
+    @RenderSection("style", required: false)
+}
+
+@await Component.InvokeAsync("ManageHeader")
+
+<div class="container-fluid page-body-wrapper">
+    @await Component.InvokeAsync("ManageSidebar")
+    <div class="main-panel">
+        <div class="content-wrapper">
+            @RenderBody()
+        </div>
+        <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                &copy; @CopyRightModel.YEAR - @CopyRightModel.NAME
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section script {
+    @RenderSection("script", required: false)
+}

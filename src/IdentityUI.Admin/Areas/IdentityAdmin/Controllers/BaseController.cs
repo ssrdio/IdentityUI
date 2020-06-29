@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using System.Diagnostics;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using Newtonsoft.Json;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
@@ -31,6 +32,22 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         protected IActionResult NotFoundView()
         {
             return View("NotFound");
+        }
+
+        protected void SaveTempData<T>(string key, T data)
+        {
+            TempData[key] = JsonConvert.SerializeObject(data);
+        }
+
+        protected T GetTempData<T>(string key)
+        {
+            bool exists = TempData.TryGetValue(key, out object obj);
+            if(!exists)
+            {
+                return default;
+            }
+
+            return JsonConvert.DeserializeObject<T>((string)obj);
         }
     }
 }

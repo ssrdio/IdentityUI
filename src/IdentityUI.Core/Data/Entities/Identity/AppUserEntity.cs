@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
+using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 {
@@ -23,6 +22,8 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
         public virtual ICollection<SessionEntity> Sessions { get; set; }
 
         public virtual ICollection<GroupUserEntity> Groups { get; set; }
+
+        public TwoFactorAuthenticationType TwoFactor { get; set; }
 
         /// <summary>
         /// This column does not exist in database. It is only used for login

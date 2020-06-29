@@ -15,6 +15,9 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
+using Microsoft.AspNetCore.Http;
+using SSRD.IdentityUI.Core.Services.Identity;
 
 namespace SSRD.IdentityUI.Core.Services.Auth
 {
@@ -24,25 +27,38 @@ namespace SSRD.IdentityUI.Core.Services.Auth
         private readonly UserManager<AppUserEntity> _userManager;
 
         private readonly ISessionService _sessionService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IValidator<LoginWith2faRequest> _lginwith2faValidator;
+        private readonly IValidator<LoginWithRecoveryCodeRequest> _loginWithRecoveryCodeValidator;
 
         private readonly ILogger<LoginService> _logger;
 
         public LoginService(SignInManager<AppUserEntity> signInManager, UserManager<AppUserEntity> userManager, IUserRepository userRepository,
-            ISessionService sessionService, IValidator<LoginRequest> loginValidator, IValidator<LoginWith2faRequest> loginWith2faValidator,
+            ISessionService sessionService, IHttpContextAccessor httpContextAccessor, IValidator<LoginRequest> loginValidator, 
+            IValidator<LoginWith2faRequest> loginWith2faValidator, IValidator<LoginWithRecoveryCodeRequest> loginWithRecoveryCodeValidator,
             ILogger<LoginService> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
 
+            _httpContextAccessor = httpContextAccessor;
             _sessionService = sessionService;
 
             _loginValidator = loginValidator;
             _lginwith2faValidator = loginWith2faValidator;
+            _loginWithRecoveryCodeValidator = loginWithRecoveryCodeValidator;
 
             _logger = logger;
+        }
+
+        public Task<SignInResult> Login(LoginRequest login)
+        {
+            string ip = _httpContextAccessor.HttpContext.GetRemoteIp();
+            string sessionCode = _httpContextAccessor.HttpContext.User.GetSessionCode();
+
+            return Login(ip, sessionCode, login);
         }
 
         public async Task<SignInResult> Login(string ip, string sessionCode, LoginRequest login)
@@ -81,7 +97,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
             {
                 return SignInResult.Failed;
             }
-            
+
             SignInResult result = await _signInManager.PasswordSignInAsync(appUser, login.Password, login.RememberMe, lockoutOnFailure: true);
             if(!result.Succeeded)
             {
@@ -103,6 +119,19 @@ namespace SSRD.IdentityUI.Core.Services.Auth
             _logger.LogInformation($"User id loged in. UserId {appUser.Id}");
 
             return result;
+        }
+
+        /// <summary>
+        /// Used to login user after password change, 2fa change
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public Task<Result> Login(string userId)
+        {
+            string ip = _httpContextAccessor.HttpContext.GetRemoteIp();
+            string sessionCode = _httpContextAccessor.HttpContext.User.GetSessionCode();
+
+            return Login(userId, sessionCode, ip);
         }
 
         /// <summary>
@@ -173,6 +202,12 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 return SignInResult.Failed;
             }
 
+            if (!appUser.TwoFactorEnabled || appUser.TwoFactor == TwoFactorAuthenticationType.None)
+            {
+                _logger.LogError($"Use does not have 2fa enabled. User {appUser.Id}");
+                return SignInResult.Failed;
+            }
+
             appUser.SessionCode = Guid.NewGuid().ToString();
 
             Result addSessionResult = _sessionService.Add(appUser.SessionCode, appUser.Id, ip);
@@ -181,8 +216,9 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 return SignInResult.Failed;
             }
 
-            SignInResult signInResult = await _signInManager.TwoFactorAuthenticatorSignInAsync
-                (code, loginWith2FaRequest.RememberMe, loginWith2FaRequest.RememberMachine);
+            SignInResult signInResult = await _signInManager.TwoFactorSignInAsync(appUser.TwoFactor.ToProvider(), code,
+                loginWith2FaRequest.RememberMe, loginWith2FaRequest.RememberMachine);
+
             if(!signInResult.Succeeded)
             {
                 _logger.LogError($"Faild to log in user with TwoFactorAuthenticator");
@@ -192,6 +228,25 @@ namespace SSRD.IdentityUI.Core.Services.Auth
             _logger.LogInformation($"User loged in with 2fa. UserId {appUser.Id}");
 
             return signInResult;
+        }
+
+        public async Task<Result> LoginWithRecoveryCode(LoginWithRecoveryCodeRequest loginWithRecoveryCode)
+        {
+            ValidationResult validationResult = _loginWithRecoveryCodeValidator.Validate(loginWithRecoveryCode);
+            if(!validationResult.IsValid)
+            {
+                _logger.LogWarning($"Invalid {nameof(LoginWithRecoveryCodeRequest)} model");
+                return Result.Fail(validationResult.Errors);
+            }
+
+            SignInResult loginResult = await _signInManager.TwoFactorRecoveryCodeSignInAsync(loginWithRecoveryCode.RecoveryCode);
+            if(!loginResult.Succeeded)
+            {
+                _logger.LogError($"Failed to login with recovery code");
+                return Result.Fail("invalid_recovery_code", "Invalid recovery code");
+            }
+
+            return Result.Ok();
         }
 
         public async Task<Result> Logout(string userId, string sessionCode)

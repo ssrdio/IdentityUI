@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace SSRD.IdentityUI.Core.Helper
 {
@@ -52,6 +53,28 @@ namespace SSRD.IdentityUI.Core.Helper
                 else
                 {
                     modelState.AddModelError(string.Empty, error.Message);
+                }
+            }
+
+            return modelState;
+        }
+
+        public static ModelStateDictionary AddErrors(this ModelStateDictionary modelState, List<(string key, string value)> errors)
+        {
+            if(errors == null)
+            {
+                return modelState;
+            }
+
+            foreach ((string key, string value) in errors)
+            {
+                if (!string.IsNullOrEmpty(key))
+                {
+                    modelState.AddModelError(key, value);
+                }
+                else
+                {
+                    modelState.AddModelError(string.Empty, value);
                 }
             }
 

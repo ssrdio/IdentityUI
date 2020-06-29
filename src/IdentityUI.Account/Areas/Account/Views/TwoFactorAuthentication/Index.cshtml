@@ -1,0 +1,81 @@
+﻿@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.TwoFactorAuthenticatorViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.TwoFactorAuthenticator;
+}
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+@await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+
+@if (Model.TwoFactorAuthenticationEnabled)
+{
+    <div class="main-card mb-3 card col-xl-6 col-lg-12 offset-xl-3">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Manage your 2FA account:
+                </h5>
+            </div>
+            <div class="custom-form custom-spacing">
+                <p>Currently you have <b>@Model.TwoFactorAuthenticationName</b> activated. The following actions are available for selected type of authentication: </p>
+                <div class="selected-auth-options-holder">
+                    <a class="settings-option negative-option" href="@PagePath.DISABLE_TWO_FACTOR_AUTHENTICATION">Disable</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="main-card mb-3 card col-xl-6 col-lg-12 offset-xl-3">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Two Factor Authentication
+            </h5>
+        </div>
+        <div class="custom-form">
+            <p><b>Two-factor (2FA) is an additional security layer for your business – helping to address the vulnerabilities of a standard password-only approach. </b></p>
+            <p>
+                Below you can choose between different ways of setting up 2FA for your account. Only one method can be used at the same time, so choosing a different method
+                will override any method that was previously set
+            </p>
+
+            <div class="auth-methods">
+                <h5>Authenticator application</h5>
+                <p>If you wish to additionally <u>secure your account using authenticator applications</u>, click on the button below and follow instructions.</p>
+                <div class="link-holder">
+                    <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_TWO_FACTOR_AUTHENTICATOR">Set up 2FA</a>
+                </div>
+            </div>
+
+            @if (Model.IsPhoneAuthenticationAvailable)
+            {
+                <div class="auth-methods">
+                    <h5>SMS</h5>
+                    <p>If you wish to additionally <u>secure your account using SMS</u>, click on the button below and follow instructions.</p>
+                    <div class="link-holder">
+                        <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_PHONE_TWO_FACTOR_AUTHENTICATION">Setup SMS 2FA</a>
+                    </div>
+
+                </div>
+            }
+
+            @if (Model.IsEmailAuthenticationAvailable)
+            {
+                <div class="auth-methods">
+                    <h5>Email</h5>
+                    <p>If you wish to additionally <u>secure your account using email</u>, click on the button below and follow instructions.</p>
+                    <div class="link-holder">
+                        <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_EMAIL_TWO_FACTOR_AUTHENTICATION">Setup Email 2FA</a>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+    </div>
+</div>

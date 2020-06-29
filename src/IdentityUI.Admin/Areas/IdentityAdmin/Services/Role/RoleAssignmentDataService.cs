@@ -91,7 +91,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Role
                 new SelectSpecification<RoleEntity, Select2ItemBase>();
             selectSpecification.AddFilter(x => x.Id != roleId);
             selectSpecification.AddFilter(x => x.Type == Core.Data.Enums.Entity.RoleTypes.Group);
-            selectSpecification.AddFilter(x => !x.CanBeAssignedBy.Select(c => c.RoleId).Contains(roleId)); //TODO: check this
+            selectSpecification.AddFilter(x => !x.CanBeAssignedBy.Select(c => c.RoleId).Contains(roleId));
             selectSpecification.AddSelect(x => new Select2ItemBase(
                 x.Id,
                 x.Name));

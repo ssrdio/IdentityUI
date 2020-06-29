@@ -1,0 +1,59 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.AddPhoneTwoFactorAuthenticationViewModel;
+@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.TwoFactorAuthenticator;
+}
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+@await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+
+<div class="main-card mb-3 card col-xl-6 col-lg-12 offset-xl-3">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                SMS Two Factor Authentication
+            </h5>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+        {
+            <div class="sms-text-holder">
+                <p>
+                    A text message with a verification code was sent to @Model.PhoneNumber . Please enter the code below and click
+                    finish setup
+                </p>
+                <form asp-controller="TwoFactorAuthentication" asp-action="SendTwoFactorPhoneAuthentication" method="post">
+                    <p class="resend-text">Didn't receive the code? </p><button class="resend-button" type="submit">Resend code here</button>
+                </form>
+            </div>
+
+            <form asp-controller="TwoFactorAuthentication" asp-action="AddTwoFactorPhoneAuthentication" method="post" class="custom-form-sms">
+                <div class="form-group">
+                    <input placeholder="Enter code here" asp-for="@Model.Token" class="form-control" />
+                    <span asp-validation-for="@Model.Token" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="button-holder">
+                    <a class="resend-diffrent-number" href="/Account/Manage/">Resend code to different number?</a>
+                    <button type="submit" class="btn btn-primary custom-submit">Finish setup</button>
+                </div>
+            </form>
+
+
+        } else
+        {
+            <div class="custom-form">
+                <p>
+                    SMS authentication is currently not available, because you don't have a mobile number saved on your profile. If
+                    you wish to use this type of authentication you need to update your profile with a valid phone number.
+                </p>
+                <div class="button-holder">
+                    <a class="btn btn-primary " href="@PagePath.MANAGE_ACCOUNT">Go to profile</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -23,7 +23,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     //TODO: change this to api controller
     [Route("[area]/Group/{groupId}/[controller]/[action]")]
-    [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
+    [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
     public class GroupUserController : BaseController
     {
         private readonly IGroupUserService _groupUserService;
@@ -35,7 +35,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
              _groupUserDataService = groupUserDataService;
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupUserTableModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -56,7 +56,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
             return Ok(result.Value);
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS)]
         [HttpGet]
         [ProducesResponseType(typeof(Select2Result<Select2ItemBase>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -77,7 +77,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
             return Ok(result.Value);
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS)]
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -98,7 +98,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
             return Ok(new EmptyResult());
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)]
         [HttpPost("{groupUserId}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
@@ -119,7 +119,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
             return Ok(new EmptyResult());
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)]
         [HttpPost("{groupUserId}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]

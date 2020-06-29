@@ -19,15 +19,13 @@ namespace IdentityUI.Sample
     {
         public static void Main(string[] args)
         {
-            LayoutRenderer.Register<UserIdLayoutRenderer>("user-id");
-
             NLog.Logger logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
                 logger.Debug("init main");
                 IHost host = CreateHostBuilder(args).Build();
 
-                host.RunIdentityMigrations();
+                host.CreateIdentityDatabase();
                 host.SeedSystemEntities();
 
                 host.SeedIdentityAdmin("admin", "Password");

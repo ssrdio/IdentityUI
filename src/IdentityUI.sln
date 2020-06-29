@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityUI.Dev", "IdentityUI.Dev\IdentityUI.Dev.csproj", "{88A010C0-4EA4-4B71-9684-B4F2B8E792B5}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.IdentityUI.Core", "IdentityUI.Core\SSRD.IdentityUI.Core.csproj", "{915F39E8-1646-47E2-A7D6-A961AAD5C1FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.IdentityUI.Admin", "IdentityUI.Admin\SSRD.IdentityUI.Admin.csproj", "{0C676693-CB00-4FE6-99A8-07C1B459593C}"
@@ -17,6 +19,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88A010C0-4EA4-4B71-9684-B4F2B8E792B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88A010C0-4EA4-4B71-9684-B4F2B8E792B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88A010C0-4EA4-4B71-9684-B4F2B8E792B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88A010C0-4EA4-4B71-9684-B4F2B8E792B5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{915F39E8-1646-47E2-A7D6-A961AAD5C1FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{915F39E8-1646-47E2-A7D6-A961AAD5C1FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{915F39E8-1646-47E2-A7D6-A961AAD5C1FD}.Release|Any CPU.ActiveCfg = Release|Any CPU

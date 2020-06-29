@@ -1,5 +1,4 @@
 ﻿using SSRD.IdentityUI.Account.Areas.Account.Models;
-using SSRD.IdentityUI.Account.Areas.Account.Services.Manage;
 using SSRD.IdentityUI.Core.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +6,8 @@ using SSRD.AdminUI.Template;
 using SSRD.IdentityUI.Account.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 using System;
-using SSRD.IdentityUI.Account.Areas.Account.Services.Account;
+using SSRD.IdentityUI.Account.Areas.Account.Services;
+using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 
 namespace SSRD.IdentityUI.Account
 {
@@ -26,6 +26,7 @@ namespace SSRD.IdentityUI.Account
 
             builder.Services.AddScoped<IManageDataService, ManageDataService>();
             builder.Services.AddScoped<IAccountDataService, AccountDataService>();
+            builder.Services.AddScoped<ITwoFactorAuthenticationDataService, TwoFactorAuthenticationDataService>();
 
             builder.Services.ConfigureOptions(typeof(UIConfigureOptions));
 

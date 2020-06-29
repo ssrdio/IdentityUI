@@ -1,0 +1,42 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.AddEmailTwoFactorAuthenticationViewModel;
+@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.TwoFactorAuthenticator;
+}
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+@await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+
+<div class="main-card mb-3 card col-xl-6 col-lg-12 offset-xl-3">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Email Two Factor Authentication
+            </h5>
+        </div>
+
+        <div class="sms-text-holder">
+            <p>
+                A email message with a verification code was sent to your email. Please enter the code below and click
+                finish setup
+            </p>
+            <form asp-controller="TwoFactorAuthentication" asp-action="SendTwoFactorEmailAuthentication" method="post">
+                <p class="resend-text">Didn't receive the code? </p><button class="resend-button" type="submit">Resend code here</button>
+            </form>
+        </div>
+
+        <form asp-controller="TwoFactorAuthentication" asp-action="AddTwoFactorEmailAuthentication" method="post" class="custom-form-sms">
+            <div class="form-group">
+                <input placeholder="Enter code here" asp-for="@Model.Token" class="form-control" />
+                <span asp-validation-for="@Model.Token" class="text-danger error-alert-custom"></span>
+            </div>
+            <div class="button-holder">
+                <button type="submit" class="btn btn-primary custom-submit">Finish setup</button>
+            </div>
+        </form>
+    </div>
+</div>

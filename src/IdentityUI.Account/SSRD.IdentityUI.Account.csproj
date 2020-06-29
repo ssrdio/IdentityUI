@@ -33,14 +33,18 @@
     <EmbeddedResource Include="www\**\*" />
     <Content Update="**\*.cshtml" Pack="false" />
   </ItemGroup>
+  
+  
+
+  <ItemGroup>
+    <Folder Include="www\account\app\css\" />
+  </ItemGroup>
+  
+  
 
   <ItemGroup>
     <ProjectReference Include="..\AdminUI.Template\SSRD.AdminUI.Template.csproj" />
     <ProjectReference Include="..\IdentityUI.Core\SSRD.IdentityUI.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="www\account\app\css\" />
   </ItemGroup>
 
 </Project>

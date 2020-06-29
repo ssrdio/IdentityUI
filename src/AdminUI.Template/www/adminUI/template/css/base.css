@@ -305,6 +305,47 @@ body {
     padding: 30px;
 }
 
+.auth-methods{
+    padding: 10px 0px;
+}
+
+.auth-methods .link-holder {
+    width: 100%;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.sms-text-holder {
+    padding: 30px;
+    padding-bottom: 10px;
+}
+
+.resend-text{
+    display: inline-block
+}
+
+.resend-button {
+    border: 0;
+    background-color: transparent;
+    text-decoration: underline;
+    color: var(--blue);
+    font-size: 14px;
+    display: inline-block;
+}
+
+.resend-diffrent-number {
+    text-decoration: underline !important;
+    color: var(--blue) !important;
+    font-size: 14px;
+    display: inline-block;
+    padding-right: 10px;
+}
+
+.custom-form-sms {
+    padding: 30px;
+    padding-top: 10px;
+}
+
 .button-holder {
     padding: 10px 0px;
     text-align: right;
@@ -375,30 +416,52 @@ body {
 }
 
 .custom-2fa {
-    margin-top: 20px;
-    min-width: 18%;
+    margin-top: 10px;
+    min-width: 25%;
+    padding: 10px;
 }
 
 .settings-option {
-    background-color: #fbfbfb;
-    display: block;
-    padding: 18px;
+    background-color: var(--blue);
+    display: flex;
+    padding: 9px 25px;
     cursor: pointer;
-    color: var(--blue);
+    color: white;
+    border-radius: 0.1875rem;
+    font-size: 14px;
+    width: 30%;
+    justify-content:center;
+    align-items: center;
+    text-align: center;
 }
 
-    .settings-option:hover {
-        background-color: #ececec;
-        text-decoration: none;
-    }
+.selected-auth-options-holder {
+    display: flex;
+    justify-content: space-between;
+   padding-top: 10px;
+}
+
+.recovery-codes-options-holder {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+}
+
+
+.settings-option:hover {
+    background-color: #005CBC;
+    text-decoration: none;
+    color: white;
+}
 
 .negative-option {
-    color: var(--red);
+    background-color: var(--red);
 }
 
-    .negative-option:hover {
-        color: var(--danger);
-    }
+.negative-option:hover {
+    background-color: var(--danger);
+    color: white;
+}
 
 .custom-spacing hr {
     margin: 0px;
@@ -465,6 +528,7 @@ body {
         visibility: visible;
         -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
         animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation-fill-mode: forwards;
     }
 
     #snackbar.showError {

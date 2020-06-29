@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 using Microsoft.AspNetCore.Http;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using SSRD.AdminUI.Template.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
 {
@@ -67,11 +68,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
                 return NotFoundView();
             }
 
-            return View(result.Value);
+            RoleDetailViewModel roleDetails = result.Value;
+
+            return View(roleDetails);
         }
 
         [HttpPost]
-        public IActionResult Edit(string id, EditRoleRequest request)
+        public IActionResult Details(string id, EditRoleRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -90,11 +93,11 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
                 ModelState.AddErrors(editResult.Errors);
                 role.Value.StatusAlert = StatusAlertViewExtension.Get(editResult);
 
-                return View("Details", role.Value);
+                return View(role.Value);
             }
 
             role.Value.StatusAlert = StatusAlertViewExtension.Get("Role updated");
-            return View("Details", role.Value);
+            return View(role.Value);
         }
 
         [HttpGet]

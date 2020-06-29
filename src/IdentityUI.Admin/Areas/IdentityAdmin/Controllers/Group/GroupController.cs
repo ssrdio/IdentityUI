@@ -48,7 +48,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return RedirectToAction(nameof(User), new { id = User.GetGroupId() });
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
         [HttpGet("/[area]/[controller]/[action]/{groupId}")]
         public IActionResult Users(string groupId)
         {
@@ -66,7 +66,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return View(result.Value);
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
         [HttpGet("/[area]/[controller]/[action]/{groupId}")]
         public IActionResult Invites(string groupId)
         {
@@ -84,7 +84,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             return View(result.Value);
         }
 
-        [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
+        [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
         [HttpGet("/[area]/[controller]/[action]/{groupId}")]
         public IActionResult Attributes(string groupId)
         {

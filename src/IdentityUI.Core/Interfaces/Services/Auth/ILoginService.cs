@@ -1,9 +1,6 @@
-﻿using SSRD.IdentityUI.Core.Models.Result;
+﻿using Microsoft.AspNetCore.Identity;
+using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Login.Models;
-using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Interfaces.Services.Auth
@@ -19,7 +16,16 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.Auth
         /// <param name="ip"></param>
         /// <returns></returns>
         Task<Result> Login(string userId, string sessionCode, string ip);
+
+        /// <summary>
+        /// Used to login user after password change, 2fa change
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<Result> Login(string userId);
         Task<SignInResult> LoginWith2fa(string ip, LoginWith2faRequest loginWith2FaRequest);
+
+        Task<Result> LoginWithRecoveryCode(LoginWithRecoveryCodeRequest loginWithRecoveryCode);
 
         Task<Result> Logout(string userId, string sessionCode);
     }

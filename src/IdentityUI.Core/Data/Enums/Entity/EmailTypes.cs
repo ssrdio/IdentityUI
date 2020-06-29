@@ -18,5 +18,8 @@ namespace SSRD.IdentityUI.Core.Data.Enums.Entity
 
         [Description("Invite")]
         Invite = 4,
+
+        [Description("Two factor authentication token")]
+        TwoFactorAuthenticationToken = 20,
     }
 }

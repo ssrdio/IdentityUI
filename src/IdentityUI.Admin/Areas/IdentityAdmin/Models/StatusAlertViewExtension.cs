@@ -16,18 +16,24 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
                 return null;
             }
 
-            List<string> messages = result.Errors
-                 .Where(x => x.PropertyName == null)
-                 .Select(x => x.Message)
-                 .ToList();
+            List<string> messages = new List<string>();
+            List<(string key, string value)> validationErrors = new List<(string key, string value)>();
 
-            if (messages.Count == 0)
+            foreach(Result.ResultError error in result.Errors)
             {
-                return null;
+                if(string.IsNullOrEmpty(error.PropertyName))
+                {
+                    messages.Add(error.Message);
+                }
+                else
+                {
+                    validationErrors.Add((error.PropertyName, error.Message));
+                }
             }
 
             return new StatusAlertViewModel(
                 messages: messages,
+                validationErrors: validationErrors,
                 success: false);
         }
 

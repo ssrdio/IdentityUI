@@ -60,7 +60,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 
             try
             {
-
                 _logger.LogInformation($"Hosting env: {_hostingEnvironment}");
 
                 IRelationalDatabaseCreator relationalDatabaseCreator = _context.Database.GetService<IDatabaseCreator>() as IRelationalDatabaseCreator;
@@ -105,7 +104,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                 {
                     _logger.LogInformation($"===== Performing update: {update} =====");
                     _logger.LogInformation($"Before Schema Change: {update}");
-                    update.BeforeSchemaChange();
+                    update.BeforeSchemaChange(_context);
                     _logger.LogInformation($"Finished Before Schema Change: {update}");
 
                     _logger.LogInformation($"Schema Change: {update}");
@@ -113,7 +112,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                     _logger.LogInformation($"Finished Schema Change: {update}");
 
                     _logger.LogInformation($"After Schema Change: {update}");
-                    update.AfterSchemaChange();
+                    update.AfterSchemaChange(_context);
                     _logger.LogInformation($"Finished After Schema Change: {update}");
                     _logger.LogInformation($"===== Finished update: {update} =====");
 
@@ -134,6 +133,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
             {
                 new Update_01_InitialCreate(),
                 new Update_02_AddPermissionsAddGroups(),
+                new Update_03_UserActiveTwoFactorAuthenticationColumnAdded(),
             };
             return updates.OrderBy(m => m.GetVersion()).ToList();
         }

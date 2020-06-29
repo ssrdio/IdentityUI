@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     //TODO: change this to api controller
-    [GrouPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
+    [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
     [Route("[area]/Group/{groupId}/[controller]/[action]")]
     public class GroupAttributeController : BaseController
     {

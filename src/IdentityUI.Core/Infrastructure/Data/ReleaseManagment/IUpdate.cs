@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,7 +26,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
         /// <summary>
         /// Performed before database schema change is applied.
         /// </summary>
-        void BeforeSchemaChange();
+        void BeforeSchemaChange(IdentityDbContext context);
 
         /// <summary>
         /// Performs database schema change, usually SQL read from Migrations/Scripts folder.
@@ -36,6 +37,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
         /// <summary>
         /// Performed after database schema change is applied.
         /// </summary>
-        void AfterSchemaChange();
+        void AfterSchemaChange(IdentityDbContext context);
     }
 }

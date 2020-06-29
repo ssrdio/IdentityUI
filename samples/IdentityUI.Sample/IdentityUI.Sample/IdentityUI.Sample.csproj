@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SSRD.IdentityUI" Version="2.0.0" />
-    <PackageReference Include="SSRD.RevisionLogger" Version="1.0.4" />
+    <PackageReference Include="SSRD.IdentityUI" Version="2.1.0" />
+    <PackageReference Include="SSRD.RevisionLogger" Version="1.0.5" />
   </ItemGroup>
 
 </Project>

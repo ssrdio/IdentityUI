@@ -1,5 +1,5 @@
-﻿@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
-@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.ProfileViewModel;
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.ProfileViewModel;
+@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
 
 @{
     SidebarSelection.SelectedOption = SidebarOptions.Profile;
@@ -9,25 +9,7 @@
     ViewData["Title"] = "Profile";
 }
 
-@section script{
-    @if (Model.StatusAlert != null)
-    {
-        <script>
-            $(document).ready(function () {
-                var x = document.getElementById("snackbar");
-                x.className = "show";
-                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-            });
-        </script>
-    }
-}
-
-@if (Model.StatusAlert != null)
-{
-    <div id="snackbar">
-        @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
-    </div>
-}
+@await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
 
 <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
     <div class="card-body">
@@ -55,9 +37,17 @@
             </div>
             <div class="form-group">
                 <label asp-for="PhoneNumber" class="control-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
+                @if (Model.IsPhoneNumberConfirmed == false)
+                {
+                    <input asp-for="PhoneNumber" class="form-control" />
+                }
+                else
+                {
+                    <input asp-for="PhoneNumber" class="form-control" disabled />
+                }
                 <span asp-validation-for="PhoneNumber" class="text-danger error-alert-custom"></span>
             </div>
+
             <div class="button-holder">
                 <button type="submit" class="btn btn-primary custom-submit">Save</button>
             </div>

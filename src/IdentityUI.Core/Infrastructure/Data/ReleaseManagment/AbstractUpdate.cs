@@ -16,9 +16,19 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
         protected abstract string migrationId { get; }
 
         public abstract int GetVersion();
-        public abstract void BeforeSchemaChange();
-        public abstract void SchemaChange(DatabaseFacade database);
-        public abstract void AfterSchemaChange();
+
+        public virtual void BeforeSchemaChange(IdentityDbContext context)
+        {
+        }
+
+        public virtual void SchemaChange(DatabaseFacade database)
+        {
+            ExecuteMigrationSql(database, migrationId);
+        }
+
+        public virtual void AfterSchemaChange(IdentityDbContext context)
+        {
+        }
 
         public bool ShouldExecute(List<string> applaydMigrations)
         {
