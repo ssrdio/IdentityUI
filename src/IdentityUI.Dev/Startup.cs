@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using IdentityUI.Dev.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SSRD.IdentityUI.Account;
 using SSRD.IdentityUI.Admin;
 using SSRD.IdentityUI.Core;
-using SSRD.IdentityUI.Core.Interfaces.Services;
+using System;
 
 namespace IdentityUI.Dev
 {
@@ -74,17 +68,6 @@ namespace IdentityUI.Dev
             .AddEmailSender();
 
             services.AddScoped<UserSeeder>();
-
-            services.AddScoped<ISmsSender, TwilioSmsSender>(options =>
-            {
-                string sid = Configuration["IdentityUI:SmsGateway:Sid"];
-                string token = Configuration["IdentityUI:SmsGateway:Token"];
-                string from = Configuration["IdentityUI:SmsGateway:FromNumber"];
-
-                ILogger<TwilioSmsSender> logger = options.GetRequiredService<ILogger<TwilioSmsSender>>();
-
-                return new TwilioSmsSender(sid, token, from, logger);
-            });
 
             services.AddControllersWithViews();
 
