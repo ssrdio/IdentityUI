@@ -7,7 +7,8 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
-namespace IdentityUI.Dev.Services
+
+namespace IdentityUI.Sample.Sms.Services
 {
     public class TwilioSmsSender : ISmsSender
     {

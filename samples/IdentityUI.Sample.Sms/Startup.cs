@@ -1,15 +1,21 @@
-using IdentityUI.Dev.Services;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Security.Claims;
+using IdentityUI.Sample.Sms.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SSRD.IdentityUI.Account;
 using SSRD.IdentityUI.Admin;
 using SSRD.IdentityUI.Core;
-using System;
+using SSRD.IdentityUI.Core.Interfaces.Services;
+using SSRD.RevisionLogger.Extensions;
 
-namespace IdentityUI.Dev
+namespace IdentityUI.Sample.Sms
 {
     public class Startup
     {
@@ -36,7 +42,7 @@ namespace IdentityUI.Dev
                 endpoints.ResetPassword = "/Account/ResetPassword";
 
                 endpoints.RegisterEnabled = true;
-                endpoints.UseEmailSender = true;
+
                 endpoints.UseSmsGateway = true;
             })
             .AddIdentityUI(options =>
@@ -64,31 +70,45 @@ namespace IdentityUI.Dev
                 options.LogoutPath = "/Account/Logout/";
             })
             .AddIdentityAdmin()
-            .AddAccountManagement()
-            .AddEmailSender();
+            .AddAccountManagement();
 
-            services.AddScoped<UserSeeder>();
+            services.ConfigureRevisionLogger(options =>
+            {
+                options.LogQueryData = false;
+                options.LogBodyData = false;
+
+                options.LogBodyDataMaxSize = 30 * 1024;
+                options.IgnoreLogignBodyForRoutes = new List<string>
+                {
+                    "Account/.*",
+                    "IdentityAdmin/User/SetNewPassword",
+                };
+
+                options.UserIdentityClaimType = ClaimTypes.NameIdentifier;
+                options.UseXForwardedForIp = true;
+
+                options.Version = Assembly.GetExecutingAssembly().GetName()?.Version?.ToString();
+            });
 
             services.AddControllersWithViews();
 
-#if DEBUG
-            services.AddControllersWithViews().AddRazorRuntimeCompilation(o =>
+            // configure the sms sender
+            services.AddScoped<ISmsSender, TwilioSmsSender>(options =>
             {
+                string sid = Configuration["IdentityUI:SmsGateway:Sid"];
+                string token = Configuration["IdentityUI:SmsGateway:Token"];
+                string from = Configuration["IdentityUI:SmsGateway:FromNumber"];
 
-                string basePath = AppContext.BaseDirectory;
-                string accountPath = System.IO.Path.Combine(basePath, "../../../../IdentityUI.Account");
-                string adminPath = System.IO.Path.Combine(basePath, "../../../../IdentityUI.Admin");
+                ILogger<TwilioSmsSender> logger = options.GetRequiredService<ILogger<TwilioSmsSender>>();
 
-                o.FileProviders.Add(new Microsoft.Extensions.FileProviders.PhysicalFileProvider(accountPath));
-                o.FileProviders.Add(new Microsoft.Extensions.FileProviders.PhysicalFileProvider(adminPath));
+                return new TwilioSmsSender(sid, token, from, logger);
             });
-#endif
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -97,11 +117,13 @@ namespace IdentityUI.Dev
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-            app.UseStaticFiles();
 
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseIdentityUI();
+
+            app.UseRevisionLogger();
 
             app.UseEndpoints(endpoints =>
             {
