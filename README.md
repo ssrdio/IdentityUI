@@ -6,7 +6,7 @@
 [![](https://sonarcloud.io/api/project_badges/measure?project=ssrdio_IdentityUI&branch=master&metric=code_smells)](https://sonarcloud.io/dashboard/?id=ssrdio_IdentityUI&branch=master) 
 
 
-IdentityUI is a simple platform for administrative management of users and admins with a graphical interface. It is easy to set up, has a clean API, and runs on all recent .NET Core releases.
+IdentityUI is a simple platform for administrative management of users and admins with a graphical interface. It is easy to set up, has a clean API, and runs on all recent. NET Core releases.
 
 
 ![](images/example.gif)
@@ -36,7 +36,7 @@ EmailSender options are optional if you provide custom implementation of IEmailS
 
 ## Startup
 
-In ConfigureServices add:
+In the `ConfigureServices` method add:
 ```c#
 services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pass in your own identityUI options.
     .AddIdentityUI() // Adds IdentityManagement core services.
@@ -46,23 +46,26 @@ services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pa
     .AddAccountManagement(); // Adds services for AccountManagement.
 ```
 
-In Configure add:
+In the `Configure` method add:
 ```c#
-app.UseIdentityUI(); // Adds IdentityUI   
+app.UseIdentityUI(); // Adds IdentityUI
 ```
 
-.NET Core 2:  
-In `app.UseMvc()` add
+If you are using .NET Core 2 you need to configure the MVC setup by adding or updating:
 ```c#
-routes.MapAccountManagement(); // Adds AccountManagement UI
-routes.MapIdentityAdmin(); // Adds IdentityAdmin UI
+  app.UseMvc(routes => 
+  {
+    /* your code */
+    routes.MapAccountManagement(); // Adds AccountManagement UI
+    routes.MapIdentityAdmin(); // Adds IdentityAdmin UI
+  });
 ```
 
-For adding admin `app.SeedIdentityAdmin("admin", "Password");`
+You can seed an admin user by calling `app.SeedIdentityAdmin("admin", "Password");`.
 
 **Important: If you are using .NET Core 3 remove `app.UseAuthorization()`;**
 
-IdentityAdmin Dashboard: `{server}:{port}/IdentityAdmin/`  
+IdentityAdmin Dashboard: `{server}:{port}/IdentityAdmin/`
 Account management: `{server}:{port}/Account/Manage/`
 
 ## Database
