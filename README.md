@@ -235,5 +235,4 @@ Setting up an SMS gateway also enables SMS two-factor authentication for the use
 For custom feature request or technical support contact us at [identity[at]ssrd.io](identity@ssrd.io)
 
 ## Credits
-
 - [RoyalUI-Free-Bootstrap-Admin-Template](https://github.com/TemplateWatch/RoyalUI-Free-Bootstrap-Admin-Template)
