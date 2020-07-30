@@ -231,6 +231,9 @@ With that, you should have SMS sending functionality available in your system.
 
 Setting up an SMS gateway also enables SMS two-factor authentication for the users of your system.
 
+# Custom pages
+Check out [custom pages documentation](docs/IdentityUI%20custom%20pages.md) and define page structure and styles on your own!
+
 # Support
 For custom feature request or technical support contact us at [identity[at]ssrd.io](identity@ssrd.io)
 
