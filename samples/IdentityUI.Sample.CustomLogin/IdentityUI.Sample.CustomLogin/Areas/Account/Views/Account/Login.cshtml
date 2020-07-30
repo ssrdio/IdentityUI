@@ -1,0 +1,42 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.LoginViewModel
+
+    @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<div class="h-100">
+    <div class="d-flex min-vh-100 justify-content-center align-items-center">
+        <form class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div class="modal-body extra-body-padding">
+                <div class="h5 modal-title text-center">
+                    <h4 class="mt-2 modal-header-custom">
+                        <div>Welcome back,</div>
+                        <span>Please sign in to your account below.</span>
+                    </h4>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="position-relative form-group">
+                            <input asp-for="UserName" placeholder="Email here..." type="text" class="form-control">
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="position-relative form-group">
+                            <input asp-for="Password" placeholder="Password here..." type="password" class="form-control">
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="position-relative form-check checkbox-keep">
+                    <label class="form-check-label">
+                        <input asp-for="RememberMe" type="checkbox" class="form-check-input">
+                        Keep me logged in
+                    </label>
+                </div>
+            </div>
+            <div class="float-right">
+                <button class="btn btn-primary btn-lg">Login</button>
+            </div>
+        </form>
+    </div>
+</div>
