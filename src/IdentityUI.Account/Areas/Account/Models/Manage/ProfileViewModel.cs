@@ -17,6 +17,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Manage
 
         public StatusAlertViewModel StatusAlert { get; set; }
 
+        public string ProfileImage { get; set; }
+
         public ProfileViewModel(string userName, string firstName, string lastName, string phoneNumber, bool isPhoneNumberConfirmed)
         {
             UserName = userName;

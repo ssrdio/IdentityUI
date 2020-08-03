@@ -52,6 +52,10 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity
 
             builder.Ignore(x => x.SessionCode);
 
+            //builder.HasOne(x => x.UserImage)
+            //       .WithOne(x => x.User)
+            //       .HasForeignKey(x => x.UserId);
+
             builder.ToTable("Users");
         }
     }
