@@ -25,6 +25,8 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 
         public TwoFactorAuthenticationType TwoFactor { get; set; }
 
+        public virtual UserImageEntity UserImage { get; set; }
+
         /// <summary>
         /// This column does not exist in database. It is only used for login
         /// </summary>

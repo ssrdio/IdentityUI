@@ -1,4 +1,5 @@
-﻿using SSRD.IdentityUI.Core.Models.Result;
+﻿using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
         Task<Result> RemoveRoles(string userId, List<string> roles, string adminId);
         Task<Result> AddRoles(string userId, List<string> roles, string adminId);
         Result EditUser(string id, EditProfileRequest editProfileRequest);
+
+        Result UpdateProfileImage(string userId, byte[] image, string fileName);
+        Result<string> GetProfileImageURL(string userId);
 
         Result UnlockUser(UnlockUserRequest request, string adminId);
 

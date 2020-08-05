@@ -22,6 +22,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         public DbSet<RoleAssignmentEntity> RoleAssignments { get; set; }
         public DbSet<PermissionEntity> Permissions { get; set; }
         public DbSet<PermissionRoleEntity> PermissionRole { get; set; }
+        public DbSet<UserImageEntity> UserImage { get; set; }
 
         public DbSet<GroupAttributeEntity> GroupAttributes { get; set; }
         public DbSet<GroupEntity> Groups { get; set; }
@@ -58,6 +59,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
             builder.ApplyConfiguration(new InviteConfiguration());
             builder.ApplyConfiguration(new EmailConfiguration());
+
+            builder.ApplyConfiguration(new UserImageConfiguration());
 
             builder.Entity<SessionEntity>().HasQueryFilter(x => x._DeletedDate == null);
         }

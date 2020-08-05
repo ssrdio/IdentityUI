@@ -13,6 +13,7 @@ using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -102,6 +103,41 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             viewModel = new ChangePasswordViewModel(StatusAlertViewExtension.Get("Password updated"));
 
             return View(viewModel);
+        }
+
+        [HttpPost("/[area]/[controller]/[action]")]
+        public IActionResult ProfileImage(IFormFile files)
+        {
+            if (files != null)
+            {
+                if (files.Length > 0)
+                {
+                    var fileName = System.IO.Path.GetFileName(files.FileName);
+                    var fileExtension = System.IO.Path.GetExtension(fileName);
+                    var newFileName = String.Concat(Convert.ToString(Guid.NewGuid()), fileExtension);
+
+                    using (var target = new System.IO.MemoryStream())
+                    {
+                        files.CopyTo(target);
+
+                        Result result = _manageUserService.UpdateProfileImage(GetUserId(),
+                                                                              target.ToArray(),
+                                                                              newFileName);
+
+                        if (result.Failure)
+                        {
+                            ModelState.AddErrors(result.Errors);
+                            return RedirectToAction(nameof(Profile));
+                        }
+                    }
+
+                    Result<ProfileViewModel> profileResult = _manageDataService.GetProfile(GetUserId());
+                    profileResult.Value.StatusAlert = StatusAlertViewExtension.Get("Profile Image updated");
+
+                    return View(nameof(Profile), profileResult.Value);
+                }
+            }
+            return RedirectToAction(nameof(Profile));
         }
     }
 }
