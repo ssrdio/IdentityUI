@@ -16,9 +16,6 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
         Task<Result> AddRoles(string userId, List<string> roles, string adminId);
         Result EditUser(string id, EditProfileRequest editProfileRequest);
 
-        Result UpdateProfileImage(string userId, byte[] image, string fileName);
-        Result<string> GetProfileImageURL(string userId);
-
         Result UnlockUser(UnlockUserRequest request, string adminId);
 
         Task<Result> SendEmilVerificationMail(SendEmailVerificationMailRequest request, string adminId);

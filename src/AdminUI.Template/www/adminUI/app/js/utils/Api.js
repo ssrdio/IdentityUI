@@ -20,5 +20,21 @@
             contentType: 'application/json',
             data: JSON.stringify(data)
         });
+    },
+
+    upload: function (url, data, token) {
+        var form = new FormData();
+        form.append("file", data);
+
+        return $.ajax({
+            type: 'POST',
+            url: url,
+            contentType: false,
+            processData: false,
+            headers: {
+                RequestVerificationToken: token
+            },
+            data: form
+        });
     }
 }

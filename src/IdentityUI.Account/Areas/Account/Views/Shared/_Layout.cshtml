@@ -15,8 +15,9 @@
     <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/adminUI/template/css/style.css" />
     <link rel="stylesheet" href="~/adminUI/template/css/base.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/adminUI/template/css/all.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/adminUI/template/vendors/ti-icons/css/themify-icons.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/vendors/fontawesome-free-5.14.0-web/css/all.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
 
     @RenderSection("style", required: false)
 
@@ -26,14 +27,15 @@
     <div class="container-scroller">
         @RenderBody()
     </div>
+
+    <script src="~/adminUI/app/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/adminUI/app/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/template/js/template.js" asp-append-version="true"></script>
+    <script src="~/account/app/js/site.js" asp-append-version="true"></script>
+    <script src="~/adminUI/app/js/alert/alertClose.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/template/js/off-canvas.js" asp-append-version="true"></script>
+
+    @RenderSection("script", required: false)
 </body>
-<script src="~/adminUI/app/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
-<script src="~/adminUI/app/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
-
-<script type="text/javascript" src="~/adminUI/template/js/template.js" asp-append-version="true"></script>
-<script src="~/account/app/js/site.js" asp-append-version="true"></script>
-<script src="~/adminUI/app/js/alert/alertClose.js" asp-append-version="true"></script>
-<script type="text/javascript" src="~/adminUI/template/js/off-canvas.js" asp-append-version="true"></script>
-
-@RenderSection("script", required: false)
 </html>

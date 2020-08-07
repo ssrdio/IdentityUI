@@ -14,6 +14,7 @@ using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using Microsoft.AspNetCore.Http;
+using SSRD.IdentityUI.Core.Data.Models;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -23,14 +24,16 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         private readonly IManageDataService _manageDataService;
         private readonly IManageUserService _manageUserService;
         private readonly ICredentialsService _credentialsService;
+        private readonly IProfileImageService _profileImageService;
 
         public ManageController(ITwoFactorAuthService twoFactorAuthService, IManageDataService manageDataService, IManageUserService manageUserService,
-            ICredentialsService credentialsService)
+            ICredentialsService credentialsService, IProfileImageService profileImageService)
         {
             _twoFactorAuthService = twoFactorAuthService;
             _manageDataService = manageDataService;
             _manageUserService = manageUserService;
             _credentialsService = credentialsService;
+            _profileImageService = profileImageService;
         }
 
         [HttpGet("/[area]/[controller]")]
@@ -106,38 +109,29 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         }
 
         [HttpPost("/[area]/[controller]/[action]")]
-        public IActionResult ProfileImage(IFormFile files)
+        public async Task<IActionResult> ProfileImage([FromForm] UploadProfileImageRequest uploadImageRequest)
         {
-            if (files != null)
+            Result result = await _profileImageService.UpdateProfileImage(GetUserId(), uploadImageRequest);
+            if(result.Failure)
             {
-                if (files.Length > 0)
-                {
-                    var fileName = System.IO.Path.GetFileName(files.FileName);
-                    var fileExtension = System.IO.Path.GetExtension(fileName);
-                    var newFileName = String.Concat(Convert.ToString(Guid.NewGuid()), fileExtension);
-
-                    using (var target = new System.IO.MemoryStream())
-                    {
-                        files.CopyTo(target);
-
-                        Result result = _manageUserService.UpdateProfileImage(GetUserId(),
-                                                                              target.ToArray(),
-                                                                              newFileName);
-
-                        if (result.Failure)
-                        {
-                            ModelState.AddErrors(result.Errors);
-                            return RedirectToAction(nameof(Profile));
-                        }
-                    }
-
-                    Result<ProfileViewModel> profileResult = _manageDataService.GetProfile(GetUserId());
-                    profileResult.Value.StatusAlert = StatusAlertViewExtension.Get("Profile Image updated");
-
-                    return View(nameof(Profile), profileResult.Value);
-                }
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
             }
-            return RedirectToAction(nameof(Profile));
+
+            return Ok(new EmptyResult());
+        }
+
+        [HttpGet]
+        [Produces("application/octet-stream")]
+        public async Task<IActionResult> GetProfileImage()
+        {
+            Result<FileData> result = await _profileImageService.GetProfileImage(GetUserId());
+            if(result.Failure)
+            {
+                return NotFound();
+            }
+
+            return File(result.Value.File, "application/octet-stream", result.Value.FileName);
         }
     }
 }

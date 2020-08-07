@@ -8,18 +8,26 @@ namespace SSRD.IdentityUI.Core.Data.Entities
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }
 
-        public int Id { get; set; }
-        public string UserId { get; set; }
+        public long Id { get; set; }
         public byte[] BlobImage { get; set; }
         public string FileName { get; set; }
         public bool? IsDefault { get; set; }
 
+        public string UserId { get; set; }
         public virtual AppUserEntity User { get; set; }
 
         public string URL { get { return $"data:image/jpg;base64,{Convert.ToBase64String(BlobImage)}"; } }
 
-        public UserImageEntity()
+        protected UserImageEntity()
         {
+        }
+
+        public UserImageEntity(string userId, byte[] blobImage, string fileName, bool? isDefault)
+        {
+            UserId = userId;
+            BlobImage = blobImage;
+            FileName = fileName;
+            IsDefault = isDefault;
         }
     }
 }

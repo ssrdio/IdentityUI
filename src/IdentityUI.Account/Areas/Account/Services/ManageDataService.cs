@@ -13,20 +13,19 @@ using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Services
 {
     internal class ManageDataService : IManageDataService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IBaseRepository<UserImageEntity> _userImageRepository;
 
         private readonly ILogger<ManageDataService> _logger;
 
-        public ManageDataService(IUserRepository userRepository, IBaseRepository<UserImageEntity> userImageRepository, ILogger<ManageDataService> logger)
+        public ManageDataService(IUserRepository userRepository, ILogger<ManageDataService> logger)
         {
             _userRepository = userRepository;
-            _userImageRepository = userImageRepository;
             _logger = logger;
         }
 
@@ -47,15 +46,6 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
             {
                 _logger.LogWarning($"No user. UserId {userId}");
                 return Result.Fail<ProfileViewModel>("no_user", "No User");
-            }
-
-            BaseSpecification<UserImageEntity> userImageSpecification = new BaseSpecification<UserImageEntity>();
-            userImageSpecification.AddFilter(x => x.UserId == userId);
-
-            if (_userImageRepository.Exist(userImageSpecification))
-            {
-                UserImageEntity userImage = _userImageRepository.SingleOrDefault(userImageSpecification);
-                profile.ProfileImage = userImage.URL;
             }
 
             return Result.Ok(profile);

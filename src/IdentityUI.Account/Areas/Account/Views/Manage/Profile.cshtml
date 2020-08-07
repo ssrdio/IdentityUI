@@ -1,104 +1,161 @@
 ﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Manage.ProfileViewModel;
 @using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
 
-@{
-    SidebarSelection.SelectedOption = SidebarOptions.Profile;
-}
+@{ SidebarSelection.SelectedOption = SidebarOptions.Profile; }
 
-@{
-    ViewData["Title"] = "Profile";
-}
+@{ ViewData["Title"] = "Profile"; }
 
-@await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
 
-<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
-    <div class="card-body">
-        <div class="card-title-space">
-            <h5 class="card-title">
-                Profile
-            </h5>
-        </div>
-        <form method="post" enctype="multipart/form-data" asp-controller="Manage" asp-action="ProfileImage" class="custom-form">
-            <div class="form-group">
-                <img id="filePreview" src="@Model.ProfileImage" width="300" />
+<div>
+    <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Profile
+                </h5>
             </div>
-            <div class="form-group">
-                <label>Upload file</label>
-                <input id="selectFile" class="form-control" name="files" type="file" accept="image/x-png,image/jpeg" required />
-            </div>
-            <div class="form-group">
-                <div class="button-holder">
-                    <button type="submit" class="btn btn-primary custom-submit">Upload</button>
+            <div>
+                <div class="mt-3">
+                    <div class="row">
+                        <div class="d-flex justify-content-center col-12">
+                            <img class="rounded-circle img-responsive profile-image-container profile-image" id="filePreview" src="@PagePath.PROFILE_IMAGE" alt="Profile image"/>
+                        </div>
+                        <div class="col-12">
+                            <div class="upload_container mt-3">
+                                <label for="select-file" class="upload_label btn btn-primary">Change Image</label>
+                                <input id="select-file" class="custom-file-input" type="file" accept="image/x-png,image/jpeg">
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <input id="selectFile" type="file" accept="image/x-png,image/jpeg">
             </div>
-        </form>
-    </div>
-</div>
+            <form asp-controller="Manage" asp-action="Profile" method="post" class="custom-form">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="UserName" class="control-label"></label>
+                    <input asp-for="UserName" class="form-control disabled" disabled />
+                    <span asp-validation-for="UserName" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="FirstName" class="control-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LastName" class="control-label"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger error-alert-custom"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="control-label"></label>
+                    @if (Model.IsPhoneNumberConfirmed == false)
+                    {
+        <input asp-for="PhoneNumber" class="form-control" /> }
+                    else
+                    {
+        <input asp-for="PhoneNumber" class="form-control" disabled />}
+                    <span asp-validation-for="PhoneNumber" class="text-danger error-alert-custom"></span>
+                </div>
 
-<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
-    <div class="card-body">
-        <div class="card-title-space">
-            <h5 class="card-title">
-                Profile
-            </h5>
+                <div class="button-holder">
+                    <button type="submit" class="btn btn-primary custom-submit">Save</button>
+                </div>
+            </form>
         </div>
-        <form asp-controller="Manage" asp-action="Profile" method="post" class="custom-form">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="UserName" class="control-label"></label>
-                <input asp-for="UserName" class="form-control disabled" disabled />
-                <span asp-validation-for="UserName" class="text-danger error-alert-custom"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger error-alert-custom"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger error-alert-custom"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PhoneNumber" class="control-label"></label>
-                @if (Model.IsPhoneNumberConfirmed == false)
-                {
-                <input asp-for="PhoneNumber" class="form-control" />
-                }
-                else
-                {
-                <input asp-for="PhoneNumber" class="form-control" disabled />
-                }
-                <span asp-validation-for="PhoneNumber" class="text-danger error-alert-custom"></span>
-            </div>
-
-            <div class="button-holder">
-                <button type="submit" class="btn btn-primary custom-submit">Save</button>
-            </div>
-        </form>
     </div>
 </div>
-
 
 @section script {
-<script type="text/javascript">
-    $(function () {
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/statusAlert/StatusAlert.js" asp-append-version="true"></script>
 
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
+    <script type="text/javascript">
+        $(document).ready(function () {
+            new UserProfile();
+        });
 
-                reader.onload = function (e) {
-                    $('#filePreview').attr('src', e.target.result);
+        class UserProfile {
+            constructor() {
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                this.$selectFileInput = $('#select-file');
+
+                this.$selectFileInput.on('change', () => {
+                    this.uploadImage();
+                });
+
+                @if (Model.StatusAlert != null)
+                {
+                    <text>
+                        if ('@Model.StatusAlert.Success' === 'True')
+                        {
+                            this.statusAlert.showSuccess(@Json.Serialize(Model.StatusAlert.Messages));
+                        }
+                        else
+                        {
+                            this.statusAlert.showError(@Json.Serialize(Model.StatusAlert.Messages));
+                        }
+                    </text>
                 }
+            }
 
-                reader.readAsDataURL(input.files[0]);
+            readURL(file) {
+                if (file !== null || file !== undefined) {
+                    var reader = new FileReader();
+
+                    $('img.profile-image').show();
+                    $('i.temp-image').hide();
+
+                    reader.onload = function (e) {
+                        $('#filePreview').attr('src', e.target.result);
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            uploadImage() {
+                this.statusAlert.hide();
+
+                var file = this.$selectFileInput.prop('files')[0];
+
+                Api.upload(`/Account/Manage/ProfileImage`, file)
+                    .done(() => {
+                        this.statusAlert.showSuccess('Profile image changed')
+                        this.readURL(file);
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showError(resp.responseJSON['']);
+                    })
             }
         }
+    </script>
+}
 
-        $("#selectFile").change(function () {
-            readURL(this);
-        });
-    });
-</script>
+@section style {
+    <style>
+        .upload_container {
+            text-align: center;
+        }
+
+        label.upload_label {
+            text-align: center;
+        }
+
+        input[type="file"] {
+            width: 0%;
+            height: 0%;
+            display: none;
+        }
+
+        .profile-image-container {
+            width: 250px;
+            height: 250px;
+            font-size: 250px;
+        }
+    </style>
 }

@@ -29,7 +29,6 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IRoleRepository _roleRepository;
         private readonly IBaseRepository<UserRoleEntity> _userRoleRepository;
         private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
-        private readonly IBaseRepository<UserImageEntity> _userImageRepository;
 
         private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ISessionService _sessionService;
@@ -44,7 +43,6 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         public ManageUserService(UserManager<AppUserEntity> userManager, IUserRepository userRepository, IRoleRepository roleRepository,
             IBaseRepository<UserRoleEntity> userRoleRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
-            IBaseRepository<UserImageEntity> userImageRepository,
             IEmailConfirmationService emailConfirmationService, ISessionService sessionService,
             IValidator<EditUserRequest> editUserValidator, IValidator<SetNewPasswordRequest> setNewPasswordValidator,
             IValidator<EditProfileRequest> editRequestValidator, IValidator<UnlockUserRequest> unlockUserValidator,
@@ -56,7 +54,6 @@ namespace SSRD.IdentityUI.Core.Services.User
             _roleRepository = roleRepository;
             _userRoleRepository = userRoleRepository;
             _groupUserRepository = groupUserRepository;
-            _userImageRepository = userImageRepository;
 
             _emailConfirmationService = emailConfirmationService;
             _sessionService = sessionService;
@@ -397,57 +394,6 @@ namespace SSRD.IdentityUI.Core.Services.User
                         return Result.Fail("invalid_role_type", "Invalid role type");
                     }
             }
-        }
-
-        public Result UpdateProfileImage(string userId, byte[] image, string fileName)
-        {
-            if (image == null || image.Length < 1)
-            {
-                _logger.LogWarning($"Invlid Image. UserId {userId}");
-                return Result.Fail("error", "Image is invalid, please select '.JPG' or '.PNG' image format.");
-            }
-
-            BaseSpecification<UserImageEntity> userImageSpecification = new BaseSpecification<UserImageEntity>();
-            userImageSpecification.AddFilter(x => x.UserId == userId);
-
-            if (_userImageRepository.Exist(userImageSpecification))
-            {
-                UserImageEntity userImage = _userImageRepository.SingleOrDefault(userImageSpecification);
-                userImage.BlobImage = image;
-                userImage.FileName = fileName;
-
-                bool updateResult = _userImageRepository.Update(userImage);
-                if (!updateResult)
-                {
-                    _logger.LogError($"Faild to update user image. UserId {userId}");
-                    return Result.Fail("error", "Error");
-                }
-            }
-            else
-            {
-                _userImageRepository.Add(new UserImageEntity
-                {
-                    BlobImage = image,
-                    FileName = fileName,
-                    UserId = userId,
-                    IsDefault = true
-                });
-            }
-            return Result.Ok();
-        }
-
-        public Result<string> GetProfileImageURL(string userId)
-        {
-            BaseSpecification<UserImageEntity> userImageSpecification = new BaseSpecification<UserImageEntity>();
-            userImageSpecification.AddFilter(x => x.UserId == userId);
-
-            if (_userImageRepository.Exist(userImageSpecification))
-            {
-                UserImageEntity userImage = _userImageRepository.SingleOrDefault(userImageSpecification);
-                return Result.Ok(userImage.URL);
-            }
-
-            return Result.Ok(default(string));
         }
 
         private async Task<Result> RemoveGlobalRole(string userId, string roleName)

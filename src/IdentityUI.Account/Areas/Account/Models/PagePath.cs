@@ -43,6 +43,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models
 
         public const string MANAGE_CHANGE_PASSWORD = MANAGE + "/ChangePassword";
 
+        public const string PROFILE_IMAGE = MANAGE + "/GetProfileImage";
+
         public static string HOME;
     }
 }
