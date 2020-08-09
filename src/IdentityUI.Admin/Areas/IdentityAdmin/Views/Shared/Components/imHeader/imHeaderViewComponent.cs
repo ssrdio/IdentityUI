@@ -38,7 +38,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.imHe
 
         public imHeaderViewComponent(IManageUserService manageUserService)
         {
-            _manageUserService = manageUserService;
         }
 
         public IViewComponentResult Invoke()
