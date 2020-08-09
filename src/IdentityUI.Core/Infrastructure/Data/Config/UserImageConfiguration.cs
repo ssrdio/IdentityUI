@@ -16,7 +16,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config
             builder.Property(x => x.FileName)
                 .HasMaxLength(250);
 
-            builder.Ignore(x => x.FileName);
+            builder.Ignore(x => x.URL);
         }
     }
 }

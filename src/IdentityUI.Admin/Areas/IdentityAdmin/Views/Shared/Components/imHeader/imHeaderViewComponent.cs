@@ -6,33 +6,35 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Result;
+using Microsoft.AspNetCore.Http;
+
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.imHeader
 {
     public class imHeaderViewComponent : ViewComponent
     {
         private readonly IManageUserService _manageUserService;
+        private const string ProfileImageKey = "_ProfileImage";
 
-        // TODO; TBD, Need to implement session based cache for profile image.
-        //public string ProfileImage
-        //{
-        //    get
-        //    {
-        //        //if (string.IsNullOrEmpty(HttpContext.Session.GetString("_ProfileImage")))
-        //        {
-        //            string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //            Result<string> result = _manageUserService.GetProfileImageURL(userId);
+        public string ProfileImage
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(HttpContext.Session.GetString(ProfileImageKey)))
+                {
+                    string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    Result<string> result = _manageUserService.GetProfileImageURL(userId);
 
-        //            if (result.Success)
-        //            {
-        //                return result.Value;
-        //            }
-        //            return default(string);
-        //        }
-        //        //return HttpContext.Session.GetString("_ProfileImage");
-        //    }
-        //    //private set { HttpContext.Session.SetString("_ProfileImage", value);  }
-        //}
+                    if (result.Success && !string.IsNullOrEmpty(result.Value))
+                    {
+                        ProfileImage = result.Value;
+                        return result.Value;
+                    }
+                }
+                return HttpContext.Session.GetString(ProfileImageKey);
+            }
+            private set { HttpContext.Session.SetString(ProfileImageKey, value); }
+        }
 
         public imHeaderViewComponent(IManageUserService manageUserService)
         {
@@ -41,13 +43,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Shared.Components.imHe
 
         public IViewComponentResult Invoke()
         {
-            string userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Result<string> result = _manageUserService.GetProfileImageURL(userId);
-
-            if (result.Success && !string.IsNullOrEmpty(result.Value))
-            {
-                ViewBag.ProfileImage = result.Value;
-            }
+            ViewBag.ProfileImage = ProfileImage;
 
             return View();
         }

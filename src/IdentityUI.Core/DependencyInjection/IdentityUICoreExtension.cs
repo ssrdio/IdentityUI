@@ -202,6 +202,7 @@ namespace SSRD.IdentityUI.Core
                 };
             });
 
+            builder.Services.AddSession();
 
             return builder;
         }
@@ -395,6 +396,7 @@ namespace SSRD.IdentityUI.Core
         /// <returns></returns>
         public static IdentityUIAppBuilder UseIdentityUI(this IApplicationBuilder app, bool enableMigrations = false)
         {
+            app.UseSession();
             app.UseAuthentication();
 #if NET_CORE3
             app.UseAuthorization();
