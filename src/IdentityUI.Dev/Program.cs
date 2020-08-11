@@ -22,7 +22,7 @@ namespace IdentityUI.Dev
                 logger.Debug("init main");
                 IHost host = CreateHostBuilder(args).Build();
 
-                host.CreateIdentityDatabase();
+                host.RunIdentityMigrations();
                 host.SeedSystemEntities();
 
                 host.SeedIdentityAdmin("admin", "Password");

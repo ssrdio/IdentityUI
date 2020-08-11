@@ -11,7 +11,6 @@ namespace SSRD.IdentityUI.Core.Data.Entities
         public long Id { get; set; }
         public byte[] BlobImage { get; set; }
         public string FileName { get; set; }
-        public bool? IsDefault { get; set; }
 
         public string UserId { get; set; }
         public virtual AppUserEntity User { get; set; }
@@ -22,12 +21,11 @@ namespace SSRD.IdentityUI.Core.Data.Entities
         {
         }
 
-        public UserImageEntity(string userId, byte[] blobImage, string fileName, bool? isDefault)
+        public UserImageEntity(string userId, byte[] blobImage, string fileName)
         {
             UserId = userId;
             BlobImage = blobImage;
             FileName = fileName;
-            IsDefault = isDefault;
         }
     }
 }

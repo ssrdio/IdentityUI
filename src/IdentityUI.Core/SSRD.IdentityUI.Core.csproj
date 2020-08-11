@@ -54,7 +54,6 @@
 
   <ItemGroup>
     <Folder Include="Infrastructure\Data\Scripts\Migrations\" />
-    <Folder Include="Infrastructure\Data\ReleaseManagment\Updates\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,6 +62,10 @@
 
   <ItemGroup>
     <PackageReference Include="Stubble.Core" Version="1.7.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AdminUI.Template\SSRD.AdminUI.Template.csproj" />
   </ItemGroup>
 
 </Project>

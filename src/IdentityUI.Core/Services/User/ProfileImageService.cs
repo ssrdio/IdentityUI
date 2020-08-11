@@ -37,31 +37,21 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         private readonly TimeSpan IMAGE_IN_CACHE_TIME_SPAN = new TimeSpan(1, 0, 0);
 
-        private const string DEFAULT_PROFILE_IMAGE = "adminUI/template/vendors/fontawesome-free-5.14.0-web/svgs/solid/user-check.svg";
+        private const string DEFAULT_PROFILE_IMAGE = "www.adminUI.template.vendors.fontawesome_free_5._14._0_web.svgs.solid.user-circle.svg";
+        private const string DEFAULT_IMAGE_NAME = "fontawesome-free-5.14.0-web/svgs/solid/user-circle.svg";
 
         private readonly IBaseRepositoryAsync<UserImageEntity> _userImageRepository;
 
-#if NET_CORE2
-        private readonly IHostingEnvironment _hostingEnvironment;
-#elif NET_CORE3
-        private readonly IWebHostEnvironment _hostingEnvironment;
-#endif
         private readonly IMemoryCache _memoryCache;
         private readonly IdentityUIOptions _identityUIOptions;
 
         private readonly ILogger<ProfileImageService> _logger;
 
-#if NET_CORE2
         public ProfileImageService(IBaseRepositoryAsync<UserImageEntity> userImageRepository, IMemoryCache memoryCache,
-             IHostingEnvironment hostingEnvironment, IOptions<IdentityUIOptions> identityUIOptions, ILogger<ProfileImageService> logger)
-#elif NET_CORE3
-        public ProfileImageService(IBaseRepositoryAsync<UserImageEntity> userImageRepository, IMemoryCache memoryCache,
-            IWebHostEnvironment hostingEnvironment, IOptions<IdentityUIOptions> identityUIOptions, ILogger<ProfileImageService> logger)
-#endif
+            IOptions<IdentityUIOptions> identityUIOptions, ILogger<ProfileImageService> logger)
         {
             _userImageRepository = userImageRepository;
             _memoryCache = memoryCache;
-            _hostingEnvironment = hostingEnvironment;
             _identityUIOptions = identityUIOptions.Value;
             _logger = logger;
         }
@@ -88,6 +78,12 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("image_is_to_big", $"Image is to big. Max image size {_identityUIOptions.MaxProfileImageSize / 1024} kB");
             }
 
+            if (uploadProfileImageRequest.File.FileName.Length > 250)
+            {
+                _logger.LogWarning($"Image name is to long. Image name length {uploadProfileImageRequest.File.FileName.Length}");
+                return Result.Fail("image_name_to_long", "Image name to long");
+            }
+
             byte[] image;
 
             using (MemoryStream memoryStream = new MemoryStream())
@@ -111,8 +107,7 @@ namespace SSRD.IdentityUI.Core.Services.User
                 UserImageEntity newUserImage = new UserImageEntity(
                     userId: userId,
                     blobImage: image,
-                    fileName: uploadProfileImageRequest.File.FileName,
-                    isDefault: true);
+                    fileName: uploadProfileImageRequest.File.FileName);
 
                 bool addResult = await _userImageRepository.Add(newUserImage);
                 if (!addResult)
@@ -179,7 +174,15 @@ namespace SSRD.IdentityUI.Core.Services.User
             {
                 _logger.LogError($"No profile image. UserId {userId}");
 
-                return GetDefaultImage();
+                Result<FileData> defaultImage = await GetDefaultImage();
+                if(defaultImage.Failure)
+                {
+                    return Result.Fail<FileData>(defaultImage.Errors);
+                }
+
+                _memoryCache.Set(cacheKey, defaultImage.Value, IMAGE_IN_CACHE_TIME_SPAN);
+
+                return Result.Ok(defaultImage.Value);
             }
 
             FileData fileData = new FileData(
@@ -191,10 +194,21 @@ namespace SSRD.IdentityUI.Core.Services.User
             return Result.Ok(fileData);
         }
 
-        private Result<FileData> GetDefaultImage()
+        private async Task<Result<FileData>> GetDefaultImage()
         {
-            return Result.Fail<FileData>("error", "Error");
-            //TODO: return default image
+            Assembly assembly = typeof(SSRD.AdminUI.Template.IdentityManagementTemplateExtension).GetTypeInfo().Assembly;
+
+            using (Stream resource = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.{DEFAULT_PROFILE_IMAGE}"))
+            {
+                byte[] buffer = new byte[resource.Length];
+                int read = await resource.ReadAsync(buffer, 0, (int)resource.Length);
+
+                FileData fileData = new FileData(
+                    fileName: DEFAULT_IMAGE_NAME,
+                    file: buffer);
+
+                return Result.Ok(fileData);
+            }
         }
     }
 }

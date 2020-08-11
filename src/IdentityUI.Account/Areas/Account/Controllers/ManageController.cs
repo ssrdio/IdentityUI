@@ -131,7 +131,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
                 return NotFound();
             }
 
-            return File(result.Value.File, "application/octet-stream", result.Value.FileName);
+            //TODO: make this nicer
+            string contentType = "application/octet-stream";
+            if(result.Value.FileName.EndsWith(".svg"))
+            {
+                contentType = "image/svg+xml";
+            }
+
+            return File(result.Value.File, contentType, result.Value.FileName);
         }
     }
 }
