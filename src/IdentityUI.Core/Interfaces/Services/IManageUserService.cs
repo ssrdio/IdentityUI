@@ -1,4 +1,5 @@
-﻿using SSRD.IdentityUI.Core.Models.Result;
+﻿using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using System;
 using System.Collections.Generic;

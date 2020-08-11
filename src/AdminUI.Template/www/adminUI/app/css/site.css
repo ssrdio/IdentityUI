@@ -6,9 +6,9 @@
     color: #ff4747 !important;
 }
 
-.btn-danger:hover, .btn-danger:active {
-    color: white !important;
-}
+    .btn-danger:hover, .btn-danger:active {
+        color: white !important;
+    }
 
 table.dataTableClass > tbody > tr > td {
     background-clip: padding-box !important;
@@ -18,10 +18,10 @@ table.dataTableClass > tbody > tr > td {
     color: white !important
 }
 
-.remove-button:hover, .remove-button:active {
-    background-color: #e20000 !important;
-    border-color: #e20000 !important;
-}
+    .remove-button:hover, .remove-button:active {
+        background-color: #e20000 !important;
+        border-color: #e20000 !important;
+    }
 
 .styled-checkbox {
     position: absolute;
@@ -94,4 +94,28 @@ table.dataTableClass > tbody > tr > td {
     position: relative;
     padding: 0px !important;
     width: 120px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.custom-row {
+    margin: 0px !important;
+}
+
+    .custom-row .left-card {
+        max-width: 49% !important;
+        margin-right: 1% !important;
+    }
+
+    .custom-row .right-card {
+        max-width: 49% !important;
+        margin-left: 1% !important;
+    }
+
+.profile-image-sm {
+    width: 40px;
+    height: 40px;
+/*    opacity: 0.35;*/
 }

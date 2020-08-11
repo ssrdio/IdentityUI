@@ -330,6 +330,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<ISessionService, Services.Auth.Session.SessionService>();
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<AppUserEntity>, CustomClaimsPrincipalFactory>();
             builder.Services.AddScoped<ISecurityStampValidator, CustomSecurityStampValidator>();
+
+            builder.Services.AddScoped<IProfileImageService, ProfileImageService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)

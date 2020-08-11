@@ -13,6 +13,8 @@ using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
+using Microsoft.AspNetCore.Http;
+using SSRD.IdentityUI.Core.Data.Models;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -22,14 +24,16 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         private readonly IManageDataService _manageDataService;
         private readonly IManageUserService _manageUserService;
         private readonly ICredentialsService _credentialsService;
+        private readonly IProfileImageService _profileImageService;
 
         public ManageController(ITwoFactorAuthService twoFactorAuthService, IManageDataService manageDataService, IManageUserService manageUserService,
-            ICredentialsService credentialsService)
+            ICredentialsService credentialsService, IProfileImageService profileImageService)
         {
             _twoFactorAuthService = twoFactorAuthService;
             _manageDataService = manageDataService;
             _manageUserService = manageUserService;
             _credentialsService = credentialsService;
+            _profileImageService = profileImageService;
         }
 
         [HttpGet("/[area]/[controller]")]
@@ -102,6 +106,39 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             viewModel = new ChangePasswordViewModel(StatusAlertViewExtension.Get("Password updated"));
 
             return View(viewModel);
+        }
+
+        [HttpPost("/[area]/[controller]/[action]")]
+        public async Task<IActionResult> ProfileImage([FromForm] UploadProfileImageRequest uploadImageRequest)
+        {
+            Result result = await _profileImageService.UpdateProfileImage(GetUserId(), uploadImageRequest);
+            if(result.Failure)
+            {
+                ModelState.AddErrors(result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new EmptyResult());
+        }
+
+        [HttpGet]
+        [Produces("application/octet-stream")]
+        public async Task<IActionResult> GetProfileImage()
+        {
+            Result<FileData> result = await _profileImageService.GetProfileImage(GetUserId());
+            if(result.Failure)
+            {
+                return NotFound();
+            }
+
+            //TODO: make this nicer
+            string contentType = "application/octet-stream";
+            if(result.Value.FileName.EndsWith(".svg"))
+            {
+                contentType = "image/svg+xml";
+            }
+
+            return File(result.Value.File, contentType, result.Value.FileName);
         }
     }
 }

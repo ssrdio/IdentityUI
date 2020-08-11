@@ -568,6 +568,40 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.UserImageEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<byte[]>("BlobImage")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("character varying(250)")
+                        .HasMaxLength(250);
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("_CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("_ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserImage");
+                });
+
             modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.Group.GroupAttributeEntity", b =>
                 {
                     b.HasOne("SSRD.IdentityUI.Core.Data.Entities.Group.GroupEntity", "Group")
@@ -699,6 +733,15 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.HasOne("SSRD.IdentityUI.Core.Data.Entities.Identity.AppUserEntity", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.UserImageEntity", b =>
+                {
+                    b.HasOne("SSRD.IdentityUI.Core.Data.Entities.Identity.AppUserEntity", "User")
+                        .WithOne("UserImage")
+                        .HasForeignKey("SSRD.IdentityUI.Core.Data.Entities.UserImageEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

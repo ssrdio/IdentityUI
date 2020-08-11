@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
+using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Services
 {
@@ -39,6 +41,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
                 x.PhoneNumberConfirmed));
 
             ProfileViewModel profile = _userRepository.SingleOrDefault(selectSpecification);
+
             if (profile == null)
             {
                 _logger.LogWarning($"No user. UserId {userId}");

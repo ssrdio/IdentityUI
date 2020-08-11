@@ -793,8 +793,7 @@ table.dataTable.no-footer {
 .user-name {
     display: inline-block;
     color: white;
-    border-left: solid 2px rgb(255, 255, 255);
-    padding-left: 30px;
+    padding-left: 5px;
     padding-right: 8px;
     font-weight: bold;
 }
