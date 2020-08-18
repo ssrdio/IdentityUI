@@ -116,7 +116,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         public async Task<Result> Register(RegisterRequest registerRequest)
         {
-            //if(!_identityUIEndpoints.RegisterEnabled)
+            if (!_identityUIEndpoints.RegisterEnabled)
             {
                 _logger.LogError($"User tried to register, but registrations are disabled");
                 return Result.Fail("registration_is_not_enabled", "Registration disabled");
@@ -279,7 +279,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         public async Task<Result> ExternalLoginRequest(ExternalLoginRegisterRequest externalLoginRegisterRequest)
         {
-            //if (!_identityUIEndpoints.RegisterEnabled)
+            if (!_identityUIEndpoints.RegisterEnabled)
             {
                 _logger.LogError($"User tried to register, but registrations are disabled");
                 return Result.Fail("registration_is_not_enabled", "Registration disabled");
