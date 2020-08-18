@@ -41,7 +41,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models
         public const string DISABLE_TWO_FACTOR_AUTHENTICATION = TWO_FACTOR_AUTHENTICATION + "/DisableTwoFactorAuthentication";
         public const string GENERATE_RECOVERY_CODES = TWO_FACTOR_AUTHENTICATION + "/RecoveryCodesView";
 
-        public const string MANAGE_CHANGE_PASSWORD = MANAGE + "/ChangePassword";
+        public const string MANAGE_CREDENTIALS = MANAGE + "/Credentials";
+        public const string REMOVE_EXTERNAL_PROVIDER = MANAGE_CREDENTIALS + "/RemoveExternalProvider";
 
         public const string PROFILE_IMAGE = MANAGE + "/GetProfileImage";
 

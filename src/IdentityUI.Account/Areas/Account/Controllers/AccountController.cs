@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -28,12 +29,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ICredentialsService _credentialsService;
         private readonly IAccountDataService _accountDataService;
+        private readonly IExternalLoginService _externalLoginService;
 
         private readonly IdentityUIEndpoints _identityUIEndpoints;
 
         public AccountController(ILoginService loginService, IEmailConfirmationService emailConfirmationService,
             IAddUserService addUserService, ICredentialsService credentialsService, IAccountDataService accountDataService,
-            ITwoFactorAuthService twoFactorAuthService, IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
+            ITwoFactorAuthService twoFactorAuthService, IExternalLoginService externalLoginService,
+            IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
         {
             _loginService = loginService;
             _emailConfirmationService = emailConfirmationService;
@@ -41,15 +44,16 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             _credentialsService = credentialsService;
             _accountDataService = accountDataService;
             _twoFactorAuthService = twoFactorAuthService;
+            _externalLoginService = externalLoginService;
 
             _identityUIEndpoints = identityUIEndpoints.Value;
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public async Task<IActionResult> Login(string returnUrl = null)
         {
-            LoginViewModel loginViewModel = _accountDataService.GetLoginViewModel(returnUrl);
+            LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
 
             return View(loginViewModel);
         }
@@ -60,7 +64,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         {
             if (!ModelState.IsValid)
             {
-                LoginViewModel loginViewModel = _accountDataService.GetLoginViewModel(returnUrl);
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
                 return View(loginViewModel);
             }
 
@@ -73,7 +77,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             }
             else if(result.RequiresTwoFactor)
             {
-                return RedirectToAction("LoginWith2fa", new { RememberMe = loginRequest.RememberMe, ReturnUrl = returnUrl});
+                return RedirectToAction(nameof(LoginWith2fa), new { RememberMe = loginRequest.RememberMe, ReturnUrl = returnUrl});
             }
             else if(result.IsLockedOut)
             {
@@ -81,12 +85,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             }
             else
             {
-                LoginViewModel loginViewModel = _accountDataService.GetLoginViewModel(returnUrl);
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt");
                 return View(loginViewModel);
             }
-
         }
 
         [AllowAnonymous]
@@ -170,6 +173,13 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [AllowAnonymous]
         [HttpGet]
         public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ExternalLoginError()
         {
             return View();
         }
@@ -377,6 +387,109 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             {
                 ModelState.AddErrors(result);
                 return View();
+            }
+
+            return RedirectToAction(nameof(RegisterSuccess));
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ExternalLogin(ExternalLoginRequest externalLoginRequest, string returnUrl)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            if (!ModelState.IsValid)
+            {
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
+                return View(nameof(Login), loginViewModel);
+            }
+
+            Result<AuthenticationProperties> result = await _externalLoginService.ExternalLogin(externalLoginRequest, returnUrl);
+            if(result.Failure)
+            {
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
+                return View(nameof(Login), loginViewModel);
+            }
+
+            return Challenge(result.Value, externalLoginRequest.Provider);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback([FromQuery] string returnUrl, [FromQuery] string remoteError)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            Result<Microsoft.AspNetCore.Identity.SignInResult> proccessCallbackResult = await _externalLoginService.Callback(remoteError);
+            if (proccessCallbackResult.Failure)
+            {
+                return RedirectToAction(nameof(Login), new { ReturnUrl = returnUrl });
+            }
+
+            if(proccessCallbackResult.Value.Succeeded)
+            {
+                return LocalRedirect(returnUrl);
+            }
+            if(proccessCallbackResult.Value.IsLockedOut)
+            {
+                return RedirectToAction(nameof(Lockout));
+            }
+            if(proccessCallbackResult.Value.RequiresTwoFactor)
+            {
+                return RedirectToAction(nameof(LoginWith2fa), new { ReturnUrl = returnUrl });
+            }
+
+            Result<ExternalLoginRegisterViewModel> getViewModelResult = await _accountDataService.GetExternalLoginViewModel(returnUrl);
+            if(getViewModelResult.Failure)
+            {
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
+                return View(nameof(Login), loginViewModel);
+            }
+
+            return View("ExternalLoginRegister", getViewModelResult.Value);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginRegister(string returnUrl)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            Result<ExternalLoginRegisterViewModel> getViewModelResult = await _accountDataService.GetExternalLoginViewModel(returnUrl);
+            if (getViewModelResult.Failure)
+            {
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl);
+                return View(nameof(Login), loginViewModel);
+            }
+
+            return View(getViewModelResult.Value);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ExternalLoginRegister(ExternalLoginRegisterRequest externalLoginRegisterRequest, string returnUrl)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            Result<ExternalLoginRegisterViewModel> getViewModelResult = await _accountDataService.GetExternalLoginViewModel(returnUrl);
+            if (getViewModelResult.Failure)
+            {
+                //HACK: change to support list of errors
+                LoginViewModel loginViewModel = await _accountDataService.GetLoginViewModel(returnUrl, getViewModelResult.Errors.FirstOrDefault()?.Message);
+                return View(nameof(Login), loginViewModel);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(getViewModelResult.Value);
+            }
+
+            Result result = await _addUserService.ExternalLoginRequest(externalLoginRegisterRequest);
+            if(result.Failure)
+            {
+                getViewModelResult.Value.StatusAlert = StatusAlertViewExtension.Get(result);
+                ModelState.AddErrors(result.Errors);
+                return View(getViewModelResult.Value);
             }
 
             return RedirectToAction(nameof(RegisterSuccess));

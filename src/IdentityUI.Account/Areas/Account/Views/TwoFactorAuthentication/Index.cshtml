@@ -22,8 +22,8 @@
             </div>
             <div class="custom-form custom-spacing">
                 <p>Currently you have <b>@Model.TwoFactorAuthenticationName</b> activated. The following actions are available for selected type of authentication: </p>
-                <div class="selected-auth-options-holder">
-                    <a class="settings-option negative-option" href="@PagePath.DISABLE_TWO_FACTOR_AUTHENTICATION">Disable</a>
+                <div class="button-holder">
+                    <a class="btn btn-danger remove-button custom-2fa" href="@PagePath.DISABLE_TWO_FACTOR_AUTHENTICATION">Disable</a>
                 </div>
             </div>
         </div>
@@ -47,9 +47,13 @@
             <div class="auth-methods">
                 <h5>Authenticator application</h5>
                 <p>If you wish to additionally <u>secure your account using authenticator applications</u>, click on the button below and follow instructions.</p>
-                <div class="link-holder">
-                    <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_TWO_FACTOR_AUTHENTICATOR">Set up 2FA</a>
-                </div>
+                
+                @if (!Model.TwoFactorAuthenticationEnabled)
+                {
+                    <div class="link-holder">
+                        <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_TWO_FACTOR_AUTHENTICATOR">Set up 2FA</a>
+                    </div>
+                }
             </div>
 
             @if (Model.IsPhoneAuthenticationAvailable)
@@ -57,10 +61,13 @@
                 <div class="auth-methods">
                     <h5>SMS</h5>
                     <p>If you wish to additionally <u>secure your account using SMS</u>, click on the button below and follow instructions.</p>
-                    <div class="link-holder">
-                        <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_PHONE_TWO_FACTOR_AUTHENTICATION">Setup SMS 2FA</a>
-                    </div>
 
+                    @if (!Model.TwoFactorAuthenticationEnabled)
+                    {
+                        <div class="link-holder">
+                            <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_PHONE_TWO_FACTOR_AUTHENTICATION">Setup SMS 2FA</a>
+                        </div>
+                    }
                 </div>
             }
 
@@ -69,9 +76,13 @@
                 <div class="auth-methods">
                     <h5>Email</h5>
                     <p>If you wish to additionally <u>secure your account using email</u>, click on the button below and follow instructions.</p>
-                    <div class="link-holder">
-                        <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_EMAIL_TWO_FACTOR_AUTHENTICATION">Setup Email 2FA</a>
-                    </div>
+
+                    @if (!Model.TwoFactorAuthenticationEnabled)
+                    {
+                        <div class="link-holder">
+                            <a class="btn btn-primary custom-2fa" href="@PagePath.ADD_EMAIL_TWO_FACTOR_AUTHENTICATION">Setup Email 2FA</a>
+                        </div>
+                    }
                 </div>
             }
         </div>

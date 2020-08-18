@@ -32,5 +32,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
 
         public int NumberOfRecoveryCodes { get; set; } = 6;
         public TimeSpan InviteValidForTimeSpan { get; set; } = TimeSpan.FromDays(7);
+
+        public bool BypassTwoFactorOnExternalLogin { get; set; } = false;
     }
 }

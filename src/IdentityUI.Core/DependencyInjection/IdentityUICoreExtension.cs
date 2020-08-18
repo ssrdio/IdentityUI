@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -127,7 +128,7 @@ namespace SSRD.IdentityUI.Core
                 options.InviteValidForTimeSpan = identityManagementEndpoints.InviteValidForTimeSpan;
             });
 
-            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints);
+            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, configuration);
 
             builder.Services.AddScoped<IEmailSender, NullEmailSender>();
             builder.Services.AddScoped<ISmsSender, NullSmsSender>();
@@ -184,6 +185,9 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IGroupStore, GroupStore>();
             builder.Services.AddScoped<IGroupUserStore, GroupUserStore>();
 
+            //To create UrlHelper we need ActionContext
+            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
             builder.Services.AddScoped<ReleaseManagement>();
 
             builder.Services.Configure<IdentityOptions>(identityOptions);
@@ -233,11 +237,6 @@ namespace SSRD.IdentityUI.Core
             return builder.AddIdentityUI(identityOptions);
         }
 
-        class Config
-        {
-            public bool IsEmailConfigured { get; set; }
-        }
-
         /// <summary>
         /// Registers EmailSender
         /// </summary>
@@ -280,6 +279,54 @@ namespace SSRD.IdentityUI.Core
         {
             builder.Services.ConfigureApplicationCookie(optionsAction);
 
+            Microsoft.AspNetCore.Authentication.AuthenticationBuilder authenticationBuilder = builder.Services.AddAuthentication();
+
+            if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:Microsoft:ClientId"]) && !string.IsNullOrEmpty(builder.Configuration["IdentityUI:Microsoft:ClientSecret"]))
+            {
+                authenticationBuilder.AddMicrosoftAccount(options =>
+                {
+                    options.ClientId = builder.Configuration["IdentityUI:Microsoft:ClientId"];
+                    options.ClientSecret = builder.Configuration["IdentityUI:Microsoft:ClientSecret"];
+                });
+            }
+
+            if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:Google:ClientId"]) && !string.IsNullOrEmpty(builder.Configuration["IdentityUI:Google:ClientSecret"]))
+            {
+                authenticationBuilder.AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["IdentityUI:Google:ClientId"];
+                    options.ClientSecret = builder.Configuration["IdentityUI:Google:ClientSecret"];
+                });
+            }
+
+            if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:Facebook:AppId"]) && !string.IsNullOrEmpty(builder.Configuration["IdentityUI:Facebook:AppSecret"]))
+            {
+                authenticationBuilder.AddFacebook(options =>
+                {
+                    options.AppId = builder.Configuration["IdentityUI:Facebook:AppId"];
+                    options.AppSecret = builder.Configuration["IdentityUI:Facebook:AppSecret"];
+                });
+            }
+
+            if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:Twitter:ConsumerKey"]) && !string.IsNullOrEmpty(builder.Configuration["IdentityUI:Twitter:ConsumerSecret"]))
+            {
+                authenticationBuilder.AddTwitter(options =>
+                {
+                    options.ConsumerKey = builder.Configuration["IdentityUI:Twitter:ConsumerKey"];
+                    options.ConsumerSecret = builder.Configuration["IdentityUI:Twitter:ConsumerSecret"];
+                    options.RetrieveUserDetails = builder.Configuration["IdentityUI:Twitter:RetrieveUserDetails"] == "True";
+                });
+            }
+
+            if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:WsFederation:Wtrealm"]))
+            {
+                authenticationBuilder.AddWsFederation(options =>
+                {
+                    options.MetadataAddress = builder.Configuration["IdentityUI:WsFederation:MetadataAddress"];
+                    options.Wtrealm = builder.Configuration["IdentityUI:WsFederation:Wtrealm"];
+                });
+            }
+
             return builder;
         }
 
@@ -304,6 +351,8 @@ namespace SSRD.IdentityUI.Core
 
         private static void AddServices(this IdentityUIServicesBuilder builder)
         {
+            builder.Services.AddScoped<IUrlGenerator, UrlGenerator>();
+
             builder.Services.AddScoped<IManageUserService, ManageUserService>();
             builder.Services.AddScoped<IAddUserService, AddUserService>();
 
@@ -332,6 +381,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<ISecurityStampValidator, CustomSecurityStampValidator>();
 
             builder.Services.AddScoped<IProfileImageService, ProfileImageService>();
+
+            builder.Services.AddScoped<IExternalLoginService, Services.Auth.Login.ExternalLoginService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
@@ -342,6 +393,7 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Core.Services.User.Models.NewUserRequest>, Core.Services.User.Models.NewUserRequestValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.User.Models.RegisterRequest>, Core.Services.User.Models.RegisterRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.AcceptInviteRequest>, Services.User.Models.AcceptInviteRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.ExternalLoginRegisterRequest>, Services.User.Models.ExternalLoginRegisterRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginRequest>, Core.Services.Auth.Login.Models.LoginRequestValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginWith2faRequest>, Core.Services.Auth.Login.Models.LoginWith2faRequestValidator>();
@@ -357,6 +409,7 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Credentials.Models.RecoverPasswordRequest>, Core.Services.Auth.Credentials.Models.RecoverPasswordValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Credentials.Models.ResetPasswordRequest>, Core.Services.Auth.Credentials.Models.ResetPasswordValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Credentials.Models.ChangePasswordRequest>, Core.Services.Auth.Credentials.Models.ChangePasswordValidator>();
+            builder.Services.AddSingleton<IValidator<Core.Services.Auth.Credentials.Models.CreatePasswordRequest>, Core.Services.Auth.Credentials.Models.CreatePasswordValidator>();
 
             builder.Services.AddSingleton<IValidator<Core.Services.User.Models.EditProfileRequest>, Core.Services.User.Models.EditProfileValidator>();
 
@@ -387,6 +440,8 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddSingleton<IValidator<Services.User.Models.InviteToGroupRequest>, Services.User.Models.InviteToGroupRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.InviteRequest>, Services.User.Models.InviteRequestValidatior>();
+
+            builder.Services.AddSingleton<IValidator<Services.Auth.Login.Models.ExternalLoginRequest>, Services.Auth.Login.Models.ExternalLoginRequestValidator>();
         }
 
         /// <summary>

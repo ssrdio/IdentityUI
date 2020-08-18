@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
@@ -22,12 +23,7 @@ namespace IdentityUI.Dev
                 logger.Debug("init main");
                 IHost host = CreateHostBuilder(args).Build();
 
-                host.RunIdentityMigrations();
-                host.SeedSystemEntities();
-
-                host.SeedIdentityAdmin("admin", "Password");
-                
-                //host.SeedDatabase(password: "", adminPassword: "");
+                PrepereDatabase(host, logger);
 
                 logger.Debug("run host");
                 host.Run();
@@ -54,5 +50,24 @@ namespace IdentityUI.Dev
                   logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
               })
               .UseNLog();
+
+        public static void PrepereDatabase(IHost host, NLog.ILogger logger)
+        {
+            logger.Info($"Preparing IdentityUI database");
+
+            using (IServiceScope serviceScope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                IServiceProvider serviceProvider = serviceScope.ServiceProvider;
+                IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
+
+                serviceProvider.RunIdentityMigrations();
+                //serviceProvider.CreateIdentityDatabase();
+
+                serviceProvider.SeedSystemEntities();
+
+                serviceProvider.SeedDatabase(adminUserName: configuration["IdentityUI:Admin:Username"], adminPassword: configuration["IdentityUI:Admin:Password"]);
+            }
+        }
+
     }
 }

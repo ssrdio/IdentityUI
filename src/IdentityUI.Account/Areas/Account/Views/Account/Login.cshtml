@@ -4,21 +4,47 @@
     ViewData["Title"] = "Login";
 }
 
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            $('button.external-login').on('click', (event) => {
+                let provider = $(event.target).data('provider');
+
+                let data = { provider: provider };
+
+                Api.post('/Account/ExternalLogin?returnUrl=@Model.ReturnUrl', data)
+                    .done(() => {
+
+                    })
+                    .fail((resp) => {
+                        console.log(resp.responseJSON);
+                    });
+            });
+        });
+
+    </script>
+}
 <div class="app-container">
     <div class="h-100 bg-plum-plate bg-animation">
-        <div class="d-flex min-vh-100 justify-content-center align-items-center">
-            <div class="mx-auto app-login-box col-md-8">
-                <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
-                <div class="modal-dialog w-100 mx-auto">
-                    <div class="modal-content">
-                        <form class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                            <div class="modal-body extra-body-padding">
+
+        <div id="login-screen" class="d-flex min-vh-100 justify-content-center align-items-center">
+            <div class="@if (Model.ExternalLogins.Count > 0) { @Html.Raw("main-card mb-3 col-lg-12 col-xl-6 card") } else { @Html.Raw("main-card mb-3 col-md-12 col-lg-6 col-xl-3 card") }" >
+                <div class="h5 modal-title text-center">
+                    <h4 class="custom-margin-top modal-header-custom">
+                       <div> Welcome back,</div>
+                    </h4>
+                </div>
+                <div class="card-body row ">
+                    <div class="@if (Model.ExternalLogins.Count > 0) { @Html.Raw("col-lg-6 col-md-12 login-row") } else { @Html.Raw("col-lg-12 col-md-12 login-row") }">
+                        <form id="classic-login" class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <div class="modal-body login-padding">
                                 <div class="h5 modal-title text-center">
                                     <h4 class="mt-2 modal-header-custom">
-                                        <div>Welcome back,</div>
                                         <span>Please sign in to your account below.</span>
                                     </h4>
                                 </div>
+
                                 <div class="form-row">
                                     <div class="col-md-12">
                                         <div class="position-relative form-group">
@@ -33,7 +59,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div asp-validation-summary="All" class="text-danger"></div>
+                                @await Component.InvokeAsync("AdminUIErrorAlertRazor")
                                 <div class="position-relative form-check checkbox-keep">
                                     <label class="form-check-label">
                                         <input asp-for="RememberMe" type="checkbox" class="form-check-input">
@@ -41,27 +67,221 @@
                                     </label>
                                 </div>
                                 <div class="divider"></div>
+                                <button class="btn btn-block btn-primary btn-lg font-weight-medium">Login</button>
+
                                 @if (Model.RegistrationEnabled)
                                 {
-                                    <h6 class="mb-0">No account? <a href="@PagePath.REGISTER" class="text-primary">Sign up</a> </h6>
+                                    <h6 class="mt-4 mb-2">No account? <a href="@PagePath.REGISTER" class="text-primary">Sign up</a> </h6>
                                 }
                                 @if (Model.PasswordRecoveryEnabled)
                                 {
-                                    <div class="password-margin">
+                                    <div class="mt-2 mb-2">
                                         <h6 class="mb-0">Forgotten Password? <a href="@PagePath.RECOVER_PASSWORD" class="text-primary">Recover</a> </h6>
                                     </div>
                                 }
                             </div>
-                            <div class="modal-footer clearfix">
-                                <div class="float-right">
-                                    <button class="btn btn-primary btn-lg">Login</button>
-                                </div>
-                            </div>
                         </form>
                     </div>
+                    @if (Model.ExternalLogins.Count > 0)
+                    {
+                        <div class="col-lg-6 col-sm-12 login-row login-row-border">
+                            <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                <div class="modal-body login-padding">
+                                    <div class="h5 modal-title text-center">
+                                        <h4 class="mt-2 modal-header-custom">
+                                            <span>or use one of your other profiles to proceed.</span>
+                                        </h4>
+                                    </div>
+                                    <div>
+                                        @foreach (var provider in Model.ExternalLogins)
+                                        {
+                                            if (provider.Name == "Google")
+                                            {
+                                                <div class="col-md-12">
+                                                    <button type="submit" class="btn btn-block btn-google" value="@provider.Name"
+                                                            title="Log in using your @provider.DisplayName account" name="provider">
+
+                                                        <i class="fab fa-google-plus-g fa-align-left social-icon" style=""></i>
+                                                        <span class="text">Google</span>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else if (provider.Name == "Facebook")
+                                            {
+                                                <div class="col-md-12">
+                                                    <button class="btn-block btn btn-facebook" type="submit" value="@provider.Name"
+                                                            title="Log in using your @provider.DisplayName account" name="provider">
+
+                                                        <i class="fab fa-facebook-f fa-align-left social-icon"></i>
+                                                        <span class="text">Facebook</span>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else if (provider.Name == "Twitter")
+                                            {
+                                                <div class="col-md-12">
+                                                    <button class="btn-block btn btn-twitter" type="submit" value="@provider.Name"
+                                                            title="Log in using your @provider.DisplayName account" name="provider">
+
+                                                        <i class="fab fa-twitter fa-align-left social-icon"></i>
+                                                        <span class="text">Twitter</span>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else if (provider.Name == "Microsoft")
+                                            {
+                                                <div class="col-md-12">
+                                                    <button class="btn-block btn btn-microsoft" type="submit" value="@provider.Name"
+                                                            title="Log in using your @provider.DisplayName account" name="provider">
+
+                                                        <i class="fab fa-microsoft fa-align-left social-icon"></i>
+                                                        <span class="text">Microsoft</span>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-12">
+                                                    <button class="btn-block btn btn-other" type="submit" name="provider"
+                                                            value="@provider.Name" title="Log in using your @provider.DisplayName account">
+
+                                                        <i class="fas fa-share-alt fa-align-left social-icon"></i>
+                                                        <span class="text">Sign in with @provider.Name</span>
+
+
+                                                    </button>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    }
                 </div>
-                <div class="text-center text-white opacity-8 mt-3">© @CopyRightModel.YEAR - @CopyRightModel.NAME</div>
+            </div>
+            <!-- <div class="mx-auto app-login-box col-md-8">
+        <!-- <div class="app-logo-inverse mx-auto mb-3"></div> 
+            <div class="modal-dialog w-100 mx-auto">
+                <div class="modal-content">
+                    <form class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div class="modal-body extra-body-padding">
+                            <div class="h5 modal-title text-center">
+                                <h4 class="mt-2 modal-header-custom">
+                                    <div>Welcome back,</div>
+                                    <span>Please sign in to your account below.</span>
+                                </h4>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <input asp-for="UserName" placeholder="Email here..." type="text" class="form-control">
+                                        <span asp-validation-for="UserName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <input asp-for="Password" placeholder="Password here..." type="password" class="form-control">
+                                        <span asp-validation-for="Password" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            <div class="position-relative form-check checkbox-keep">
+                                <label class="form-check-label">
+                                    <input asp-for="RememberMe" type="checkbox" class="form-check-input">
+                                    Keep me logged in
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <button class="btn btn-block btn-primary btn-lg font-weight-medium">Login</button>
+
+                            @*@foreach (var provider in Model.ExternalLogins)
+                        {
+                        <button type="button" class="btn btn-primary external-login" data-provider="@provider.Name">@provider.DisplayName</button>
+                        }*@
+
+                            @if (Model.RegistrationEnabled)
+                            {
+                                <h6 class="mb-0">No account? <a href="@PagePath.REGISTER" class="text-primary">Sign up</a> </h6>
+                            }
+                            @if (Model.PasswordRecoveryEnabled)
+                            {
+                                <div class="password-margin">
+                                    <h6 class="mb-0">Forgotten Password? <a href="@PagePath.RECOVER_PASSWORD" class="text-primary">Recover</a> </h6>
+                                </div>
+                            }
+                        </div>
+                        @*<div class="modal-footer clearfix">
+                        <div class="float-right">
+                            <button class="btn btn-primary btn-lg">Login</button>
+                        </div>
+                    </div>*@
+                    </form>
+
+                    <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div>
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                if (provider.Name == "Google")
+                                {
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-block btn-google" value="@provider.Name"
+                                                title="Log in using your @provider.DisplayName account" name="provider">
+
+                                            <i class="fab fa-google-plus fa-align-left social-icon" style=""></i>Google
+                                        </button>
+                                    </div>
+                                }
+                                else if (provider.Name == "Facebook")
+                                {
+                                    <div class="col-md-4">
+                                        <button class="btn-block btn btn-facebook" type="submit" value="@provider.Name"
+                                                title="Log in using your @provider.DisplayName account" name="provider">
+
+                                            <i class="fab fa-facebook fa-align-left social-icon"></i>Facebook
+                                        </button>
+                                    </div>
+                                }
+                                else if (provider.Name == "Twitter")
+                                {
+                                    <div class="col-md-4">
+                                        <button class="btn-block btn btn-twitter" type="submit" value="@provider.Name"
+                                                title="Log in using your @provider.DisplayName account" name="provider">
+
+                                            <i class="fab fa-twitter fa-align-left social-icon"></i>Twitter
+                                        </button>
+                                    </div>
+                                }
+                                else if (provider.Name == "Microsoft")
+                                {
+                                    <div class="col-md-4">
+                                        <button class="btn-block btn btn-microsoft" type="submit" value="@provider.Name"
+                                                title="Log in using your @provider.DisplayName account" name="provider">
+
+                                            <i class="fab fa-microsoft fa-align-left social-icon"></i>Microsoft
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="col-md-4">
+                                        <button class="btn-block btn btn-linkedin" type="submit" name="provider"
+                                                value="@provider.Name" title="Log in using your @provider.DisplayName account">
+
+                                            <i class="fab fa-life-buoy fa-align-left social-icon"></i>
+                                            Sign in with @provider.Name
+
+                                        </button>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center text-white opacity-8 mt-3">© @CopyRightModel.YEAR - @CopyRightModel.NAME</div>
+        </div> -->
+        </div>
             </div>
         </div>
-    </div>
-</div>

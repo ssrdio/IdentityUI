@@ -1,0 +1,13 @@
+﻿@foreach(var item in ViewData.ModelState)
+{
+    if(item.Key == string.Empty && item.Value.Errors.Any())
+    {
+    <div class="login-error-holder">
+        @foreach(var error in item.Value.Errors)
+        {
+        <p>@error.ErrorMessage</p>
+        }
+    </div>
+    }
+
+}

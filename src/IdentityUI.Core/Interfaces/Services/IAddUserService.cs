@@ -12,5 +12,6 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
         Task<Result<string>> AddUser(NewUserRequest newUserRequest, string adminId);
         Task<Result> Register(RegisterRequest registerRequest);
         Task<Result> AcceptInvite(AcceptInviteRequest acceptInvite);
+        Task<Result> ExternalLoginRequest(ExternalLoginRegisterRequest externalLoginRegisterRequest);
     }
 }

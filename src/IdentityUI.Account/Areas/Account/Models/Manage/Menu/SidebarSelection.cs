@@ -12,7 +12,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu
     public enum SidebarOptions
     {
         Profile = 1,
-        ChangePassword = 2,
+        Credentials = 2,
         TwoFactorAuthenticator = 3,
     }
 }

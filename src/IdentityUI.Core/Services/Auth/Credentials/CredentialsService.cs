@@ -17,6 +17,10 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.Interfaces.Services;
+using Microsoft.AspNetCore.Http;
+using SSRD.IdentityUI.Core.Services.Identity;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
 {
@@ -27,9 +31,12 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
         private readonly IEmailService _emailService;
         private readonly ILoginService _loginService;
 
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         private readonly IValidator<RecoverPasswordRequest> _forgotPasswordValidator;
         private readonly IValidator<ResetPasswordRequest> _recoverPasswordValidator;
         private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
+        private readonly IValidator<CreatePasswordRequest> _createPasswordValidator;
 
         private readonly ILogger<CredentialsService> _logger;
 
@@ -37,8 +44,9 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
         private readonly IdentityUIEndpoints _identityManagementEndpoints;
 
         public CredentialsService(UserManager<AppUserEntity> userManager, IEmailService emailService, ILoginService loginService,
-            IValidator<RecoverPasswordRequest> forgotPasswordValidator, IValidator<ResetPasswordRequest> recoverPasswordValidator,
-            IValidator<ChangePasswordRequest> changePasswordValidator, ILogger<CredentialsService> logger,
+            IHttpContextAccessor httpContextAccessor, IValidator<RecoverPasswordRequest> forgotPasswordValidator,
+            IValidator<ResetPasswordRequest> recoverPasswordValidator, IValidator<ChangePasswordRequest> changePasswordValidator,
+            IValidator<CreatePasswordRequest> createPasswordValidator, ILogger<CredentialsService> logger,
             IOptionsSnapshot<IdentityUIOptions> identityManagementOptions, IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
         {
             _userManager = userManager;
@@ -46,9 +54,12 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
             _emailService = emailService;
             _loginService = loginService;
 
+            _httpContextAccessor = httpContextAccessor;
+
             _forgotPasswordValidator = forgotPasswordValidator;
             _recoverPasswordValidator = recoverPasswordValidator;
             _changePasswordValidator = changePasswordValidator;
+            _createPasswordValidator = createPasswordValidator;
 
             _logger = logger;
 
@@ -75,7 +86,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
             IdentityResult identityResult = await _userManager.ChangePasswordAsync(appUser, request.OldPassword, request.NewPassword);
             if(!identityResult.Succeeded)
             {
-                _logger.LogWarning($"Faild to change password. UserId {userId}");
+                _logger.LogWarning($"Failed to change password. UserId {userId}");
                 return Result.Fail(identityResult.Errors);
             }
 
@@ -84,7 +95,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
             Result loginResult = await _loginService.Login(userId, sessionCode, ip);
             if(loginResult.Failure)
             {
-                _logger.LogError($"Faild to log in user after password change. UserId {userId}");
+                _logger.LogError($"Failed to log in user after password change. UserId {userId}");
             }
 
             return Result.Ok();
@@ -167,6 +178,80 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
             }
 
             _logger.LogInformation($"Password reset. UserId {appUser.Id}");
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> CreatePassword(CreatePasswordRequest createPasswordRequest)
+        {
+            ValidationResult validationResult = _createPasswordValidator.Validate(createPasswordRequest);
+            if(!validationResult.IsValid)
+            {
+                _logger.LogWarning($"Invalid {nameof(CreatePasswordRequest)} model");
+                return Result.Fail(validationResult.Errors);
+            }
+
+            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+
+            AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
+            if(appUser == null)
+            {
+                _logger.LogError($"No User. UserId {userId}");
+                return Result.Fail("no_user", "No User");
+            }
+
+            _logger.LogTrace($"Creating password. UserId {userId}");
+
+            IdentityResult identityResult = await _userManager.AddPasswordAsync(appUser, createPasswordRequest.NewPassword);
+            if(!identityResult.Succeeded)
+            {
+                _logger.LogError($"Failed to add password. UserId {userId}");
+                return Result.Fail(identityResult.Errors);
+            }
+
+            Result loginResult = await _loginService.Login(userId);
+            if (loginResult.Failure)
+            {
+                _logger.LogError($"Failed to log in user after password was added. UserId {userId}");
+            }
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> RemoveExternalLogin()
+        {
+            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+
+            AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
+            if (appUser == null)
+            {
+                _logger.LogError($"No User. UserId {userId}");
+                return Result.Fail("no_user", "No User");
+            }
+
+            _logger.LogTrace($"Removing external login provider. UserId {userId}");
+
+            IList<UserLoginInfo> loginProviders = await _userManager.GetLoginsAsync(appUser);
+
+            UserLoginInfo userLoginInfo = loginProviders.SingleOrDefault(); //TODO: only support one login provider
+            if(userLoginInfo == null)
+            {
+                _logger.LogWarning($"User does not have a external login provider. UserId {userId}");
+                return Result.Ok();
+            }
+
+            IdentityResult identityResult = await _userManager.RemoveLoginAsync(appUser, userLoginInfo.LoginProvider, userLoginInfo.ProviderKey);
+            if(!identityResult.Succeeded)
+            {
+                _logger.LogError($"Failed to remove external login provider. UserId {userId}");
+                return Result.Fail("failed_to_remove_external_login_provider", "Failed to remove external login provider");
+            }
+
+            Result loginResult = await _loginService.Login(userId);
+            if (loginResult.Failure)
+            {
+                _logger.LogError($"Failed to log in user after external login provider was removed. UserId {userId}");
+            }
 
             return Result.Ok();
         }

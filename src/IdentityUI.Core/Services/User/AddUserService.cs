@@ -29,6 +29,7 @@ namespace SSRD.IdentityUI.Core.Services.User
     internal class AddUserService : IAddUserService
     {
         private readonly UserManager<AppUserEntity> _userManager;
+        private readonly SignInManager<AppUserEntity> _signInManager;
 
         private readonly IEmailConfirmationService _emailService;
 
@@ -40,16 +41,21 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IValidator<NewUserRequest> _newUserValidator;
         private readonly IValidator<RegisterRequest> _registerValidator;
         private readonly IValidator<AcceptInviteRequest> _acceptInviteValidator;
+        private readonly IValidator<ExternalLoginRegisterRequest> _externalLoginRequsterRequestValidator;
+
+        private readonly IdentityUIEndpoints _identityUIEndpoints;
 
         private readonly ILogger<AddUserService> _logger;
 
-        public AddUserService(UserManager<AppUserEntity> userManager, IValidator<NewUserRequest> newUserValidator,
+        public AddUserService(UserManager<AppUserEntity> userManager, SignInManager<AppUserEntity> signInManager, IValidator<NewUserRequest> newUserValidator,
             IValidator<RegisterRequest> registerValidator, IValidator<AcceptInviteRequest> acceptInviteValidator,
             ILogger<AddUserService> logger, IEmailConfirmationService emailService, IBaseRepository<InviteEntity> inviteRepository,
-            IBaseRepository<GroupEntity> groupRepository, IBaseRepository<GroupUserEntity> groupUserRepository, 
-            IBaseRepository<RoleEntity> roleRepository)
+            IBaseRepository<GroupEntity> groupRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
+            IValidator<ExternalLoginRegisterRequest> externalLoginRequsterRequestValidator,
+            IOptions<IdentityUIEndpoints> identityUIEndpoints, IBaseRepository<RoleEntity> roleRepository)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
 
             _inviteRepository = inviteRepository;
             _groupRepository = groupRepository;
@@ -59,8 +65,11 @@ namespace SSRD.IdentityUI.Core.Services.User
             _newUserValidator = newUserValidator;
             _registerValidator = registerValidator;
             _acceptInviteValidator = acceptInviteValidator;
+            _externalLoginRequsterRequestValidator = externalLoginRequsterRequestValidator;
 
             _emailService = emailService;
+
+            _identityUIEndpoints = identityUIEndpoints.Value;
 
             _logger = logger;
         }
@@ -107,6 +116,12 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         public async Task<Result> Register(RegisterRequest registerRequest)
         {
+            //if(!_identityUIEndpoints.RegisterEnabled)
+            {
+                _logger.LogError($"User tried to register, but registrations are disabled");
+                return Result.Fail("registration_is_not_enabled", "Registration disabled");
+            }
+
             ValidationResult validationResult = _registerValidator.Validate(registerRequest);
             if (!validationResult.IsValid)
             {
@@ -258,6 +273,56 @@ namespace SSRD.IdentityUI.Core.Services.User
                 _logger.LogError($"Failed to add role. UserId {appUser.Id}, RoleId {roleId}");
                 return Result.Fail("failed_to_add_role", "Failed to add role");
             }
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> ExternalLoginRequest(ExternalLoginRegisterRequest externalLoginRegisterRequest)
+        {
+            //if (!_identityUIEndpoints.RegisterEnabled)
+            {
+                _logger.LogError($"User tried to register, but registrations are disabled");
+                return Result.Fail("registration_is_not_enabled", "Registration disabled");
+            }
+
+            ValidationResult validationResult = _externalLoginRequsterRequestValidator.Validate(externalLoginRegisterRequest);
+            if(!validationResult.IsValid)
+            {
+                _logger.LogWarning($"Invalid {nameof(ExternalLoginRegisterRequestValidator)} model");
+                return Result.Fail(validationResult.Errors);
+            }
+
+            ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
+            if(externalLoginInfo == null)
+            {
+                _logger.LogError($"Failed to get external login info.");
+                return Result.Fail("failed_to_get_external_login_info", "Failed to get external login info");
+            }
+
+            AppUserEntity appUser = new AppUserEntity(
+                userName: externalLoginRegisterRequest.Email,
+                email: externalLoginRegisterRequest.Email,
+                firstName: externalLoginRegisterRequest.FirstName,
+                lastName: externalLoginRegisterRequest.LastName,
+                emailConfirmed: false,
+                enabled: true);
+
+            IdentityResult createUserResult = await _userManager.CreateAsync(appUser);
+            if(!createUserResult.Succeeded)
+            {
+                _logger.LogError($"Failed to create user");
+                return Result.Fail(createUserResult.Errors);
+            }
+
+            IdentityResult addLoginResult = await _userManager.AddLoginAsync(appUser, externalLoginInfo);
+            if(!addLoginResult.Succeeded)
+            {
+                _logger.LogError($"Failed to add login to user. UserId {appUser.Id}");
+            }
+
+            string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+
+            await _emailService.SendVerificationMail(appUser, code);
 
             return Result.Ok();
         }

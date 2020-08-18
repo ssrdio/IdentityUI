@@ -1,4 +1,3 @@
-using IdentityUI.Dev.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -67,8 +66,6 @@ namespace IdentityUI.Dev
             .AddAccountManagement()
             .AddEmailSender();
 
-            services.AddScoped<UserSeeder>();
-
             services.AddControllersWithViews();
 
 #if DEBUG
@@ -86,6 +83,7 @@ namespace IdentityUI.Dev
 
         }
 
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -97,6 +95,7 @@ namespace IdentityUI.Dev
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             app.UseStaticFiles();
 
             app.UseRouting();

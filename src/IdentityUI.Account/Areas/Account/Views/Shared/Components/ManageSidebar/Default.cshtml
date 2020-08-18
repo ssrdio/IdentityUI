@@ -8,10 +8,10 @@
                 <span class="menu-title i-mar">Profile</span>
             </a>
         </li>
-        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.ChangePassword ? "active": "")">
-            <a class="nav-link" href="@PagePath.MANAGE_CHANGE_PASSWORD">
+        <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Credentials ? "active": "")">
+            <a class="nav-link" href="@PagePath.MANAGE_CREDENTIALS">
                 <i class="fas fa-unlock "></i>
-                <span class="menu-title i-mar">Change Password</span>
+                <span class="menu-title i-mar">Credentials</span>
             </a>
         </li>
         <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.TwoFactorAuthenticator ? "active": "")">

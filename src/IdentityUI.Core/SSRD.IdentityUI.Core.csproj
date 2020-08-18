@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
-    <NoWarn>EF1000</NoWarn>  <!--Change this now it is only for AbstractUpdate.ExecuteMigrationSql-->
     <NoWarn>$(NoWarn);1591</NoWarn>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
@@ -40,6 +39,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.14" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="2.1.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.WsFederation" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0'">
@@ -50,6 +54,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.WsFederation" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

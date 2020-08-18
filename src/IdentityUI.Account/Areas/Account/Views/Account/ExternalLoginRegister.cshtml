@@ -1,4 +1,4 @@
-﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.RegisterViewModel
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.ExternalLoginRegisterViewModel
 
 @{
     ViewData["Title"] = "Register";
@@ -11,13 +11,14 @@
                 <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
                 <div class="modal-dialog w-100">
                     <div class="modal-content">
-                        <form asp-area="Account" asp-controller="Account" asp-action="Register" method="post">
+                        <form asp-area="Account" asp-controller="Account" asp-action="ExternalLoginRegister" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                             <div class="modal-body extra-body-padding">
 
                                 <div class="h5 modal-title text-center">
                                     <h4 class="mt-2 modal-header-custom">
                                         <div>Welcome,</div>
                                         <span>It only takes a <span class="text-success inline-span">few seconds</span> to create your account</span>
+                                        <span>@Model.ExternalLoginProviderName</span>
                                     </h4>
                                 </div>
                                 <div class="divider row"></div>
@@ -40,26 +41,10 @@
                                             <span asp-validation-for="Email" class="text-danger"></span>
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
-                                        <div class="position-relative form-group">
-                                            <input asp-for="Password" placeholder="Password here..." type="password" class="form-control">
-                                            <span asp-validation-for="Password" class="text-danger"></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="position-relative form-group">
-                                            <input asp-for="ConfirmPassword" placeholder="Repeat Password here..." type="password" class="form-control">
-                                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                                        </div>
-                                    </div>
                                 </div>
-
                                 @await Component.InvokeAsync("AdminUIErrorAlertRazor")
+
                                 <div class="divider row"></div>
-                                <h6 class="mb-0">
-                                    Already have an account? <a href="@PagePath.LOGIN" class="text-primary">Sign in</a> @if (Model.RecoverPasswordEnabled)
-                                    {<span> | <a href="@PagePath.RECOVER_PASSWORD" class="text-primary">Recover Password</a> </span>}
-                                </h6>
                             </div>
                             <div class="modal-footer d-block">
                                 <div class="float-right" style="padding-bottom: 15px">

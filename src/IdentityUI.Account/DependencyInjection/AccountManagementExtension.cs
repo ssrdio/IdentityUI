@@ -27,6 +27,7 @@ namespace SSRD.IdentityUI.Account
             builder.Services.AddScoped<IManageDataService, ManageDataService>();
             builder.Services.AddScoped<IAccountDataService, AccountDataService>();
             builder.Services.AddScoped<ITwoFactorAuthenticationDataService, TwoFactorAuthenticationDataService>();
+            builder.Services.AddScoped<ICredentialsDataService, CredentialsDataService>();
 
             builder.Services.ConfigureOptions(typeof(UIConfigureOptions));
 

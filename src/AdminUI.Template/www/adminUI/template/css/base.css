@@ -988,3 +988,112 @@ table.dataTableClass > tbody > tr > td.checkbox-holder {
     padding: 5px 0px !important;
     background: transparent !important;
 }
+
+.btn-google:hover {
+    background: #b22222;
+    color: #fff;
+}
+
+.btn-facebook:hover {
+    background: #2b4db1;
+    color: #fff;
+}
+
+.btn-twitter:hover {
+    background: #007bb6;
+    color: #fff;
+}
+
+.btn-microsoft:hover {
+    background: #00618E;
+    color: #fff;
+}
+
+.btn-facebook {
+    background: #305c99;
+    color: #fff;
+}
+
+.btn-twitter {
+    background: #00cdff;
+    color: #fff;
+}
+
+.btn-google {
+    background: #d24228;
+    color: #fff;
+}
+
+.btn-other {
+    background: var(--blue);
+    color: #fff;
+}
+
+.btn-other:hover {
+    background-color: #005CBC;
+    color: white;
+
+}
+
+.btn-microsoft {
+    background: #007bb6;
+    color: #fff;
+}
+
+.btn-facebook, .btn-twitter, .btn-google, .btn-other, .btn-microsoft{
+    margin-bottom: 19px;
+}
+
+.btn-facebook .fab, .btn-twitter .fab, .btn-google .fab, .btn-other .fab, .btn-microsoft .fab, .btn-other .fas {
+    width: 30px;
+}
+
+.btn-facebook .text, .btn-twitter .text, .btn-google .text, .btn-other .text, .btn-microsoft .text {
+    min-width: 75px;
+    display: inline-block;
+    text-align: left;
+}
+
+#external-account, #classic-login {
+    display: flex;
+    height: 100%;
+}
+
+.login-padding{
+    margin: 0px;
+    padding: 0px;
+}
+
+.custom-margin-top{
+    margin-top: 30px !important;
+}
+
+.login-row-border{
+    border-left: solid 1px lightgrey;
+}
+
+.login-row {
+    margin 0px;
+    margin-bottom: 40px;
+    padding: 0px 40px;
+    margin-top: 25px;
+}
+
+#login-screen .main-card {
+    margin-bottom: 0px !important;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
+}
+
+.error-reasoning {
+    font-size: 15px;
+    padding-top: 10px;
+    color: black;
+}
+
+.login-error-holder {
+    margin: 0px;
+    color: red;
+    padding-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
+}

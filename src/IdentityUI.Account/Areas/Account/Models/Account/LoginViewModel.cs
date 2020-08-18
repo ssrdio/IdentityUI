@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authentication;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -17,11 +18,18 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
         public bool RegistrationEnabled { get; set; }
         public bool PasswordRecoveryEnabled { get; set; }
 
-        public LoginViewModel(string returnUrl, bool registrationEnabled, bool passwordRecoveryEnabled)
+        public string Error { get; set; }
+        public List<AuthenticationScheme> ExternalLogins { get; set; }
+
+        public LoginViewModel(string returnUrl, bool registrationEnabled, bool passwordRecoveryEnabled, string error, List<AuthenticationScheme> externalLogins)
         {
             ReturnUrl = returnUrl;
             RegistrationEnabled = registrationEnabled;
             PasswordRecoveryEnabled = passwordRecoveryEnabled;
+
+            Error = error;
+
+            ExternalLogins = externalLogins;
         }
     }
 }

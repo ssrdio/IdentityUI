@@ -23,16 +23,15 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         private readonly ITwoFactorAuthService _twoFactorAuthService;
         private readonly IManageDataService _manageDataService;
         private readonly IManageUserService _manageUserService;
-        private readonly ICredentialsService _credentialsService;
         private readonly IProfileImageService _profileImageService;
 
         public ManageController(ITwoFactorAuthService twoFactorAuthService, IManageDataService manageDataService, IManageUserService manageUserService,
-            ICredentialsService credentialsService, IProfileImageService profileImageService)
+            IProfileImageService profileImageService)
         {
             _twoFactorAuthService = twoFactorAuthService;
             _manageDataService = manageDataService;
             _manageUserService = manageUserService;
-            _credentialsService = credentialsService;
+
             _profileImageService = profileImageService;
         }
 
@@ -79,40 +78,11 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             return View(getResult.Value);
         }
 
-        [HttpGet]
-        public IActionResult ChangePassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return RedirectToAction(nameof(Profile));
-            }
-
-            Result result = await _credentialsService.ChangePassword(GetUserId(), GetSessionCode(), GetIp(), request);
-            ChangePasswordViewModel viewModel;
-
-            if (result.Failure)
-            {
-                viewModel = new ChangePasswordViewModel(StatusAlertViewExtension.Get(result));
-
-                ModelState.AddErrors(result.Errors);
-                return View(viewModel);
-            }
-            viewModel = new ChangePasswordViewModel(StatusAlertViewExtension.Get("Password updated"));
-
-            return View(viewModel);
-        }
-
         [HttpPost("/[area]/[controller]/[action]")]
         public async Task<IActionResult> ProfileImage([FromForm] UploadProfileImageRequest uploadImageRequest)
         {
             Result result = await _profileImageService.UpdateProfileImage(GetUserId(), uploadImageRequest);
-            if(result.Failure)
+            if (result.Failure)
             {
                 ModelState.AddErrors(result);
                 return BadRequest(ModelState);
@@ -126,14 +96,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         public async Task<IActionResult> GetProfileImage()
         {
             Result<FileData> result = await _profileImageService.GetProfileImage(GetUserId());
-            if(result.Failure)
+            if (result.Failure)
             {
                 return NotFound();
             }
 
             //TODO: make this nicer
             string contentType = "application/octet-stream";
-            if(result.Value.FileName.EndsWith(".svg"))
+            if (result.Value.FileName.EndsWith(".svg"))
             {
                 contentType = "image/svg+xml";
             }
