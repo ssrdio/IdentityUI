@@ -21,7 +21,6 @@
                                     </h4>
                                 </div>
                                 <div class="divider row"></div>
-                                <div asp-validation-summary="All" class="text-danger"></div>
                                 <div class="form-row">
                                     <input asp-for="Code" type="hidden" />
                                     <div class="col-md-12">
@@ -49,6 +48,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                @await Component.InvokeAsync("AdminUIErrorAlertRazor")
                                 <div class="divider row"></div>
                             </div>
                             <div class="modal-footer d-block">

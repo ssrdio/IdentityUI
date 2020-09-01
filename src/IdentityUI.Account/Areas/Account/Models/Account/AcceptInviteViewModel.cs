@@ -16,6 +16,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
 
         public string ConfirmPassword { get; set; }
 
+        public IDictionary<string, string> Attributes { get; set; }
+
         public string Code { get; set; }
 
         public AcceptInviteViewModel(string code)

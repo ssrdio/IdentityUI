@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
@@ -17,6 +19,8 @@ namespace IdentityUI.Sample.Sms
             {
                 logger.Debug("init main");
                 IHost host = CreateHostBuilder(args).Build();
+
+                PrepereDatabase(host, logger);
 
                 logger.Debug("run host");
                 host.Run();
@@ -43,5 +47,18 @@ namespace IdentityUI.Sample.Sms
                   logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
               })
               .UseNLog();
+
+        public static void PrepereDatabase(IHost host, NLog.ILogger logger)
+        {
+            logger.Info($"Preparing IdentityUI database");
+
+            using IServiceScope serviceScope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            IServiceProvider serviceProvider = serviceScope.ServiceProvider;
+            IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            serviceProvider.RunIdentityMigrations();
+            serviceProvider.SeedDatabase(adminUserName: configuration["IdentityUI:Admin:Username"], adminPassword: configuration["IdentityUI:Admin:Password"]);
+        }
     }
 }

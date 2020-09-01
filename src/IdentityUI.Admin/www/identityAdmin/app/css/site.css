@@ -1,10 +1,6 @@
-﻿
-
-
-
-.table-input input {
+﻿.table-input input {
     padding: 5px !important;
-    height: 38px;
+    height: 30px;
 }
 
 .table-input select {

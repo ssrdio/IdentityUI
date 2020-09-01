@@ -135,6 +135,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                 new Update_02_AddPermissionsAddGroups(),
                 new Update_03_UserActiveTwoFactorAuthenticationColumnAdded(),
                 new Update_04_AddUserImageTable(),
+                new Update_05_AddUserAttributes(),
             };
             return updates.OrderBy(m => m.GetVersion()).ToList();
         }

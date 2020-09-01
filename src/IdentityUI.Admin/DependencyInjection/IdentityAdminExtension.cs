@@ -59,6 +59,8 @@ namespace SSRD.IdentityUI.Admin
 
             builder.Services.AddScoped<IEmailDataService, EmailDataService>();
 
+            builder.Services.AddScoped<IUserAttributeDataService, UserAttributeDataService>();
+
             if(builder.IdentityManagementEndpoints.UseEmailSender.HasValue && builder.IdentityManagementEndpoints.UseEmailSender.Value == true)
             {
                 SidebarSelection.UseEmailSender = true;

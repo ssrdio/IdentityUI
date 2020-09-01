@@ -1,0 +1,39 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu.UserMenuViewComponent.ViewModel
+
+<div class="custom-header">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div>
+                @Model.UserName
+            </div>
+        </div>
+    </div>
+    <ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == UserMenuViewComponent.TabSelected.Details ? "active" : "") show" href="@(string.Format(PagePath.USER_DETAILS, Model.UserId))" aria-selected="@(Model.TabSelected == UserMenuViewComponent.TabSelected.Details ? "true" : "false")">
+                <span>Details</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == UserMenuViewComponent.TabSelected.Credentials ? "active" : "") show" href="@(string.Format(PagePath.USER_CREDENTIALS, Model.UserId))" aria-selected="@(Model.TabSelected == UserMenuViewComponent.TabSelected.Credentials ? "true" : "false")">
+                <span>Credentials</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == UserMenuViewComponent.TabSelected.Roles ? "active" : "") show" href="@(string.Format(PagePath.USER_ROLES, Model.UserId))" aria-selected="@(Model.TabSelected == UserMenuViewComponent.TabSelected.Roles ? "true" : "false")">
+                <span>Roles</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == UserMenuViewComponent.TabSelected.Sessions ? "active" : "") show" href="@(string.Format(PagePath.USER_SESSIONS, Model.UserId))" aria-selected="@(Model.TabSelected == UserMenuViewComponent.TabSelected.Sessions ? "true" : "false")">
+                <span>Sessions</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == UserMenuViewComponent.TabSelected.Attributes ? "active" : "") show" href="@(string.Format(PagePath.USER_ATTRIBUTES, Model.UserId))" aria-selected="@(Model.TabSelected == UserMenuViewComponent.TabSelected.Attributes ? "true" : "false")">
+                <span>Attributes</span>
+            </a>
+        </li>
+    </ul>
+</div>

@@ -16,6 +16,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User
         Result<UserRolesViewModel> GetRolesViewModel(string id);
         Result<RoleViewModel> GetRoles(string id);
 
+        Result<UserMenuViewModel> GetUserMenuViewModel(string id);
+
         Result<List<RegistrationsViewModel>> GetRegistrationStatistics(DateTimeOffset from, DateTimeOffset to);
         StatisticsViewModel GetStatistics();
 

@@ -8,16 +8,18 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
     public class RegisterViewModel
     {
         public string Email { get; set; }
+
         [DisplayName("First name")]
-
         public string FirstName { get; set; }
-        [DisplayName("Last name")]
 
+        [DisplayName("Last name")]
         public string LastName { get; set; }
         public string Password { get; set; }
-        [DisplayName("Confirm password")]
 
+        [DisplayName("Confirm password")]
         public string ConfirmPassword { get; set; }
+
+        public IDictionary<string, string> Attributes { get; set; }
 
         public bool RecoverPasswordEnabled { get; set; }
 

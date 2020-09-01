@@ -20,6 +20,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
 
         public string ReturnUrl { get; set; }
 
+        public IDictionary<string, string> Attributes { get; set; }
+
         public StatusAlertViewModel StatusAlert { get; set; }
 
         public ExternalLoginRegisterViewModel(string externalLoginProviderName)

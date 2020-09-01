@@ -1,0 +1,275 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User.UserMenuViewModel
+
+@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.User;
+}
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+        @await Component.InvokeAsync("AddUserAttributeModal")
+    </div>
+}
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div>
+    @(await Component.InvokeAsync("UserMenu", Model.ToViewComponentModel(UserMenuViewComponent.TabSelected.Attributes)))
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Attributes
+                    </h5>
+                    <button id="add-attribute-button" class="header-button">Add Attribute</button>
+                </div>
+
+                <div class="custom_container custom_table">
+                    <table id="attribute-table" class="dataTableClass display"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script type="text/javascript">
+        $('document').ready(function () {
+            new UserAttributes('@Model.UserId')
+        });
+
+        class UserAttributes {
+            constructor(userId) {
+                this.userId = userId;
+                this.$attributeTable = $('#attribute-table');
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                this.confirmationModal = new conformationModal(
+                    $('#modal-container'),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeAttribute') {
+                            this.remove(onYesClick.id);
+                        }
+                    });
+
+                this.addAttributeModal = new AddUserAttributeModal(this.userId, () => {
+                    this.statusAlert.showSuccess('Attribute was added');
+
+                    this.reloadTable();
+                });
+
+                $('#add-attribute-button').on('click', () => {
+                    this.addAttributeModal.showModal();
+                });
+
+                this.initTable();
+            }
+
+            initTable() {
+                this.$attributeTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    "targets": 'no-sort',
+                    "bSort": false,
+                    "order": [],
+                    ajax: {
+                        url: `/IdentityAdmin/User/${this.userId}/Attributes/Get`,
+                        type: 'GET'
+                    },
+                    columns: [
+                        {
+                            data: "key",
+                            title: "Key",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            title: "Value",
+                            className: "table-input",
+                            mRender: (data) => {
+                                let view = `<input class="form-control mr-1 attribute-{{id}}" value="{{value}}"/>`
+                                let output = Mustache.render(view, { id: data.id, value: data.value });
+
+                                return output;
+                            }
+                        },
+                        {
+                            data: null,
+                            className: "table-two-buttons",
+
+                            mRender: function (data) {
+                                return `<div>
+                                    <button class='btn btn-primary table-button edit' data-id='${data.id}'">Edit</button>
+                                    <button class='btn btn-danger table-button remove' data-id='${data.id}'">Remove</button>
+                                </div>`;
+                            }
+                        }
+                    ],
+                });
+
+                this.$attributeTable.on('click', 'button.edit', (event) => {
+                    let id = $(event.target).data('id');
+                    this.editAttribute(id);
+                });
+
+                this.$attributeTable.on('click', 'button.remove', (event) => {
+                    let id = $(event.target).data('id');
+                    this.confirmationModal.show({ key: 'removeAttribute', id: id }, 'Are you sure that you want to remove Attribute?');
+                });
+            }
+
+            reloadTable() {
+                this.$attributeTable
+                    .DataTable()
+                    .clear()
+                    .draw();
+            }
+
+            getData(id) {
+                let value = this.$attributeTable.find(`input.attribute-${id}`).val();
+
+                return {
+                    value: value,
+                }
+            }
+
+            edit(id) {
+                this.statusAlert.hide();
+
+                let data = this.getData(id);
+
+                Api.post(`/IdentityAdmin/User/${this.userId}/Attributes/Update/${id}`, data)
+                    .done(() => {
+                        this.statusAlert.showSuccess('Attribute was updated');
+                        this.reloadTable();
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showErrors(resp.responseJSON);
+                    })
+            }
+
+            remove(id) {
+                this.statusAlert.hide();
+
+                Api.delete(`/IdentityAdmin/User/${this.userId}/Attributes/Remove/${id}`)
+                    .done(() => {
+                        this.statusAlert.showSuccess('Attribute was deleted');
+                        this.reloadTable();
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showErrors(resp.responseJSON);
+                    });
+            }
+        }
+
+        class AddUserAttributeModal {
+            constructor(userId, onAdd) {
+                this.userId = userId;
+                this.onAdd = onAdd;
+
+                this.$modal = $('#add-user-attribute-modal');
+
+                this.$modalContnet = this.$modal.find('.custom-modal-contnet');
+                this.$loader = this.$modal.find('.loader-holder');
+
+                const $addAttributeForm = this.$modal.find('#add-group-attribute-form');
+                this.modalKeyInput = new InputComponent($addAttributeForm, '#attribute-key');
+                this.modalValueInput = new InputComponent($addAttributeForm, '#attribute-value');
+
+                this.addAttributeErrorAlert = new ErrorAlert($addAttributeForm);
+
+                this.$modal.on('hidden.bs.modal', () => {
+                    this.resetModal();
+                });
+
+                this.$modal.on('click', 'button.confirm', () => {
+                    this.add();
+                })
+            }
+
+            resetModal() {
+                this.hideErrors();
+
+                this.modalKeyInput.value(null);
+                this.modalValueInput.value(null);
+            }
+
+            showModal() {
+                this.$modal.modal('show');
+            }
+
+            hideModal() {
+                this.$modal.modal('hide');
+            }
+
+            showLoader() {
+                this.$modalContnet.hide();
+                this.$loader.removeClass('loader-hidden');
+            }
+
+            hideLoader() {
+                this.$modalContnet.show();
+                this.$loader.addClass('loader-hidden');
+            }
+
+            getData() {
+                return {
+                    key: this.modalKeyInput.value(),
+                    value: this.modalValueInput.value()
+                }
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.addAttributeErrorAlert.showErrors(errors['']);
+                }
+
+                this.modalKeyInput.showError(errors.Key);
+                this.modalValueInput.showError(errors.Value);
+            }
+
+            hideErrors() {
+                this.addAttributeErrorAlert.hide();
+
+                this.modalKeyInput.hideError();
+                this.modalValueInput.hideError();
+            }
+
+            add() {
+                this.showLoader();
+                this.hideErrors();
+                let data = this.getData();
+
+                Api.post(`/IdentityAdmin/User/${this.userId}/Attributes/Add`, data)
+                    .done(() => {
+                        this.$modal.modal('hide');
+
+                        if (this.onAdd !== undefined && this.onAdd !== null) {
+                            this.onAdd();
+                        }
+                    })
+                    .fail((resp) => {
+                        this.showErrors(resp.responseJSON);
+                    })
+                    .always(() => {
+                        this.hideLoader();
+                    })
+            }
+        }
+    </script>
+}

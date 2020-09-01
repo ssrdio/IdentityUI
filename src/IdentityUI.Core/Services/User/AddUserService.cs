@@ -23,6 +23,8 @@ using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Repository;
+using SSRD.IdentityUI.Core.Data.Entities.User;
+using System.Linq;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
@@ -42,17 +44,27 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IValidator<RegisterRequest> _registerValidator;
         private readonly IValidator<AcceptInviteRequest> _acceptInviteValidator;
         private readonly IValidator<ExternalLoginRegisterRequest> _externalLoginRequsterRequestValidator;
+        private readonly IValidator<IUserAttributeRequest> _userAttributeRequestValidator;
 
         private readonly IdentityUIEndpoints _identityUIEndpoints;
 
         private readonly ILogger<AddUserService> _logger;
 
-        public AddUserService(UserManager<AppUserEntity> userManager, SignInManager<AppUserEntity> signInManager, IValidator<NewUserRequest> newUserValidator,
-            IValidator<RegisterRequest> registerValidator, IValidator<AcceptInviteRequest> acceptInviteValidator,
-            ILogger<AddUserService> logger, IEmailConfirmationService emailService, IBaseRepository<InviteEntity> inviteRepository,
-            IBaseRepository<GroupEntity> groupRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
+        public AddUserService(
+            UserManager<AppUserEntity> userManager,
+            SignInManager<AppUserEntity> signInManager,
+            IValidator<NewUserRequest> newUserValidator,
+            IValidator<RegisterRequest> registerValidator,
+            IValidator<AcceptInviteRequest> acceptInviteValidator,
+            ILogger<AddUserService> logger,
+            IEmailConfirmationService emailService,
+            IBaseRepository<InviteEntity> inviteRepository,
+            IBaseRepository<GroupEntity> groupRepository,
+            IBaseRepository<GroupUserEntity> groupUserRepository,
             IValidator<ExternalLoginRegisterRequest> externalLoginRequsterRequestValidator,
-            IOptions<IdentityUIEndpoints> identityUIEndpoints, IBaseRepository<RoleEntity> roleRepository)
+            IOptions<IdentityUIEndpoints> identityUIEndpoints,
+            IBaseRepository<RoleEntity> roleRepository,
+            IValidator<IUserAttributeRequest> userAttributeRequestValidator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -66,6 +78,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             _registerValidator = registerValidator;
             _acceptInviteValidator = acceptInviteValidator;
             _externalLoginRequsterRequestValidator = externalLoginRequsterRequestValidator;
+            _userAttributeRequestValidator = userAttributeRequestValidator;
 
             _emailService = emailService;
 
@@ -122,11 +135,26 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("registration_is_not_enabled", "Registration disabled");
             }
 
-            ValidationResult validationResult = _registerValidator.Validate(registerRequest);
-            if (!validationResult.IsValid)
+            ValidationResult registerValidationResult = _registerValidator.Validate(registerRequest);
+            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(registerRequest);
+            if (!registerValidationResult.IsValid || !userAttributeValidationResult.IsValid)
             {
-                _logger.LogError($"Invalid RegisterRequest");
-                return Result.Fail(ResultUtils.ToResultError(validationResult.Errors));
+                _logger.LogError($"Invalid {typeof(RegisterRequest).Name} model");
+
+                List<Result.ResultError> errors = ResultUtils.ToResultError(registerValidationResult.Errors);
+                errors.AddRange(ResultUtils.ToResultError(userAttributeValidationResult.Errors));
+
+                return Result.Fail(errors);
+            }
+
+            List<UserAttributeEntity> userAttributes = null;
+            if(registerRequest.Attributes != null)
+            {
+                userAttributes = registerRequest.Attributes
+                    .Select(x => new UserAttributeEntity(
+                        key: x.Key,
+                        value: x.Value))
+                    .ToList();
             }
 
             AppUserEntity appUser = new AppUserEntity(
@@ -135,7 +163,8 @@ namespace SSRD.IdentityUI.Core.Services.User
                 firstName: registerRequest.FirstName,
                 lastName: registerRequest.LastName,
                 emailConfirmed: false,
-                enabled: true);
+                enabled: true,
+                attributes: userAttributes);
 
             IdentityResult identityResult = await _userManager.CreateAsync(appUser, registerRequest.Password);
             if (!identityResult.Succeeded)
@@ -153,11 +182,16 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         public async Task<Result> AcceptInvite(AcceptInviteRequest acceptInvite)
         {
-            ValidationResult validationResult = _acceptInviteValidator.Validate(acceptInvite);
-            if(!validationResult.IsValid)
+            ValidationResult acceptInviteValidationResult = _acceptInviteValidator.Validate(acceptInvite);
+            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(acceptInvite);
+            if (!acceptInviteValidationResult.IsValid || !userAttributeValidationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {nameof(AcceptInviteRequest)} model");
-                return Result.Fail(validationResult.Errors);
+
+                List<Result.ResultError> errors = ResultUtils.ToResultError(acceptInviteValidationResult.Errors);
+                errors.AddRange(ResultUtils.ToResultError(userAttributeValidationResult.Errors));
+
+                return Result.Fail(errors);
             }
 
             BaseSpecification<InviteEntity> getInviteSpecification = new BaseSpecification<InviteEntity>();
@@ -177,13 +211,24 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("no_invite", "No Invite");
             }
 
+            List<UserAttributeEntity> userAttributes = null;
+            if (acceptInvite.Attributes != null)
+            {
+                userAttributes = acceptInvite.Attributes
+                    .Select(x => new UserAttributeEntity(
+                        key: x.Key,
+                        value: x.Value))
+                    .ToList();
+            }
+
             AppUserEntity appUser = new AppUserEntity(
                 userName: inviteEntity.Email,
                 email: inviteEntity.Email,
                 firstName: acceptInvite.FirstName,
                 lastName: acceptInvite.LastName,
                 emailConfirmed: true,
-                enabled: true);
+                enabled: true,
+                attributes: userAttributes);
 
             IdentityResult identityResult = await _userManager.CreateAsync(appUser, acceptInvite.Password);
             if (!identityResult.Succeeded)
@@ -285,11 +330,16 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("registration_is_not_enabled", "Registration disabled");
             }
 
-            ValidationResult validationResult = _externalLoginRequsterRequestValidator.Validate(externalLoginRegisterRequest);
-            if(!validationResult.IsValid)
+            ValidationResult externalLoginValidationResult = _externalLoginRequsterRequestValidator.Validate(externalLoginRegisterRequest);
+            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(externalLoginRegisterRequest);
+            if (!externalLoginValidationResult.IsValid || !userAttributeValidationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {nameof(ExternalLoginRegisterRequestValidator)} model");
-                return Result.Fail(validationResult.Errors);
+
+                List<Result.ResultError> errors = ResultUtils.ToResultError(externalLoginValidationResult.Errors);
+                errors.AddRange(ResultUtils.ToResultError(userAttributeValidationResult.Errors));
+
+                return Result.Fail(errors);
             }
 
             ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
@@ -299,13 +349,24 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("failed_to_get_external_login_info", "Failed to get external login info");
             }
 
+            List<UserAttributeEntity> userAttributes = null;
+            if (externalLoginRegisterRequest.Attributes != null)
+            {
+                userAttributes = externalLoginRegisterRequest.Attributes
+                    .Select(x => new UserAttributeEntity(
+                        key: x.Key,
+                        value: x.Value))
+                    .ToList();
+            }
+
             AppUserEntity appUser = new AppUserEntity(
                 userName: externalLoginRegisterRequest.Email,
                 email: externalLoginRegisterRequest.Email,
                 firstName: externalLoginRegisterRequest.FirstName,
                 lastName: externalLoginRegisterRequest.LastName,
                 emailConfirmed: false,
-                enabled: true);
+                enabled: true,
+                attributes: userAttributes);
 
             IdentityResult createUserResult = await _userManager.CreateAsync(appUser);
             if(!createUserResult.Succeeded)

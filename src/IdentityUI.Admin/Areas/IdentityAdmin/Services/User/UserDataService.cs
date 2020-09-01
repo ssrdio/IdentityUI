@@ -109,6 +109,24 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
             return Result.Ok(userCredentials);
         }
 
+        public Result<UserMenuViewModel> GetUserMenuViewModel(string id)
+        {
+            SelectSpecification<AppUserEntity, UserMenuViewModel> userSpecification = new SelectSpecification<AppUserEntity, UserMenuViewModel>();
+            userSpecification.AddFilter(x => x.Id == id);
+            userSpecification.AddSelect(x => new UserMenuViewModel(
+                x.Id,
+                x.UserName));
+
+            UserMenuViewModel userMenuView = _userRepository.SingleOrDefault(userSpecification);
+            if (userMenuView == null)
+            {
+                _logger.LogError($"No User. UserId {id}");
+                return Result.Fail<UserMenuViewModel>("no_user", "No user");
+            }
+
+            return Result.Ok(userMenuView);
+        }
+
         public Result<UserDetailsViewModel> GetDetailsViewModel(string id)
         {
             SelectSpecification<AppUserEntity, UserDetailsViewModel> userSpecification = new SelectSpecification<AppUserEntity, UserDetailsViewModel>();

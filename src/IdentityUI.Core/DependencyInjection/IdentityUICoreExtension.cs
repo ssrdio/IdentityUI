@@ -383,6 +383,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IProfileImageService, ProfileImageService>();
 
             builder.Services.AddScoped<IExternalLoginService, Services.Auth.Login.ExternalLoginService>();
+
+            builder.Services.AddScoped<IUserAttributeService, UserAttributeService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
@@ -394,6 +396,7 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Core.Services.User.Models.RegisterRequest>, Core.Services.User.Models.RegisterRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.AcceptInviteRequest>, Services.User.Models.AcceptInviteRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.ExternalLoginRegisterRequest>, Services.User.Models.ExternalLoginRegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.IUserAttributeRequest>, Services.User.Models.NullUserAttributeRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginRequest>, Core.Services.Auth.Login.Models.LoginRequestValidator>();
             builder.Services.AddSingleton<IValidator<Core.Services.Auth.Login.Models.LoginWith2faRequest>, Core.Services.Auth.Login.Models.LoginWith2faRequestValidator>();
@@ -442,6 +445,9 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Services.User.Models.InviteRequest>, Services.User.Models.InviteRequestValidatior>();
 
             builder.Services.AddSingleton<IValidator<Services.Auth.Login.Models.ExternalLoginRequest>, Services.Auth.Login.Models.ExternalLoginRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.User.Models.Attribute.AddUserAttributeModel>, Services.User.Models.Attribute.AddUserAttributeModelValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.Attribute.UpdateUserAttributeModel>, Services.User.Models.Attribute.UpdateUserAttributeModelValidator>();
         }
 
         /// <summary>

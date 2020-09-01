@@ -568,6 +568,38 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.User.UserAttributeEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("_CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("_ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAttributes");
+                });
+
             modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.UserImageEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -733,6 +765,14 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.HasOne("SSRD.IdentityUI.Core.Data.Entities.Identity.AppUserEntity", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.User.UserAttributeEntity", b =>
+                {
+                    b.HasOne("SSRD.IdentityUI.Core.Data.Entities.Identity.AppUserEntity", "User")
+                        .WithMany("Attributes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("SSRD.IdentityUI.Core.Data.Entities.UserImageEntity", b =>

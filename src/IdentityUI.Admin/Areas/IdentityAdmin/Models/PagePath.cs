@@ -18,6 +18,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
         public const string USER_CREDENTIALS = USER + "/Credentials/{0}";
         public const string USER_ROLES = USER + "/Roles/{0}";
         public const string USER_SESSIONS = USER + "/Sessions/{0}";
+        public const string USER_ATTRIBUTES = USER + "/{0}/Attributes";
 
         public const string USER_NEW = USER + "/New";
 

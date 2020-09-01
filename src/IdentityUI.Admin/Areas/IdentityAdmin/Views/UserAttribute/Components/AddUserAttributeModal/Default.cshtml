@@ -1,0 +1,39 @@
+﻿<div id="add-user-attribute-modal" tabindex="-1" class="modal fade" role="dialog" aria-labelledby="add-user-attribute-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Attribute</h5>
+                <button type="button" class="custom-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+
+            <div class="loader-holder loader-hidden">
+                <div class="loader">Loading...</div>
+            </div>
+
+            <div class="custom-modal-contnet">
+                <div class="modal-body">
+                    <div id="add-group-attribute-form">
+                        @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                        <div id="attribute-key" class="form-group">
+                            <label class="control-label">Key</label>
+                            <input class="form-control" />
+                            <span class="error text-danger"></span>
+                        </div>
+                        <div id="attribute-value" class="form-group">
+                            <label class="control-label">Value</label>
+                            <input class="form-control" />
+                            <span class="error text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer custom-modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary confirm">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

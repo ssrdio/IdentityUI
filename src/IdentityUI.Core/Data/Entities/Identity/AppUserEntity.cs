@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
+using SSRD.IdentityUI.Core.Data.Entities.User;
 using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,8 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 
         public virtual UserImageEntity UserImage { get; set; }
 
+        public ICollection<UserAttributeEntity> Attributes { get; set; }
+
         /// <summary>
         /// This column does not exist in database. It is only used for login
         /// </summary>
@@ -44,6 +47,17 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
             LastName = lastName;
             EmailConfirmed = emailConfirmed;
             Enabled = enabled;
+        }
+
+        public AppUserEntity(string userName, string email, string firstName, string lastName, bool emailConfirmed, bool enabled, List<UserAttributeEntity> attributes)
+        {
+            UserName = userName;
+            Email = email;
+            FirstName = firstName;
+            LastName = lastName;
+            EmailConfirmed = emailConfirmed;
+            Enabled = enabled;
+            Attributes = attributes;
         }
 
         public bool CanLogin()

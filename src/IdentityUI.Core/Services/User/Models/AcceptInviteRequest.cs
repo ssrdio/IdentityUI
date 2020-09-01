@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Services.User.Models
 {
-    public class AcceptInviteRequest
+    public class AcceptInviteRequest : IUserAttributeRequest
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -13,18 +13,13 @@ namespace SSRD.IdentityUI.Core.Services.User.Models
         public string ConfirmPassword { get; set; }
 
         public string Code { get; set; }
+        public IDictionary<string, string> Attributes { get; set; }
     }
 
     internal class AcceptInviteRequestValidator : AbstractValidator<AcceptInviteRequest>
     {
         public AcceptInviteRequestValidator()
         {
-            RuleFor(x => x.FirstName)
-                .NotEmpty();
-
-            RuleFor(x => x.LastName)
-                .NotEmpty();
-
             RuleFor(x => x.Password)
                 .NotEmpty();
 

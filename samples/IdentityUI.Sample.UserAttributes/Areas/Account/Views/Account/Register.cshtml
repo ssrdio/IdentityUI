@@ -1,0 +1,98 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.RegisterViewModel
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="app-container">
+    <div class="h-100 bg-plum-plate">
+        <div class="d-flex min-vh-100 justify-content-center align-items-center">
+            <div class="mx-auto app-login-box col-md-8">
+                <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
+                <div class="modal-dialog w-100">
+                    <div class="modal-content">
+                        <form asp-area="Account" asp-controller="Account" asp-action="Register" method="post">
+                            <div class="modal-body extra-body-padding">
+
+                                <div class="h5 modal-title text-center">
+                                    <h4 class="mt-2 modal-header-custom">
+                                        <div>Welcome,</div>
+                                        <span>It only takes a <span class="text-success inline-span">few seconds</span> to create your account</span>
+                                    </h4>
+                                </div>
+                                <div class="divider row"></div>
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="Email" placeholder="Email here..." type="email" class="form-control">
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="Password" placeholder="Password here..." type="password" class="form-control">
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="ConfirmPassword" placeholder="Repeat Password here..." type="password" class="form-control">
+                                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for='Attributes["addressLine1"]' placeholder="Address Line 1" class="form-control">
+                                            <span asp-validation-for='Attributes["addressLine1"]' class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for='Attributes["addressLine2"]' placeholder="Address Line 2" class="form-control">
+                                            <span asp-validation-for='Attributes["addressLine2"]' class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for='Attributes["city"]' placeholder="City" class="form-control">
+                                            <span asp-validation-for='Attributes["city"]' class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for='Attributes["zipCode"]' placeholder="Zip/Postal Code" class="form-control">
+                                            <span asp-validation-for='Attributes["zipCode"]' class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+
+                                            <input asp-for='Attributes["country"]' placeholder="Country" class="form-control">
+                                            <span asp-validation-for='Attributes["country"]' class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @await Component.InvokeAsync("AdminUIErrorAlertRazor")
+                                <div class="divider row"></div>
+                                <h6 class="mb-0">
+                                    Already have an account? <a href="@SSRD.IdentityUI.Account.Areas.Account.Models.PagePath.LOGIN" class="text-primary">Sign in</a> @if (Model.RecoverPasswordEnabled)
+                                    {<span> | <a href="@SSRD.IdentityUI.Account.Areas.Account.Models.PagePath.LOGIN" class="text-primary">Recover Password</a> </span>}
+                                </h6>
+                            </div>
+                            <div class="modal-footer d-block">
+                                <div class="float-right" style="padding-bottom: 15px">
+                                    <button type="submit" class="btn-wide btn-pill btn-shadow btn-hover-shine btn btn-primary btn-lg">Create Account</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center text-white opacity-8 mt-3">Copyright © @SSRD.AdminUI.Template.Models.CopyRightModel.NAME @SSRD.AdminUI.Template.Models.CopyRightModel.YEAR </div>
+            </div>
+        </div>
+    </div>
+</div>
