@@ -14,6 +14,8 @@ body {
     font-family: "Segoe UI";
 }
 
+
+
 .modal-header-custom div {
     color: var(--blue);
     font-size: 1.5em;
@@ -67,6 +69,22 @@ body {
 
 .menu-line-color {
     background-color: var(--main-navbar-color) !important;
+}
+
+.sidebar {
+    position: fixed !important;
+    transition: all 0.25s ease;
+}
+
+.main-panel {
+    width: 100%;
+    padding-left: 275px;
+    transition: all 0.25s ease;
+}
+
+.sidebar-icon-only .main-panel {
+    padding-left: 70px;
+    width: 100%;
 }
 
 .sidebar {
