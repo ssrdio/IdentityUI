@@ -20,6 +20,7 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -60,6 +61,10 @@ namespace SSRD.IdentityUI.Admin
             builder.Services.AddScoped<IEmailDataService, EmailDataService>();
 
             builder.Services.AddScoped<IUserAttributeDataService, UserAttributeDataService>();
+
+            builder.Services.AddScoped<IAuditDataService, AuditDataService>();
+
+            builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
 
             if(builder.IdentityManagementEndpoints.UseEmailSender.HasValue && builder.IdentityManagementEndpoints.UseEmailSender.Value == true)
             {

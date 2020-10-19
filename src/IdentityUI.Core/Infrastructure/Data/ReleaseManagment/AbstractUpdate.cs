@@ -9,70 +9,47 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 {
-    internal abstract class AbstractUpdate : IUpdate
+    public abstract class AbstractUpdate : IUpdate
     {
-        private const string SCRIPTS_PATH = "Infrastructure.Data.Scripts.Migrations";
+        public abstract string MigrationId { get; }
 
-        protected abstract string migrationId { get; }
-
-        public abstract int GetVersion();
+        protected AbstractUpdate()
+        {
+        }
 
         public virtual void BeforeSchemaChange(IdentityDbContext context)
         {
         }
 
-        public virtual void SchemaChange(DatabaseFacade database)
+        public virtual void SchemaChange(IdentityDbContext context)
         {
-            ExecuteMigrationSql(database, migrationId);
+            ExecuteMigrationSql(context);
         }
 
         public virtual void AfterSchemaChange(IdentityDbContext context)
         {
         }
 
-        public bool ShouldExecute(List<string> applaydMigrations)
+        public virtual bool ShouldExecute(List<string> applaydMigrations)
         {
-            return !applaydMigrations.Contains(migrationId);
+            return !applaydMigrations.Contains(MigrationId);
         }
 
-        protected AbstractUpdate()
-        {
-        }
-
-        public override string ToString()
-        {
-            return this.GetType().Name;
-        }
-
-        protected bool WasMigrationPerformed(string migrationId)
-        {
-            return false;
-        }
+        protected abstract string GetScript();
 
         /// <summary>
         /// Executed migration SQL script located in Migrations/Scripts folder.
         /// </summary>
-        /// <param name="database"></param>
-        /// <param name="migrationId">Update ID</param>
-        protected void ExecuteMigrationSql(DatabaseFacade database, string migrationId)
+        /// <param name="context"></param>
+        protected virtual void ExecuteMigrationSql(IdentityDbContext context)
         {
-            Assembly assembly = typeof(AbstractUpdate).GetTypeInfo().Assembly;
-
-            string sql;
-
-            using (Stream resource = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.{SCRIPTS_PATH}.{migrationId}.sql"))
-            {
-                using(StreamReader reader = new StreamReader(resource))
-                {
-                    sql = reader.ReadToEnd();
-                }
-            }
+            string sql = GetScript();
 
 #if NET_CORE2
-            database.ExecuteSqlCommand(sql);
+            context.Database.ExecuteSqlCommand(sql);
 #endif
 #if NET_CORE3
-            database.ExecuteSqlRaw(sql);
+            context.Database.ExecuteSqlRaw(sql);
 #endif
 
         }

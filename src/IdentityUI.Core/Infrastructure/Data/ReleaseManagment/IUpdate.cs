@@ -6,18 +6,14 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 {
-    internal interface IUpdate
+    public interface IUpdate
     {
-        /// <summary>
-        /// Return next ascending natural number, e.g. 1, 2, 3. Used for sorting update execution order.
-        /// </summary>
-        /// <returns>Previous update + 1</returns>
-        int GetVersion();
+        string MigrationId { get; }
 
         /// <summary>
-        /// Deterimes if update(and migration) will be run. 
-        /// If not overriten, it returnes true for all pending transactions("__EFMigrationsHistory" table doesn't contain this update ID).
-        /// Useful when additional conditions for execution are neccessary, e.g.: its only production update
+        /// Determines if update(and migration) will be run. 
+        /// If not overwritten, it returns true for all pending transactions("__EFMigrationsHistory" table doesn't contain this update ID).
+        /// Useful when additional conditions for execution are necessary, e.g.: its only production update
         /// </summary>
         /// <param name="applyedMigrations">List of pending migration IDs</param>
         /// <returns></returns>
@@ -31,8 +27,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
         /// <summary>
         /// Performs database schema change, usually SQL read from Migrations/Scripts folder.
         /// </summary>
-        /// <param name="database"></param>
-        void SchemaChange(DatabaseFacade database);
+        void SchemaChange(IdentityDbContext context);
 
         /// <summary>
         /// Performed after database schema change is applied.

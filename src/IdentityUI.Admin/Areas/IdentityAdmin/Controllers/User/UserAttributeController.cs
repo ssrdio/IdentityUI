@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.User
 {
-    [ApiExplorerSettings(IgnoreApi = false)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("/[area]/User/{userId}/Attributes/[action]")]
     public class UserAttributeController : BaseController
     {

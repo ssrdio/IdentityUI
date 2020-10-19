@@ -1,0 +1,426 @@
+﻿@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu;
+
+@model SSRD.IdentityUI.Account.Areas.Account.Models.Audit.AuditIndexViewModel
+
+@{ SidebarSelection.SelectedOption = SidebarOptions.Audit; }
+
+@{ ViewData["Title"] = "Audit"; }
+
+@{ Layout = "/Areas/Account/Views/Shared/_ManageLayout.cshtml"; }
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="row">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Audit:
+                </h5>
+            </div>
+            <div class="custom_container custom_table">
+                <table id="audit-table" class="dataTableClass display "></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="audit-details-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="audit-details-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body audit-modal-body">
+                <div id="invite-user-form">
+                    @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                    <div id="audit-data-loader" class="loader-holder loader-hidden">
+                        <div class="loader">Loading...</div>
+                    </div>
+
+                    <div id="audit-data-container">
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Action Type: </label>
+                            <span id="action-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Resource Name: </label>
+                            <span id="resource-name-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Created: </label>
+                            <span id="created-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Object Metadata: </label>
+
+                        </div>
+                        <span id="metadata-container"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section style {
+    <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/jjsonviewer-master/css/jjsonviewer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
+
+    <style>
+        .height-1 {
+            height: 1em;
+        }
+
+        .line-height-02 {
+            line-height: 0.2
+        }
+
+        .select2-selection.select2-selection--single {
+            border-radius: 2px;
+            border: 1px solid #c9c8c8;
+        }
+
+        .audit-modal-body {
+            max-height: 70vh;
+            overflow: auto;
+            margin-bottom: 30px;
+        }
+
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc,
+        table.dataTable thead .sorting_asc_disabled,
+        table.dataTable thead .sorting_desc_disabled {
+            cursor: pointer;
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+
+        table.dataTable thead th {
+            position: relative;
+            background-image: none !important;
+        }
+
+            table.dataTable thead th.sorting:after,
+            table.dataTable thead th.sorting_asc:after,
+            table.dataTable thead th.sorting_desc:after {
+                position: absolute;
+                top: 12px;
+                right: 8px;
+                display: block;
+                font-family: "Font Awesome 5 Free";
+            }
+
+            table.dataTable thead th.sorting:after {
+                content: "\f0dc";
+                color: #ddd;
+                font-size: 0.8em;
+                padding-top: 0.12em;
+            }
+
+            table.dataTable thead th.sorting_asc:after {
+                content: "\f0de";
+            }
+
+            table.dataTable thead th.sorting_desc:after {
+                content: "\f0dd";
+            }
+    </style>
+}
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/select2-4.0.13/dist/js/select2.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/datatables/datatables.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/jjsonviewer-master/js/jjsonviewer.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/statusAlert/StatusAlert.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/js/components/range-picker.js" asp-append-version="true"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            new AuditTable(@Json.Serialize(Model.ActionTypes));
+        });
+
+        class AuditDetailsModal {
+            constructor(actionTypes) {
+
+                this.$modal = $('#audit-details-modal');
+                this.$modal.on('hidden.bs.modal', () => {
+                    this.reset();
+                });
+
+                this.actionTypes = actionTypes;
+
+                this.$auditDataContiner = this.$modal.find('#audit-data-container');
+                this.$loader = this.$modal.find('#audit-data-loader');
+
+                this.$actionType = this.$auditDataContiner.find('#action-type-container');
+                this.$object = this.$auditDataContiner.find('#object-container');
+                this.$resourceName = this.$auditDataContiner.find('#resource-name-container');
+                this.$created = this.$auditDataContiner.find('#created-container');
+                this.$metadata = this.$auditDataContiner.find('#metadata-container');
+            }
+
+            showLoader() {
+                this.$auditDataContiner.hide();
+                this.$loader.removeClass('loader-hidden');
+            }
+
+            hideLoader() {
+                this.$auditDataContiner.show();
+                this.$loader.addClass('loader-hidden');
+            }
+
+            showModal(id) {
+                this.$modal.modal('show');
+                this.get(id);
+            }
+
+            hideModal() {
+                this.$modal.modal('hide');
+                this.reset();
+            }
+
+            reset() {
+                this.$actionType.text(null);
+                this.$resourceName.text(null);
+                this.$created.text(null);
+                this.$metadata.text(null);
+            }
+
+            set(data) {
+                this.$actionType.text(data.actionType);
+                this.$resourceName.text(data.resourceName);
+                this.$created.text(moment(data.created).format("D.MM.YYYY HH:mm:ss"));
+                this.$metadata.jJsonViewer(data.metadata);
+            }
+
+            get(id) {
+                this.showLoader();
+
+                Api.get(`/Account/Audit/Get/${id}`)
+                    .done((data) => {
+                        this.set(data)
+                    })
+                    .fail((resp) => {
+                    })
+                    .always(() => {
+                        this.hideLoader();
+                    })
+            }
+        }
+
+        class AuditTable {
+            constructor(actionTypes) {
+                this.$auditTable = $('#audit-table');
+                this.actionTypes = actionTypes;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                this.init();
+
+                this.auditDetailsModal = new AuditDetailsModal();
+
+                $('#audit-table tbody').on('click', 'tr', (event) => {
+                    const data = this.$auditTable.DataTable().row(event.target).data();
+                    this.auditDetailsModal.showModal(data.id);
+                });
+            }
+
+            init() {
+                this.$auditTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    order: [[3, 'desc']],
+                    lengthChange: false,
+                    pageLength: 20,
+                    searching: false,
+                    ajax: {
+                        url: '@PagePath.AUDIT/Get',
+                        type: 'GET',
+                        data: (params) => {
+                            const orderByTypes = Object.freeze({
+                                'Dessending': 1,
+                                'Assending': 2,
+                            });
+
+                            let customParams = {
+                                draw: params.draw,
+                                start: params.start,
+                                length: params.length,
+                            }
+
+                            if (this.selectedType !== undefined && this.selectedType !== null) {
+                                customParams.actionType = this.selectedType;
+                            }
+
+                            if (this.daterangePicker !== undefined && this.daterangePicker !== null) {
+                                customParams.from = this.daterangePicker.getFrom();
+                                customParams.to = this.daterangePicker.getTo();
+                            }
+
+                            switch (params.order.find(x => x.column === 3).dir) {
+                                case "desc": {
+                                    customParams.orderBy = orderByTypes.Dessending;
+                                    break;
+                                }
+                                case "asc": {
+                                    customParams.orderBy = orderByTypes.Assending;
+                                    break;
+                                }
+                                default: {
+                                    customParams.orderBy = orderByTypes.Dessending;
+                                    break;
+                                }
+                            }
+
+                            return customParams;
+                        }
+                    },
+                    columns: [
+                        {
+                            data: 'id',
+                            orderable: false,
+                            visible: false,
+                        },
+                        {
+                            data: "actionType",
+                            title: "Type",
+                            orderable: false,
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: "resourceName",
+                            title: "Resource Name",
+                            orderable: false,
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            title: "Created",
+                            render: (data) => {
+                                return `<span>${moment(data.created).format("D.M.YYYY HH:mm:ss")}</span>`;
+                            }
+                        }
+                    ]
+                });
+
+                this.$auditTableFilters = $('#audit-table_wrapper').find('div').first('.row');
+
+                this.initFilters();
+            }
+
+            change() {
+                this.reloadTable();
+            }
+
+            initFilters() {
+                this.$auditTableFilters.empty();
+
+                this.initEntries();
+                this.initDateRange();
+                this.initTypeSelect();
+            }
+
+            initEntries() {
+                let $entriesContainer = $(`
+			        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-1">
+				        <div id="categoryTable_filter" class="dataTables_filter custom-filters">
+						    <select id="entriesSelect" class="form-control select2-container"></select>
+				        </div>
+			        </div>
+			        `);
+
+                let $entriesSelect = $entriesContainer.find('select');
+                $entriesSelect.select2({
+                    data: [{ id: 10, text: '10' }, { id: 20, text: '20', selected: true }, { id: 50, text: '50' }, { id: 100, text: '100' }]
+                });
+
+                this.$auditTableFilters.append($entriesContainer);
+
+                $entriesSelect.on('change', () => {
+                    this.pageLength = $entriesSelect.val();
+                    this.$auditTable
+                        .DataTable()
+                        .page
+                        .len(this.pageLength)
+                        .draw();
+                });
+            }
+
+            initDateRange() {
+                let $datePickerContainer = $(`
+                            <div id="date-time-range-container" class="col-4">
+                                <div class="input-group height-1">
+                                    <div class="input-group-prepend">
+                                        <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
+                                    </div>
+                                    <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
+                                    <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
+                                </div>
+                            </div>`);
+
+                this.daterangePicker = new RangePicker($datePickerContainer, this.statusAlert, () => {
+                    this.change();
+                });
+
+                this.$auditTableFilters.append($datePickerContainer);
+            }
+
+            initTypeSelect() {
+                let $typeSelectContianer = $(`
+			            <div class="col-sm-12 col-md-6 col-lg-6 col-xl-2">
+				            <div class="dataTables_filter custom-filters">
+					            <select class="form-control select2-container"></select>
+				            </div>
+			            </div>
+			        `);
+
+                let $typeSelect = $typeSelectContianer.find('select');
+                $typeSelect.select2({
+                    data: this.actionTypes.map(x =>
+                    {
+                        if (x.id === null) {
+                            x.id = -1
+                        }
+
+                        return x;
+                    })
+                });
+
+                $typeSelect.on('change', () => {
+                    let type = $typeSelect.val();
+
+                    if (type === -1) {
+                        type = null;
+                    }
+
+                    this.selectedType = type;
+                    this.reloadTable();
+                });
+
+                this.$auditTableFilters.append($typeSelectContianer);
+            }
+
+            reloadTable() {
+                this.$auditTable.DataTable()
+                    .clear()
+                    .draw();
+            }
+        }
+
+    </script>
+}

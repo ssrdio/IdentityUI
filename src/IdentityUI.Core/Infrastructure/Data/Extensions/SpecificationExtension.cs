@@ -6,12 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SSRD.Audit.Data;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Extensions
 {
     internal static class SpecificationExtension
     {
-        public static IQueryable<TEntity> ApplayBaseSpecification<TEntity>(this IQueryable<TEntity> query, IBaseSpecification<TEntity> specification) where TEntity : class, IBaseEntity
+        public static IQueryable<TEntity> ApplayBaseSpecification<TEntity>(this IQueryable<TEntity> query, IBaseSpecification<TEntity> specification) 
+            where TEntity : class, IBaseEntity
         {
             if(specification == null)
             {
@@ -62,7 +64,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Extensions
 
             if (specification.Skip < 0 || specification.Take < 0)
             {
-                throw new ArgumentOutOfRangeException($"Skip and Take must be grather then 0");
+                throw new ArgumentOutOfRangeException($"Skip and Take must be greater then 0");
             }
 
             query = query.OrderByDescending(x => x._CreatedDate);

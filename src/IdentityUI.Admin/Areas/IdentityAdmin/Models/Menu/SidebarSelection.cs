@@ -20,5 +20,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu
         Group = 5,
         Invite = 6,
         Setting = 7,
+        Audit = 8,
     }
 }

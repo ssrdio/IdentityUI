@@ -53,7 +53,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
         /// <param name="serviceProvider"></param>
         public static void RunIdentityMigrations(this IServiceProvider serviceProvider)
         {
-            ReleaseManagement releaseManagement = serviceProvider.GetRequiredService<ReleaseManagement>();
+            IReleaseManagement releaseManagement = serviceProvider.GetRequiredService<IReleaseManagement>();
 
             releaseManagement.ApplayMigrations();
         }

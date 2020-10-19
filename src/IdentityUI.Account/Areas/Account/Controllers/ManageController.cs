@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using Microsoft.AspNetCore.Http;
 using SSRD.IdentityUI.Core.Data.Models;
+using SSRD.Audit.Attributes;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -93,6 +94,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [HttpGet]
         [Produces("application/octet-stream")]
+        [AuditIgnore]
         public async Task<IActionResult> GetProfileImage()
         {
             Result<FileData> result = await _profileImageService.GetProfileImage(GetUserId());

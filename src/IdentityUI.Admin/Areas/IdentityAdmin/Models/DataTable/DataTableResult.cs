@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable
 {
+    [Obsolete("Use SSRD.AdminUI.Template.Models.DataTables")]
     public class DataTableResult<T>
     {
         public int Draw { get; set; }

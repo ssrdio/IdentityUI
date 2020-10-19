@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Routing;
 using System;
 using SSRD.IdentityUI.Account.Areas.Account.Services;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
+using FluentValidation;
+using SSRD.IdentityUI.Account.Areas.Account.Models.Audit;
 
 namespace SSRD.IdentityUI.Account
 {
@@ -28,6 +30,10 @@ namespace SSRD.IdentityUI.Account
             builder.Services.AddScoped<IAccountDataService, AccountDataService>();
             builder.Services.AddScoped<ITwoFactorAuthenticationDataService, TwoFactorAuthenticationDataService>();
             builder.Services.AddScoped<ICredentialsDataService, CredentialsDataService>();
+
+            builder.Services.AddScoped<IAuditDataService, AuditDataService>();
+
+            builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
 
             builder.Services.ConfigureOptions(typeof(UIConfigureOptions));
 

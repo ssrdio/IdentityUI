@@ -46,6 +46,8 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models
 
         public const string PROFILE_IMAGE = MANAGE + "/GetProfileImage";
 
+        public const string AUDIT = ACCOUNT_AREA + "/Audit";
+
         public static string HOME;
     }
 }

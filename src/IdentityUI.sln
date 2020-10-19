@@ -13,6 +13,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.IdentityUI.Account", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.AdminUI.Template", "AdminUI.Template\SSRD.AdminUI.Template.csproj", "{0CDB1B76-8E9D-4E9B-9366-C05713E9F170}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.IdentityUI.EntityFrameworkCore.Postgre", "SSRD.IdentityUI.EntityFrameworkCore.Postgre\SSRD.IdentityUI.EntityFrameworkCore.Postgre.csproj", "{0B7AE0F1-881E-4D28-AC96-A37228AD1665}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.IdentityUI.EntityFrameworkCore.SqlServer", "SSRD.IdentityUI.EntityFrameworkCore.SqlServer\SSRD.IdentityUI.EntityFrameworkCore.SqlServer.csproj", "{8E7F063E-4A5F-4EBA-8980-B7EA90E17807}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.Audit", "SSRD.Audit\SSRD.Audit.csproj", "{B9DAA114-9EE7-4949-BF06-433607C803AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.CommonUtils", "SSRD.CommonUtils\SSRD.CommonUtils.csproj", "{680743D1-8DF8-47B9-9795-2E2D5FEF8873}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +47,22 @@ Global
 		{0CDB1B76-8E9D-4E9B-9366-C05713E9F170}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CDB1B76-8E9D-4E9B-9366-C05713E9F170}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CDB1B76-8E9D-4E9B-9366-C05713E9F170}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B7AE0F1-881E-4D28-AC96-A37228AD1665}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B7AE0F1-881E-4D28-AC96-A37228AD1665}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B7AE0F1-881E-4D28-AC96-A37228AD1665}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B7AE0F1-881E-4D28-AC96-A37228AD1665}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E7F063E-4A5F-4EBA-8980-B7EA90E17807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E7F063E-4A5F-4EBA-8980-B7EA90E17807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E7F063E-4A5F-4EBA-8980-B7EA90E17807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E7F063E-4A5F-4EBA-8980-B7EA90E17807}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9DAA114-9EE7-4949-BF06-433607C803AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9DAA114-9EE7-4949-BF06-433607C803AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9DAA114-9EE7-4949-BF06-433607C803AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9DAA114-9EE7-4949-BF06-433607C803AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{680743D1-8DF8-47B9-9795-2E2D5FEF8873}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{680743D1-8DF8-47B9-9795-2E2D5FEF8873}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{680743D1-8DF8-47B9-9795-2E2D5FEF8873}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{680743D1-8DF8-47B9-9795-2E2D5FEF8873}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -184,14 +184,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
         [HttpPost]
         [ProducesResponseType(typeof(DataTableResult<RolePermissionTableModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
-        public IActionResult Remove([FromRoute] string id)
+        public async Task<IActionResult> Remove([FromRoute] string id)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Result result = _roleService.Remove(id);
+            Result result = await _roleService.Remove(id);
             if(result.Failure)
             {
                 ModelState.AddErrors(result);

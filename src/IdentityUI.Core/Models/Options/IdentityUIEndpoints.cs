@@ -34,5 +34,15 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public TimeSpan InviteValidForTimeSpan { get; set; } = TimeSpan.FromDays(7);
 
         public bool BypassTwoFactorOnExternalLogin { get; set; } = false;
+
+        /// <summary>
+        /// If this is set to false you need to provide username in /Account/Register, /Account/AcceptInvite, /Account/ExternalLoginRegister requests
+        /// </summary>
+        public bool UseEmailAsUsername { get; set; } = true;
+
+        /// <summary>
+        /// If user can see his own audit
+        /// </summary>
+        public bool ShowAuditToUser { get; set; } = false;
     }
 }

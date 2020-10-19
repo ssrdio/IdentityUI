@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Models.Result
 {
+    [Obsolete("Use SSRD.CommonUtils.Result.Result")]
     public class Result
     {
         public bool Success { get; private set; }
@@ -106,6 +107,7 @@ namespace SSRD.IdentityUI.Core.Models.Result
         }
     }
 
+    [Obsolete("Use SSRD.CommonUtils.Result.Result")]
     public class Result<T> : Result
     {
         public T Value { get; private set; }

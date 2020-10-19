@@ -39,6 +39,7 @@ EmailSender options are optional if you provide custom implementation of IEmailS
 In the `ConfigureServices` method add:
 ```c#
 services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pass in your own identityUI options.
+    .UsePostgre() // Adds dbContext. You can choose between UsePostgre or UseSqlServer.
     .AddIdentityUI() // Adds IdentityManagement core services.
     .AddAuth() // Adds Authentication. You can pass in your own CookieAuthenticationOptions.
     .AddEmailSender() // Optional if you provide  custom implementation of IEmailSender
@@ -69,9 +70,9 @@ IdentityAdmin Dashboard: `{server}:{port}/IdentityAdmin/`
 Account management: `{server}:{port}/Account/Manage/`
 
 ## Database
-Supported databases: PostgreSQL, InMemory (only for testing).
+Supported databases: PostgreSQL, SQL Server, InMemory (only for testing).
 
-InMemory database provider for .NetCore3+ may not be able translate all the queries and cause exceptions.
+InMemory database provider may not be able translate all the queries and cause exceptions.
 
 To create database:
 ```c#

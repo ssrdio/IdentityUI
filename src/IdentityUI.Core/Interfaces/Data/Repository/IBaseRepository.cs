@@ -3,10 +3,10 @@ using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Interfaces.Data.Specification;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
 {
+    [Obsolete("Use Specifications.Interfaces.IBaseDAO")]
     public interface IBaseRepository<TEntity> where TEntity : class, IBaseEntity
     {
         bool Exist(IBaseSpecification<TEntity> specification);

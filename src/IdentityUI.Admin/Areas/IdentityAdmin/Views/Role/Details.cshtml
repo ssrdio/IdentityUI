@@ -12,19 +12,15 @@
 @section script{
     <script>
             $(document).ready(function () {
-                var x = document.getElementById("snackbar");
-                x.className = "show";
-                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
 
                 new RemoveRole('@Model.Id');
             });
 
             class RemoveRole {
                 constructor(roleId) {
-
                     this.roleId = roleId;
 
-                    this.statusAlert = new StatusAlertComponent('#status-alert-container');
+                    this.statusAlert = new StatusAlertComponent('#status-alert');
 
                     this.confirmationModal = new conformationModal(
                         $(`#modalContainer`),
@@ -42,9 +38,25 @@
                     $('#remove-button').on('click', () => {
                         this.confirmationModal.show({ key: 'removeRole' }, 'Are you sure you want to remove role?');
                     });
+
+                    @if (Model.StatusAlert != null)
+                    {
+                        <text>
+                            if ('@Model.StatusAlert.Success' === 'True')
+                            {
+                                this.statusAlert.showSuccess(@Json.Serialize(Model.StatusAlert.Messages));
+                            }
+                            else
+                            {
+                                this.statusAlert.showError(@Json.Serialize(Model.StatusAlert.Messages));
+                            }
+                        </text>
+                    }
                 }
 
                 remove() {
+                    this.statusAlert.hide();
+
                     Api.post(`/IdentityAdmin/Role/Remove/${this.roleId}`)
                         .done(() => {
                             window.location.href = `/IdentityAdmin/Role`;
@@ -53,18 +65,6 @@
                             this.statusAlert.showErrors(resp.responseJSON['']);
                         });
                 }
-        }
-
-        @if (Model.StatusAlert != null)
-            {
-                <text>
-                    $(document).ready(function() {
-                        var x = document.getElementById("snackbar");
-                        x.className = "show";
-                        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-                    });
-
-                </text>
         }
     </script>
 }
@@ -78,33 +78,8 @@
 <div>
     @(await Component.InvokeAsync("RoleMenu", new RoleMenuViewComponent.ViewModel(Model.Id, Model.Name, Model.Type, RoleMenuViewComponent.TabSelected.Details)))
 
-    <div id="status-alert-container">
-        <div id="snackbar" class="snackbar">
-            <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && Model.StatusAlert.Success) ? "" : "none")">
-                <div class="alertMessage" style="width: 80%;display: inline-block;">
-                    @if ((Model.StatusAlert != null && Model.StatusAlert.Success))
-                    {
-                        @foreach (string message in Model.StatusAlert.Messages)
-                        {
-                            @message <br />
-                        }
-                    }
-                </div>
-                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
-            </div>
-            <div class="alert-danger mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && !Model.StatusAlert.Success) ? "" : "none")">
-                <div class="alertMessage" style="width: 80%;display: inline-block;">
-                    @if ((Model.StatusAlert != null && !Model.StatusAlert.Success))
-                    {
-                        @foreach (string message in Model.StatusAlert.Messages)
-                        {
-                            @message <br />
-                        }
-                    }
-                </div>
-                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
-            </div>
-        </div>
+    <div id="status-alert">
+        @await Component.InvokeAsync("IdentityStatusAlertJs")
     </div>
 
     <div class="tab-content">

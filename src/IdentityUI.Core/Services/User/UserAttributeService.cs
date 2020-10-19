@@ -87,7 +87,7 @@ namespace SSRD.IdentityUI.Core.Services.User
         public async Task<Result> Update(string userId, long attributeId, UpdateUserAttributeModel updateUserAttribute)
         {
             ValidationResult validationResult = _updateUserAttribute.Validate(updateUserAttribute);
-            if(validationResult.IsValid)
+            if(!validationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {typeof(UpdateUserAttributeModel).CustomAttributes} model");
                 return Result.Fail(validationResult.Errors);

@@ -46,6 +46,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
         public const string SETTING_EMAIL = SETTING + "/Email";
         public const string SETTING_EMAIL_DETAILS = SETTING_EMAIL + "/Details/{0}";
 
+        public const string AUDIT = IDENTITY_ADMIN_AREA + "/Audit";
+
         public const string PROFILE_IMAGE = "/Account/Manage/GetProfileImage";
 
         public static string LOGOUT;

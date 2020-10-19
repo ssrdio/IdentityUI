@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SSRD.Audit.Attributes;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.User;
 using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
@@ -30,6 +31,13 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 
         public ICollection<UserAttributeEntity> Attributes { get; set; }
 
+        [AuditIgnore]
+        public override string PasswordHash { get => base.PasswordHash; set => base.PasswordHash = value; }
+        [AuditIgnore]
+        public override string ConcurrencyStamp { get => base.ConcurrencyStamp; set => base.ConcurrencyStamp = value; }
+        [AuditIgnore]
+        public override string SecurityStamp { get => base.SecurityStamp; set => base.SecurityStamp = value; }
+
         /// <summary>
         /// This column does not exist in database. It is only used for login
         /// </summary>
@@ -49,7 +57,15 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
             Enabled = enabled;
         }
 
-        public AppUserEntity(string userName, string email, string firstName, string lastName, bool emailConfirmed, bool enabled, List<UserAttributeEntity> attributes)
+        public AppUserEntity(
+            string userName,
+            string email,
+            string firstName,
+            string lastName,
+            bool emailConfirmed,
+            bool enabled,
+            string phoneNumber,
+            List<UserAttributeEntity> attributes)
         {
             UserName = userName;
             Email = email;
@@ -57,6 +73,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
             LastName = lastName;
             EmailConfirmed = emailConfirmed;
             Enabled = enabled;
+            PhoneNumber = phoneNumber;
             Attributes = attributes;
         }
 

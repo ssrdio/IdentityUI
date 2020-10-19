@@ -1,24 +1,35 @@
 ﻿@using SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu
 
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _options
+
 <nav class="sidebar sidebar-offcanvas menu-line-color" id="sidebar">
     <ul class="nav">
         <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Profile ? "active": "")">
             <a class="nav-link" href="@PagePath.MANAGE_ACCOUNT">
-                <i class="fas fa-user"></i>
+                <i class="fas fa-user sidebar-icon-container"></i>
                 <span class="menu-title i-mar">Profile</span>
             </a>
         </li>
         <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Credentials ? "active": "")">
             <a class="nav-link" href="@PagePath.MANAGE_CREDENTIALS">
-                <i class="fas fa-unlock "></i>
+                <i class="fas fa-unlock sidebar-icon-container"></i>
                 <span class="menu-title i-mar">Credentials</span>
             </a>
         </li>
         <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.TwoFactorAuthenticator ? "active": "")">
             <a class="nav-link" href="@PagePath.TWO_FACTOR_AUTHENTICATION">
-                <i class="fas fa-mobile-alt"></i>
+                <i class="fas fa-mobile-alt sidebar-icon-container"></i>
                 <span class="menu-title i-mar">Two Factor Authentication</span>
             </a>
         </li>
+        @if (_options.Value.ShowAuditToUser)
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Audit ? "active": "")">
+                <a class="nav-link" href="@PagePath.AUDIT">
+                    <i class="fas fa-book sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Audit</span>
+                </a>
+            </li>
+        }
     </ul>
 </nav>

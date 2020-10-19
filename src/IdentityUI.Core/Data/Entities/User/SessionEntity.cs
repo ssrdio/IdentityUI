@@ -1,4 +1,5 @@
-﻿using SSRD.IdentityUI.Core.Data.Entities.Identity;
+﻿using SSRD.Audit.Attributes;
+using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities
 {
+    [AuditIgnore]
     public class SessionEntity : IBaseEntity, ISoftDelete
     {
         public DateTimeOffset? _CreatedDate { get; set; }

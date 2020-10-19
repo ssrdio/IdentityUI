@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using SSRD.Audit.Data;
+using SSRD.Audit.Extensions;
+using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.DependencyInjection;
@@ -78,10 +81,16 @@ namespace SSRD.IdentityUI.Core
                 options.EmailSender = identityUIOptions.EmailSender;
             });
 
+            DatabaseOptions databaseOptions = new DatabaseOptions
+            {
+                Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory,
+                ConnectionString = identityUIOptions.Database?.ConnectionString
+            };
+
             services.Configure<DatabaseOptions>(options =>
             {
-                options.Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory;
-                options.ConnectionString = identityUIOptions.Database?.ConnectionString;
+                options.Type = databaseOptions.Type;
+                options.ConnectionString = databaseOptions.ConnectionString;
             });
 
             services.Configure<EmailSenderOptions>(options =>
@@ -128,10 +137,14 @@ namespace SSRD.IdentityUI.Core
                 options.InviteValidForTimeSpan = identityManagementEndpoints.InviteValidForTimeSpan;
             });
 
-            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, configuration);
+            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, databaseOptions, configuration);
 
             builder.Services.AddScoped<IEmailSender, NullEmailSender>();
             builder.Services.AddScoped<ISmsSender, NullSmsSender>();
+            builder.Services.AddScoped<IReleaseManagement, ReleaseManagement>();
+
+            builder.Services.AddAudit();
+            builder.Services.AddTransient<IAuditDbContext, IdentityDbContext>();
 
             return builder;
         }
@@ -145,34 +158,6 @@ namespace SSRD.IdentityUI.Core
         public static IdentityUIServicesBuilder AddIdentityUI(this IdentityUIServicesBuilder builder,
             Action<IdentityOptions> identityOptions)
         {
-            builder.Services.AddDbContext<IdentityDbContext>((provider, options) =>
-            {
-                DatabaseOptions databaseOptions = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value;
-                if (databaseOptions == null)
-                {
-                    throw new Exception("No DatabaseOptions");
-                }
-
-                switch (databaseOptions.Type)
-                {
-                    case DatabaseTypes.PostgreSql:
-                        {
-                            options.UseNpgsql(databaseOptions.ConnectionString);
-
-                            break;
-                        }
-                    case DatabaseTypes.InMemory:
-                        {
-                            options.UseInMemoryDatabase(databaseOptions.ConnectionString);
-                            break;
-                        }
-                    default:
-                        {
-                            throw new Exception($"Unsupported Database: {databaseOptions.Type}");
-                        }
-                }
-            });
-
             builder.Services.AddIdentity<AppUserEntity, RoleEntity>()
                 .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
@@ -187,8 +172,6 @@ namespace SSRD.IdentityUI.Core
 
             //To create UrlHelper we need ActionContext
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-
-            builder.Services.AddScoped<ReleaseManagement>();
 
             builder.Services.Configure<IdentityOptions>(identityOptions);
             builder.Services.Configure<SecurityStampValidatorOptions>(options =>
@@ -206,6 +189,15 @@ namespace SSRD.IdentityUI.Core
                 };
             });
 
+
+            return builder;
+        }
+
+        public static IdentityUIServicesBuilder UseInMemoryDatabase(this IdentityUIServicesBuilder builder)
+        {
+            builder.Services.AddDbContext<IdentityDbContext>(options => options.UseInMemoryDatabase(builder.DatabaseOptions.ConnectionString));
+            builder.Services.AddSingleton<IUpdateList, EmptyUpdateList>();
+            builder.Services.AddScoped<IReleaseManagement, NullReleaseManagement>();
 
             return builder;
         }
@@ -340,6 +332,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddTransient<ISessionRepository, SessionRepository>();
 
             builder.Services.AddTransient(typeof(IBaseRepositoryAsync<>), typeof(BaseRepositoryAsync<>));
+
+            builder.Services.AddTransient(typeof(IBaseDAO<>), typeof(BaseDAO<>));
         }
 
         private static void AddSeeders(this IdentityUIServicesBuilder builder)

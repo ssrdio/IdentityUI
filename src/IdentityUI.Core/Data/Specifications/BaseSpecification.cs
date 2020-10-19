@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Data.Specifications
 {
+    [Obsolete("Use SSRD.CommonUtils.Specifications.BaseSpecification")]
     public class BaseSpecification<TEntity> : IBaseSpecification<TEntity> where TEntity : class, IBaseEntity
     {
         public List<Expression<Func<TEntity, bool>>> Filters { get; } = new List<Expression<Func<TEntity, bool>>>();

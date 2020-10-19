@@ -39,8 +39,8 @@
     }
 
     hideError() {
-        this.$error.text('');
         this.$error.hide();
+        this.$error.text('');
     }
 
     empty() {
@@ -51,13 +51,13 @@
     addOptions(options) {
         if (this.$select2 !== null && this.$select2 !== undefined) {
             options.forEach((option) => {
-                this.$select2.append($('<option />').val(option.value).text(option.text));
+                this.$select2.append($('<option />').val(option.id).text(option.text));
             });
         }
-
-        if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined) {
             options.forEach((option) => {
-                this.$select.append($('<option />').val(option.value).text(option.text));
+                console.log(option)
+                this.$select.append($('<option />').val(option.id).text(option.text));
             });
         }
     }
@@ -66,30 +66,27 @@
         if (this.$select2 !== null && this.$select2 !== undefined) {
             this.$select2.append($option);
         }
-
-        if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined) {
             this.$select.append($option);
         }
     }
 
     addSelectedOption(option) {
         if (this.$select2 !== null && this.$select2 !== undefined) {
-            this.$select2.append($('<option />').val(option.value).text(option.text));
-            this.$select2.val(option.value);
+            this.$select2.append($('<option />').val(option.id).text(option.text));
+            this.$select2.val(option.text);
         }
-
-        if (this.$select !== null && this.$select !== undefined) {
-            this.$select.append($('<option />').val(option.value).text(option.text));
-            this.$select.val(option.value);
+        else if (this.$select !== null && this.$select !== undefined) {
+            this.$select.append($('<option />').val(option.id).text(option.text));
+            this.$select.val(option.text);
         }
     }
 
     selectOption(value) {
         if (this.$select2 !== null && this.$select2 !== undefined) {
-            this.$select2.val(value).trigger('change');;
+            this.$select2.val(value);
         }
-
-        if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined) {
             this.$select.val(value);
         }
     }
@@ -107,4 +104,5 @@
             });
         });
     }
+
 }

@@ -157,13 +157,30 @@ namespace SSRD.IdentityUI.Core.Services.User
                     .ToList();
             }
 
+            string username;
+            if(_identityUIEndpoints.UseEmailAsUsername)
+            {
+                username = registerRequest.Email;
+            }
+            else
+            {
+                if(string.IsNullOrEmpty(registerRequest.Username))
+                {
+                    _logger.LogError($"Username cannot be empty");
+                    return Result.Fail("username_cannot_be_empty", "username_cannot_be_empty");
+                }
+
+                username = registerRequest.Username;
+            }
+
             AppUserEntity appUser = new AppUserEntity(
-                userName: registerRequest.Email,
+                userName: username,
                 email: registerRequest.Email,
                 firstName: registerRequest.FirstName,
                 lastName: registerRequest.LastName,
                 emailConfirmed: false,
                 enabled: true,
+                phoneNumber: registerRequest.PhoneNumber,
                 attributes: userAttributes);
 
             IdentityResult identityResult = await _userManager.CreateAsync(appUser, registerRequest.Password);
@@ -221,13 +238,30 @@ namespace SSRD.IdentityUI.Core.Services.User
                     .ToList();
             }
 
+            string username;
+            if (_identityUIEndpoints.UseEmailAsUsername)
+            {
+                username = inviteEntity.Email;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(acceptInvite.Username))
+                {
+                    _logger.LogError($"Username cannot be empty");
+                    return Result.Fail("username_cannot_be_empty", "username_cannot_be_empty");
+                }
+
+                username = acceptInvite.Username;
+            }
+
             AppUserEntity appUser = new AppUserEntity(
-                userName: inviteEntity.Email,
+                userName: username,
                 email: inviteEntity.Email,
                 firstName: acceptInvite.FirstName,
                 lastName: acceptInvite.LastName,
                 emailConfirmed: true,
                 enabled: true,
+                phoneNumber: acceptInvite.PhoneNumber,
                 attributes: userAttributes);
 
             IdentityResult identityResult = await _userManager.CreateAsync(appUser, acceptInvite.Password);
@@ -359,13 +393,30 @@ namespace SSRD.IdentityUI.Core.Services.User
                     .ToList();
             }
 
+            string username;
+            if (_identityUIEndpoints.UseEmailAsUsername)
+            {
+                username = externalLoginRegisterRequest.Email;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(externalLoginRegisterRequest.Username))
+                {
+                    _logger.LogError($"Username cannot be empty");
+                    return Result.Fail("username_cannot_be_empty", "username_cannot_be_empty");
+                }
+
+                username = externalLoginRegisterRequest.Username;
+            }
+
             AppUserEntity appUser = new AppUserEntity(
-                userName: externalLoginRegisterRequest.Email,
+                userName: username,
                 email: externalLoginRegisterRequest.Email,
                 firstName: externalLoginRegisterRequest.FirstName,
                 lastName: externalLoginRegisterRequest.LastName,
                 emailConfirmed: false,
                 enabled: true,
+                phoneNumber: externalLoginRegisterRequest.PhoneNumber,
                 attributes: userAttributes);
 
             IdentityResult createUserResult = await _userManager.CreateAsync(appUser);

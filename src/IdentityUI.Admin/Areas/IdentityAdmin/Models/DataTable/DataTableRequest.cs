@@ -8,6 +8,7 @@ using FluentValidation;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable
 {
+    [Obsolete("Use SSRD.AdminUI.Template.Models.DataTables")]
     public class DataTableRequest
     {
         public int Draw { get; set; }

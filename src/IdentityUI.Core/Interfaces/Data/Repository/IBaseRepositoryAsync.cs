@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Interfaces.Data.Repository
 {
+    [Obsolete("Use Specifications.Interfaces.IBaseDAO")]
     public interface IBaseRepositoryAsync<TEntity> where TEntity : class, IBaseEntity
     {
         Task<bool> Exist(IBaseSpecification<TEntity> specification);

@@ -1,5 +1,4 @@
-﻿using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment.Updates;
-using SSRD.IdentityUI.Core.Models.Options;
+﻿using SSRD.IdentityUI.Core.Models.Options;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 {
-    internal class ReleaseManagement
+    internal class ReleaseManagement : IReleaseManagement
     {
         private readonly IdentityDbContext _context;
 
@@ -28,22 +27,21 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 #if NET_CORE3
         private readonly IWebHostEnvironment _hostingEnvironment;
 #endif
+        private readonly IUpdateList _updateList;
 
         private readonly ILogger<ReleaseManagement> _logger;
-
-        private readonly DatabaseOptions _databaseOptions;
 #if NET_CORE2
-        public ReleaseManagement(IdentityDbContext context, IHostingEnvironment hostingEnvironment, ILogger<ReleaseManagement> logger,
-            IOptionsSnapshot<DatabaseOptions> databaseOptions)
+        public ReleaseManagement(IdentityDbContext context, IHostingEnvironment hostingEnvironment, IUpdateList updateList,
+            ILogger<ReleaseManagement> logger)
 #elif NET_CORE3
-        public ReleaseManagement(IdentityDbContext context, IWebHostEnvironment hostingEnvironment, ILogger<ReleaseManagement> logger,
-            IOptionsSnapshot<DatabaseOptions> databaseOptions)
+        public ReleaseManagement(IdentityDbContext context, IWebHostEnvironment hostingEnvironment, IUpdateList updateList,
+            ILogger<ReleaseManagement> logger)
 #endif
         {
             _context = context;
             _hostingEnvironment = hostingEnvironment;
+            _updateList = updateList;
             _logger = logger;
-            _databaseOptions = databaseOptions.Value;
         }
 
         /// <summary>
@@ -51,11 +49,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
         /// </summary>
         public void ApplayMigrations()
         {
-            if (_databaseOptions.Type == DatabaseTypes.InMemory)
-            {
-                return;
-            }
-
             _logger.LogInformation("===== Release Management =====");
 
             try
@@ -71,8 +64,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                     _logger.LogInformation($"New Database was created");
                 }
 
-                List<IUpdate> updates = AllUpdates();
-                _logger.LogInformation($"All updates(also already applied): {string.Join(", ", updates)}");
+                IEnumerable<IUpdate> updates = _updateList.Get();
 
                 List<string> applyedMigrations = _context.Database
                     .GetAppliedMigrations()
@@ -94,7 +86,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                 throw new Exception($"ReleaseManagment Error. {ex.Message}");
             }
         }
-        
 
         private void PerformUpdateInTransaction(IUpdate update)
         {
@@ -108,7 +99,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                     _logger.LogInformation($"Finished Before Schema Change: {update}");
 
                     _logger.LogInformation($"Schema Change: {update}");
-                    update.SchemaChange(_context.Database);
+                    update.SchemaChange(_context);
                     _logger.LogInformation($"Finished Schema Change: {update}");
 
                     _logger.LogInformation($"After Schema Change: {update}");
@@ -125,19 +116,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
                     throw e;
                 }
             }
-        }
-
-        private List<IUpdate> AllUpdates()
-        {
-            var updates = new List<IUpdate>
-            {
-                new Update_01_InitialCreate(),
-                new Update_02_AddPermissionsAddGroups(),
-                new Update_03_UserActiveTwoFactorAuthenticationColumnAdded(),
-                new Update_04_AddUserImageTable(),
-                new Update_05_AddUserAttributes(),
-            };
-            return updates.OrderBy(m => m.GetVersion()).ToList();
         }
     }
 }

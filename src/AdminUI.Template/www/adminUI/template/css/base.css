@@ -981,7 +981,7 @@ select.form-control {
 }
 
 .dataTableClass thead tr th {
-    padding: 10px 15px;
+    padding: 5px 15px;
 }
 
 table.dataTableClass > tbody > tr > td.checkbox-holder {

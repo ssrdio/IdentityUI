@@ -107,7 +107,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
                 .RemoveRange(entities);
 
             int changes = await _context.SaveChangesAsync();
-            return changes == entities.Count();
+            return changes > 0;
         }
 
         public Task<TEntity> SingleOrDefault(IBaseSpecification<TEntity> specification)

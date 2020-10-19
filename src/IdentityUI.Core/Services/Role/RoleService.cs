@@ -14,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using SSRD.IdentityUI.Core.Data.Entities;
+using System.Linq;
 
 namespace SSRD.IdentityUI.Core.Services.Role
 {
@@ -22,18 +24,21 @@ namespace SSRD.IdentityUI.Core.Services.Role
         private readonly RoleManager<RoleEntity> _roleManager;
 
         private readonly IRoleRepository _roleRepository;
+        private readonly IBaseRepositoryAsync<RoleAssignmentEntity> _roleAssignmentRepository;
 
         private readonly IValidator<NewRoleRequest> _newRoleValidator;
         private readonly IValidator<EditRoleRequest> _editRoleValidator;
 
         private readonly ILogger<RoleService> _logger;
 
-        public RoleService(RoleManager<RoleEntity> roleManager, IRoleRepository roleRepository, IValidator<NewRoleRequest> newRoleRequest,
+        public RoleService(RoleManager<RoleEntity> roleManager, IRoleRepository roleRepository,
+            IBaseRepositoryAsync<RoleAssignmentEntity> roleAssignmentRepository, IValidator<NewRoleRequest> newRoleRequest,
             IValidator<EditRoleRequest> editRoleValidator, ILogger<RoleService> logger)
         {
             _roleManager = roleManager;
 
             _roleRepository = roleRepository;
+            _roleAssignmentRepository = roleAssignmentRepository;
 
             _newRoleValidator = newRoleRequest;
             _editRoleValidator = editRoleValidator;
@@ -103,9 +108,11 @@ namespace SSRD.IdentityUI.Core.Services.Role
             return Result.Ok();
         }
 
-        public Result Remove(string id)
+        public async Task<Result> Remove(string id)
         {
             BaseSpecification<RoleEntity> roleSpecification = new BaseSpecification<RoleEntity>();
+            roleSpecification.Includes.Add(x => x.CanAssigne);
+
             roleSpecification.AddFilter(x => x.Id == id);
 
             RoleEntity role = _roleRepository.SingleOrDefault(roleSpecification);
@@ -116,6 +123,17 @@ namespace SSRD.IdentityUI.Core.Services.Role
             }
 
             _logger.LogInformation($"Removing Role. RoleId {id}, Name {role.Name}");
+
+            //SqlServer does not support cascade delete
+            if (role.CanAssigne.Any())
+            {
+                bool removeCanAssigneRoles = await _roleAssignmentRepository.RemoveRange(role.CanAssigne);
+                if(!removeCanAssigneRoles)
+                {
+                    _logger.LogError($"Failed to remove assigned roles");
+                    return Result.Fail("failed_to_remove_assigned_roles", "Failed to remove assigned roles");
+                }
+            }
 
             bool removeResult = _roleRepository.Remove(role);
             if(!removeResult)

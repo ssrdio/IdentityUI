@@ -16,6 +16,9 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
 
         public string LastName { get; set; }
 
+        public string PhoneNumber { get; set; }
+        public string Username { get; set; }
+
         public string ExternalLoginProviderName { get; set; }
 
         public string ReturnUrl { get; set; }

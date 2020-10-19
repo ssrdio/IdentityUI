@@ -14,5 +14,6 @@ namespace SSRD.IdentityUI.Core.Models.Options
     {
         PostgreSql,
         InMemory,
+        SqlServer,
     }
 }

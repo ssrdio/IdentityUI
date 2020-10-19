@@ -199,3 +199,116 @@ table.dataTableClass > tbody > tr > td {
 .loader-hidden {
     display: none !important;
 }
+
+.daterangepicker {
+    border: 0px !important;
+    box-shadow: 0px 6px 15px 0px rgba(0,0,0,0.4) !important;
+    border-radius: 0px !important;
+}
+
+    .daterangepicker .calendar-table thead tr:nth-child(2) th {
+        padding-bottom: 15px;
+        padding-top: 5px;
+        color: grey;
+    }
+
+    .daterangepicker td.start-date, .daterangepicker td.end-date {
+        border-radius: 0px !important;
+        background-color: #008fef !important;
+    }
+
+    .daterangepicker td.off, .daterangepicker td.off.in-range, .daterangepicker td.off.start-date, .daterangepicker td.off.end-date {
+        color: #d6d6d6 !important;
+    }
+
+
+    .daterangepicker .calendar-table th, .daterangepicker .calendar-table td {
+        width: 35px !important;
+        height: 32px !important;
+        font-size: 13px !important;
+        border-radius: 0px !important;
+    }
+
+        .daterangepicker .calendar-table th.month {
+            font-size: 16px !important;
+            height: 30px !important;
+        }
+
+    .daterangepicker td.start-date.off, .daterangepicker td.end-date.off {
+        background-color: transparent !important;
+    }
+
+@media only screen and (max-width: 992px) {
+    .custom-row .left-card {
+        max-width: 100% !important;
+        margin-right: 0% !important;
+    }
+
+    .custom-row .right-card {
+        max-width: 100% !important;
+        margin-left: 0% !important;
+    }
+
+    .select2-container {
+        display: block !important;
+    }
+}
+
+.daterangepicker .calendar-time {
+    padding: 6px 0px;
+}
+
+.daterangepicker select.hourselect, .daterangepicker select.minuteselect, .daterangepicker select.secondselect, .daterangepicker select.ampmselect {
+    width: 55px !important;
+    background: transparent !important;
+    padding: 2px !important;
+    font-size: 13px !important;
+    border: 1px solid #eaeaea !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-left: 10px !important;
+    color: #272727;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAtxQTFRFAAAAysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKk30J4AAAAPR0Uk5TAAE8gbjd9P7/9t+5gz0CEHrifGrtaRS6IdvcG+AaBsmFhCT6+SOfnvcPXlyhoM/Q7u/7/eflwIg/a3DaCD78R2iQhrGkCsq/F9Yp6CBA9TRO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') 85% / 25% no-repeat transparent !important;
+}
+
+
+.daterangepicker.show-calendar .drp-buttons {
+    display: flex !important;
+    white-space: nowrap !important;
+    padding: 0px;
+    align-items: center;
+}
+
+.daterangepicker .drp-buttons .btn {
+    width: 27% !important;
+    white-space: normal !important;
+    height: 40px;
+    border-radius: 0px !important;
+    margin-left: 0px !important;
+}
+
+.daterangepicker .drp-buttons .cancelBtn {
+    background: #e6e6e6;
+}
+
+    .daterangepicker .drp-buttons .cancelBtn:hover, .daterangepicker .drp-buttons .cancelBtn:active {
+        background: #b9b9b9;
+    }
+
+.daterangepicker .drp-buttons .drp-selected {
+    width: 47% !important;
+    display: block !important;
+    white-space: normal !important;
+    padding: 0px;
+    text-align: center;
+    font-size: 11px;
+}
+
+.daterangepicker.single .drp-selected {
+    display: none !important;
+}
+
+.sidebar-icon-container {
+    min-width: 20px;
+}
+

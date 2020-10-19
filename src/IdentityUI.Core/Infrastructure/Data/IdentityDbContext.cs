@@ -15,10 +15,16 @@ using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Config.Group;
 using SSRD.IdentityUI.Core.Data.Entities.User;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Config.User;
+using Microsoft.EntityFrameworkCore.Storage;
+using SSRD.Audit.Data;
+using SSRD.Audit.Services;
+using Microsoft.Extensions.DependencyInjection;
+using SSRD.Audit.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data
 {
-    internal class IdentityDbContext : IdentityDbContext<AppUserEntity, RoleEntity, string, UserClaimEntity, UserRoleEntity, UserLoginEntity, RoleClaimEntity, UserTokenEntity>
+    public class IdentityDbContext : IdentityDbContext<AppUserEntity, RoleEntity, string, UserClaimEntity, UserRoleEntity, UserLoginEntity, RoleClaimEntity, UserTokenEntity>, IAuditDbContext
     {
         public DbSet<SessionEntity> Sessions { get; set; }
         public DbSet<RoleAssignmentEntity> RoleAssignments { get; set; }
@@ -34,11 +40,16 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
         public DbSet<InviteEntity> Invite { get; set; }
         public DbSet<EmailEntity> Emails { get; set; }
+        public DbSet<AuditEntity> Audit { get; set; }
 
-        public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
+        private readonly IAuditSubjectDataService _auditDataService;
+        private readonly ILogger<IdentityDbContext> _logger;
+
+        public IdentityDbContext(DbContextOptions<IdentityDbContext> options, IAuditSubjectDataService auditDataService, ILogger<IdentityDbContext> logger)
             : base(options)
         {
-
+            _auditDataService = auditDataService;
+            _logger = logger;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -66,20 +77,124 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
 
             builder.Entity<SessionEntity>().HasQueryFilter(x => x._DeletedDate == null);
+
+            builder.ApplyConfiguration(new AuditEntityConfiguration());
         }
 
         public override int SaveChanges()
         {
             SoftDelete();
             AddAuditInfo();
-            return base.SaveChanges();
+
+            ProccessChangeTrackerResult proccessChangeTrackerResult = ChangeTrackerAuditService.ProccessChangeTracker(ChangeTracker);
+            if(proccessChangeTrackerResult.RequiresCustomBatch)
+            {
+                using (IDbContextTransaction dbTransaction = Database.BeginTransaction())
+                {
+                    try
+                    {
+                        int changes = base.SaveChanges();
+
+                        AuditSubjectData auditSubjectData = _auditDataService.Get();
+
+                        IEnumerable<AuditEntity> auditEntities = proccessChangeTrackerResult.AuditObjectData
+                            .Select(x => new AuditEntity(
+                                auditObjectData: x,
+                                auditSubjectData: auditSubjectData));
+
+                        Audit.AddRange(auditEntities);
+
+                        int auditChanges = base.SaveChanges();
+
+                        dbTransaction.Commit();
+
+                        return changes;
+                    }
+                    catch(Exception ex)
+                    {
+                        _logger.LogError(ex, $"Failed to perform db transaction");
+
+                        dbTransaction.Rollback();
+
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+                AuditSubjectData auditSubjectData = _auditDataService.Get();
+
+                IEnumerable<AuditEntity> auditEntities = proccessChangeTrackerResult.AuditObjectData
+                    .Select(x => new AuditEntity(
+                        auditObjectData: x,
+                        auditSubjectData: auditSubjectData));
+
+                Audit.AddRange(auditEntities);
+
+                return base.SaveChanges() - auditEntities.Count();
+            }
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             SoftDelete();
             AddAuditInfo();
-            return base.SaveChangesAsync(cancellationToken);
+
+            ProccessChangeTrackerResult proccessChangeTrackerResult = ChangeTrackerAuditService.ProccessChangeTracker(ChangeTracker);
+            if (proccessChangeTrackerResult.RequiresCustomBatch)
+            {
+                using (IDbContextTransaction dbTransaction = await Database.BeginTransactionAsync(cancellationToken))
+                {
+                    try
+                    {
+                        int changes = base.SaveChanges();
+
+                        AuditSubjectData auditSubjectData = _auditDataService.Get();
+
+                        IEnumerable<AuditEntity> auditEntities = proccessChangeTrackerResult.AuditObjectData
+                            .Select(x => new AuditEntity(
+                                auditObjectData: x,
+                                auditSubjectData: auditSubjectData));
+
+                        Audit.AddRange(auditEntities);
+
+                        int auditChanges = await base.SaveChangesAsync(cancellationToken);
+
+#if NET_CORE2
+                        dbTransaction.Commit();
+#elif NET_CORE3
+                        await dbTransaction.CommitAsync(cancellationToken);
+#endif
+                        return changes;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Failed to perform db transaction");
+
+#if NET_CORE2
+                        dbTransaction.Rollback();
+#elif NET_CORE3
+                        await dbTransaction.RollbackAsync(cancellationToken);
+#endif
+
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+                AuditSubjectData auditSubjectData = _auditDataService.Get();
+
+                IEnumerable<AuditEntity> auditEntities = proccessChangeTrackerResult.AuditObjectData
+                    .Select(x => new AuditEntity(
+                        auditObjectData: x,
+                        auditSubjectData: auditSubjectData));
+
+                Audit.AddRange(auditEntities);
+
+                int changes = await base.SaveChangesAsync(cancellationToken);
+                return changes - auditEntities.Count();
+            }
         }
 
         private void AddAuditInfo()
@@ -108,6 +223,11 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 entity.State = EntityState.Unchanged;
                 ((ISoftDelete)entity.Entity)._DeletedDate = DateTime.UtcNow;
             }
+        }
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await SaveChangesAsync(new CancellationToken());
         }
     }
 }
