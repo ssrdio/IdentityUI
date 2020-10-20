@@ -66,11 +66,6 @@ namespace SSRD.IdentityUI.Admin
 
             builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
 
-            if(builder.IdentityManagementEndpoints.UseEmailSender.HasValue && builder.IdentityManagementEndpoints.UseEmailSender.Value == true)
-            {
-                SidebarSelection.UseEmailSender = true;
-            }
-
             return builder;
         }
 

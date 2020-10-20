@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
@@ -10,7 +6,6 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Permission;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -18,7 +13,6 @@ using SSRD.IdentityUI.Core.Services.Permission.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
-    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class PermissionController : BaseController
     {
         private readonly IPermissionDataService _permissionDataService;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group;
@@ -15,7 +16,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
     //TODO: change this to api controller
     [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
     [Route("[area]/Group/{groupId}/[controller]/[action]")]
-    public class GroupAttributeController : BaseController
+    public class GroupAttributeController : GroupBaseController
     {
         private readonly IGroupAttributeDataService _groupAttributeDataService;
         private readonly IGroupAttributeService _groupAttributeService;

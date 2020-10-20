@@ -20,6 +20,7 @@ namespace SSRD.Audit.Services
             AuditSubjectData auditSubjectData = new AuditSubjectData(
                 subjectType: Data.SubjectTypes.Machine,
                 subjectIdentifier: _auditOptions.DefaultSubjectName,
+                subjectMetadata: null,
                 host: null,
                 remoteIp: null,
                 resourceName: null,

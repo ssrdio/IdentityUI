@@ -35,9 +35,14 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
         private readonly ILogger<LoginService> _logger;
 
-        public LoginService(SignInManager<AppUserEntity> signInManager, UserManager<AppUserEntity> userManager, IUserRepository userRepository,
-            ISessionService sessionService, IHttpContextAccessor httpContextAccessor, IValidator<LoginRequest> loginValidator, 
-            IValidator<LoginWith2faRequest> loginWith2faValidator, IValidator<LoginWithRecoveryCodeRequest> loginWithRecoveryCodeValidator,
+        public LoginService(
+            SignInManager<AppUserEntity> signInManager,
+            UserManager<AppUserEntity> userManager,
+            ISessionService sessionService,
+            IHttpContextAccessor httpContextAccessor,
+            IValidator<LoginRequest> loginValidator,
+            IValidator<LoginWith2faRequest> loginWith2faValidator,
+            IValidator<LoginWithRecoveryCodeRequest> loginWithRecoveryCodeValidator,
             ILogger<LoginService> logger)
         {
             _signInManager = signInManager;

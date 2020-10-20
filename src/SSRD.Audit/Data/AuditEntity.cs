@@ -19,6 +19,7 @@ namespace SSRD.Audit.Data
 
         public SubjectTypes SubjectType { get; set; }
         public string SubjectIdentifier { get; set; }
+        public string SubjectMetadata { get; set; }
 
         public string Host { get; set; }
         public string RemoteIp { get; set; }
@@ -26,6 +27,8 @@ namespace SSRD.Audit.Data
         public string UserAgent { get; set; }
         public string TraceIdentifier { get; set; }
         public string AppVersion { get; set; }
+
+        public string Metadata { get; set; }
 
         /// <summary>
         /// Created is in UTC timezone
@@ -54,6 +57,7 @@ namespace SSRD.Audit.Data
 
             SubjectType = auditSubjectData.SubjectType;
             SubjectIdentifier = auditSubjectData.SubjectIdentifier;
+            SubjectMetadata = auditSubjectData.SubjectMetadata;
 
             Host = auditSubjectData.Host;
             RemoteIp = auditSubjectData.RemoteIp;

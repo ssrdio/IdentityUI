@@ -114,12 +114,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
                     x.ObjectMetadata,
                     x.SubjectType.GetDescription(),
                     x.SubjectIdentifier,
+                    x.SubjectMetadata,
                     x.Host,
                     x.RemoteIp,
                     x.ResourceName,
                     x.UserAgent,
                     x.TraceIdentifier,
                     x.AppVersion,
+                    x.Metadata,
                     x.Created.ToString("o")))
                 .Build();
 

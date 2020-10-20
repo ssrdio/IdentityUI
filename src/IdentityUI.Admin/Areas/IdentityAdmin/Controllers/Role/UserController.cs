@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Result;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
 {
-    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     [Route("[area]/Role/{roleId:required}/[controller]/[action]")]
     public class UserController : BaseController
     {

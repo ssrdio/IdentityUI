@@ -5,14 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
-using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin
+namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     internal sealed class GroupPermissionAuthorizeAttribute : AuthorizeAttribute, IAuthorizationFilter
@@ -42,7 +39,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin
             }
 
             bool groupIdExist = context.RouteData.Values.TryGetValue(GROUP_ROUTE_KEY, out object groupIdObj);
-            if(!groupIdExist)
+            if (!groupIdExist)
             {
                 context.Result = new NotFoundResult();
             }

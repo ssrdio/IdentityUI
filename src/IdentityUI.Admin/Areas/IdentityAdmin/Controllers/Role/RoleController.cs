@@ -5,20 +5,14 @@ using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Role.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 using Microsoft.AspNetCore.Http;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
-using SSRD.AdminUI.Template.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Role
 {
-    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class RoleController : BaseController
     {
         private readonly IRoleDataService _roleDataService;

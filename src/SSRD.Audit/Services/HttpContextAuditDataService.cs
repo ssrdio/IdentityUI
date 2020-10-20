@@ -29,6 +29,7 @@ namespace SSRD.Audit.Services
             Models.AuditSubjectData auditData = new Models.AuditSubjectData(
                 subjectType: Data.SubjectTypes.Human,
                 subjectIdentifier: GetUserId(),
+                subjectMetadata: GetSubjectMetadata(),
                 host: GetHost(),
                 remoteIp: GetRemoteIp(),
                 resourceName: GetResourceName(),
@@ -42,6 +43,11 @@ namespace SSRD.Audit.Services
         public virtual string GetUserId()
         {
             return _httpContextAccessor.HttpContext?.User.FindFirst(_auditOptions.UserIdClaimType)?.Value;
+        }
+
+        public virtual string GetSubjectMetadata()
+        {
+            return null;
         }
 
         public virtual string GetHost()

@@ -14,5 +14,12 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
         public const string GROUP_PERMISSION = "IdentityUI.Group.Permission";
 
         public const string PERMISSION = "IdentityUI.Permission";
+
+        public const string IMPERSONATOR_ID = "IdentityUI.ImpersonatorId";
+        public const string IMPERSONATOR_NAME = "IdentityUI.ImpersonatorName";
+        public const string IMPERSONATOR_EMAIL = "IdentityUI.ImpersonatorEmail";
+
+        public const string IMPERSONATOR_ROLE = "IdentityUI.ImpersonatorRole";
+        public const string IMPERSONATOR_PERMISSION = "IdentityUI.ImpersonatorPermission";
     }
 }

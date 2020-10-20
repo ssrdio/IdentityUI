@@ -43,6 +43,12 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
         /// </summary>
         public string SessionCode { get; set; }
 
+        /// <summary>
+        /// This column does not exist in database. It is only used for login
+        /// </summary>
+        public string ImpersonatorId { get; set; }
+
+
         protected AppUserEntity()
         {
         }

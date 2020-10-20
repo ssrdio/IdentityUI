@@ -16,5 +16,7 @@ namespace SSRD.IdentityUI.Core.Data.Enums.Entity
         SecurityCodeChange = 11,
 
         InvalidLogin = 20,
+
+        ImpersonationLogout = 30,
     }
 }

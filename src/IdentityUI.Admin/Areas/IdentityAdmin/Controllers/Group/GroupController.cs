@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SSRD.AdminUI.Template.Models.Select2;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group;
@@ -11,13 +10,11 @@ using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Services.Identity;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
+namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
-    public class GroupController : BaseController
+    public class GroupController : GroupBaseController
     {
         private readonly IGroupDataService _groupDataService;
         private readonly IGroupService _groupService;
@@ -52,13 +49,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         [HttpGet("/[area]/[controller]/[action]/{groupId}")]
         public IActionResult Users(string groupId)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return NotFoundView();
             }
 
             Result<GroupUserViewModel> result = _groupDataService.GetGroupUserViewModel(groupId);
-            if(result.Failure)
+            if (result.Failure)
             {
                 return NotFoundView();
             }
@@ -114,7 +111,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             }
 
             Result<DataTableResult<GroupTableModel>> result = _groupDataService.Get(dataTableRequest);
-            if(result.Failure)
+            if (result.Failure)
             {
                 ModelState.AddErrors(result.Errors);
                 return BadRequest(ModelState);
@@ -129,13 +126,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
         [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
         public IActionResult Add([FromBody] AddGroupRequest addGroup)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             Result result = _groupService.Add(addGroup);
-            if(result.Failure)
+            if (result.Failure)
             {
                 ModelState.AddErrors(result.Errors);
                 return BadRequest(ModelState);

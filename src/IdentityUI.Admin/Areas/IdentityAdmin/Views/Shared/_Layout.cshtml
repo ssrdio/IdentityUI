@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -26,6 +28,15 @@
             @await Component.InvokeAsync("imSidebar")
             <div class="main-panel">
                 <div class="content-wrapper">
+
+                    @if (User.IsImpersonized(_identityUIClaimOptions.Value))
+                    {
+                        <div id="impersionation-container" class="alert alert-info impersionation-container">
+                            You are impersonating <strong>@User.GetUsername(_identityUIClaimOptions.Value)</strong>
+                            <button class="btn btn-default" href="/IdentityAdmin/Impersonation/Stop">Stop</button>
+                        </div>
+                    }
+
                     @RenderBody()
                 </div>
                 <footer class="footer">
@@ -69,5 +80,30 @@
     <script type="text/javascript" src="~/adminUI/app/js/alert/alertClose.js" asp-append-version="true"></script>
 
     @RenderSection("script", required: false)
+
+    @if (User.IsImpersonized(_identityUIClaimOptions.Value))
+    {
+        <style>
+            .impersionation-container {
+                position: -webkit-sticky; /* Safari */
+                position: sticky;
+                top: 0;
+            }
+        </style>
+
+        <script type="text/javascript">
+            $(document).ready(() => {
+                $('#impersionation-container').on('click', 'button', () => {
+                    Api.get(`/IdentityAdmin/Impersonation/Stop`)
+                        .done(() => {
+                            location.reload();
+                        })
+                        .fail((response) => {
+                            console.log(response.ResponseJSON);
+                        });
+                })
+            });
+        </script>
+    }
 </body>
 </html>
