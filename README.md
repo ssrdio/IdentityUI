@@ -36,7 +36,7 @@ EmailSender options are optional if you provide custom implementation of IEmailS
 ## Startup
 
 In the `ConfigureServices` method add:
-```c#
+```csharp
 services.ConfigureIdentityUI(Configuration) // Configures IdentityUI. You can pass in your own identityUI options.
     .UsePostgre() // Adds dbContext. You can choose between UsePostgre or UseSqlServer.
     .AddIdentityUI() // Adds IdentityManagement core services.
