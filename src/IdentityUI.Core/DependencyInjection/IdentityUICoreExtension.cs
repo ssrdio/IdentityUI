@@ -333,7 +333,8 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddTransient(typeof(IBaseRepositoryAsync<>), typeof(BaseRepositoryAsync<>));
 
-            builder.Services.AddTransient(typeof(IBaseDAO<>), typeof(BaseDAO<>));
+            builder.Services.AddTransient(typeof(IBaseDAO<>), typeof(IdentityUIBaseDAO<>));
+            builder.Services.AddTransient(typeof(IBaseDAO<>), typeof(AuditBaseDAO<>));
         }
 
         private static void AddSeeders(this IdentityUIServicesBuilder builder)
