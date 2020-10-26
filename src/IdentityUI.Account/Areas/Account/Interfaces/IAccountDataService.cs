@@ -12,6 +12,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Interfaces
         Task<LoginViewModel> GetLoginViewModel(string returnUrl, string error = null);
         RegisterSuccessViewModel GetRegisterSuccessViewModel();
         RegisterViewModel GetRegisterViewModel();
+        RegisterGroupViewModel GetRegisterGroupViewModel();
 
         Task<Result<ExternalLoginRegisterViewModel>> GetExternalLoginViewModel(string returnUrl);
     }

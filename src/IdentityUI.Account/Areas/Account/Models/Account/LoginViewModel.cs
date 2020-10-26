@@ -17,15 +17,23 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Account
         public string ReturnUrl { get; set; }
         public bool RegistrationEnabled { get; set; }
         public bool PasswordRecoveryEnabled { get; set; }
+        public bool GroupRegistrationEnabled { get; set; }
 
         public string Error { get; set; }
         public List<AuthenticationScheme> ExternalLogins { get; set; }
 
-        public LoginViewModel(string returnUrl, bool registrationEnabled, bool passwordRecoveryEnabled, string error, List<AuthenticationScheme> externalLogins)
+        public LoginViewModel(
+            string returnUrl,
+            bool registrationEnabled,
+            bool passwordRecoveryEnabled,
+            bool groupRegistrationEnabled,
+            string error,
+            List<AuthenticationScheme> externalLogins)
         {
             ReturnUrl = returnUrl;
             RegistrationEnabled = registrationEnabled;
             PasswordRecoveryEnabled = passwordRecoveryEnabled;
+            GroupRegistrationEnabled = groupRegistrationEnabled;
 
             Error = error;
 

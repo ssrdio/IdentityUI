@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using System.Diagnostics;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
 using Newtonsoft.Json;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
