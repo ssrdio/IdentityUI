@@ -74,6 +74,26 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: true);
         }
 
+        public IBaseSpecificationBuilder<TEntity> Include(Expression<Func<TEntity, object>> expression)
+        {
+            if (expression == null)
+            {
+                throw new ArgumentNullException(nameof(expression), "Can not be null");
+            }
+
+            _includes.Add(expression);
+
+            return new SpecificationBuilder<TEntity>(
+                filters: _filters,
+                includes: _includes,
+                orderByType: _orderByType,
+                orderBy: _orderBy,
+                skip: _skip,
+                take: _take,
+                paginate: _paginate,
+                ignoreQueryFilters: _ignoreQueryFilters);
+        }
+
         public IBaseSpecificationBuilder<TEntity> OrderBy(Expression<Func<TEntity, object>> expression, OrderByTypes orderBy)
         {
             if (expression == null)
@@ -207,7 +227,15 @@ namespace SSRD.CommonUtils.Specifications
 
             _filters.Add(filter);
 
-            return this;
+            return new SpecificationBuilder<TEntity>(
+                filters: _filters,
+                includes: _includes,
+                orderByType: _orderByType,
+                orderBy: _orderBy,
+                skip: _skip,
+                take: _take,
+                paginate: _paginate,
+                ignoreQueryFilters: _ignoreQueryFilters);
         }
     }
 
@@ -432,6 +460,7 @@ namespace SSRD.CommonUtils.Specifications
         IBaseSpecificationBuilder<TEntity> OrderBy(Expression<Func<TEntity, object>> expression, OrderByTypes orderBy);
         IBaseSpecificationBuilder<TEntity> Paginate(int start, int lenght);
         IBaseSpecificationBuilder<TEntity> IgnoreQueryFilters();
+        IBaseSpecificationBuilder<TEntity> Include(Expression<Func<TEntity, object>> expression);
 
         IBaseSpecification<TEntity, TEntity> Build();
 

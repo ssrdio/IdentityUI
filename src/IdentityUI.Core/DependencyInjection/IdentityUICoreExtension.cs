@@ -406,6 +406,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IUserAttributeService, UserAttributeService>();
 
             builder.Services.AddScoped<IGroupRegistrationService, GroupRegistrationService>();
+
+            builder.Services.AddScoped<IAddUserCallbackService, NullAddUserCallback>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)

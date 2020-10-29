@@ -12,7 +12,6 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.User;
@@ -22,6 +21,7 @@ using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
 using SSRD.IdentityUI.Core.Services.User.Models.Add;
 using SSRD.IdentityUI.Core.Models;
+using SSRD.IdentityUI.Core.Interfaces;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
@@ -45,6 +45,8 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IBaseDAO<GroupEntity> _groupDAO; 
         private readonly IBaseDAO<GroupUserEntity> _groupUserDAO;
         private readonly IBaseDAO<RoleEntity> _roleDAO;
+
+        private readonly IAddUserCallbackService _addUserCallbackService;
 
         private readonly IValidator<NewUserRequest> _newUserValidator;
         private readonly IValidator<RegisterRequest> _registerValidator;
@@ -71,6 +73,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             IBaseDAO<GroupEntity> groupDAO,
             IBaseDAO<GroupUserEntity> groupUserDAO,
             IBaseDAO<RoleEntity> roleDAO,
+            IAddUserCallbackService addUserCallbackService,
             IValidator<ExternalLoginRegisterRequest> externalLoginRequsterRequestValidator,
             IValidator<GroupBaseUserRegisterRequest> groupBaseUserRegisterRequestValidator,
             IValidator<BaseRegisterRequest> baseRegisterValidator,
@@ -85,6 +88,8 @@ namespace SSRD.IdentityUI.Core.Services.User
             _groupDAO = groupDAO;
             _groupUserDAO = groupUserDAO;
             _roleDAO = roleDAO;
+
+            _addUserCallbackService = addUserCallbackService;
 
             _newUserValidator = newUserValidator;
             _registerValidator = registerValidator;
@@ -137,6 +142,8 @@ namespace SSRD.IdentityUI.Core.Services.User
                 _logger.LogError($"Failed to find new user with UserName {newUserRequest.UserName}. Admin {adminId}");
                 return Core.Models.Result.Result.Fail<string>("no_user", "No user");
             }
+
+            Result afterUserAddedCallbackResult = await _addUserCallbackService.AfterUserAdded(appUser);
 
             return Core.Models.Result.Result.Ok(appUser.Id);
         }
@@ -423,6 +430,8 @@ namespace SSRD.IdentityUI.Core.Services.User
                 _logger.LogError($"Failed to register user");
                 return CommonUtils.Result.Result.Fail<AppUserEntity>(identityResult.ToResultError());
             }
+
+            Result afterUserAddedCallbackResult = await _addUserCallbackService.AfterUserAdded(appUser);
 
             if (sendConfirmationMail)
             {
