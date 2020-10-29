@@ -18,6 +18,7 @@
 
         this.$subjectType = this.$auditDataContiner.find('#subject-type-container');
         this.$subjectIdentifier = this.$auditDataContiner.find('#subject-identifier-container');
+        this.$subjectMetadata = this.$auditDataContiner.find('#subject-metadata-container');
 
         this.$resourceName = this.$auditDataContiner.find('#resource-name-container');
         this.$host = this.$auditDataContiner.find('#host-container');
@@ -25,6 +26,7 @@
         this.$userAgent = this.$auditDataContiner.find('#user-agent-container');
         this.$traceIdentifier = this.$auditDataContiner.find('#trace-identifier-container');
         this.$appVersion = this.$auditDataContiner.find('#app-version-container');
+        this.$metadata = this.$auditDataContiner.find('#metadata-container');
 
         this.$created = this.$auditDataContiner.find('#created-container');
     }
@@ -58,6 +60,7 @@
 
         this.$subjectType.text(null);
         this.$subjectIdentifier.text(null);
+        this.$subjectMetadata.text(null);
 
         this.$resourceName.text(null);
         this.$host.text(null);
@@ -65,6 +68,7 @@
         this.$userAgent.text(null);
         this.$traceIdentifier.text(null);
         this.$appVersion.text(null);
+        this.$metadata.text(null);
 
         this.$created.text(null);
     }
@@ -78,6 +82,7 @@
 
         this.$subjectType.text(data.subjectType);
         this.$subjectIdentifier.text(data.subjectIdentifier);
+        this.$subjectMetadata.jJsonViewer(data.subjectMetadata);
 
         this.$resourceName.text(data.resourceName);
         this.$host.text(data.host);
@@ -85,6 +90,7 @@
         this.$userAgent.text(data.userAgent);
         this.$traceIdentifier.text(data.traceIdentifier);
         this.$appVersion.text(data.appVersion);
+        this.$metadata.jJsonViewer(data.metadata);
 
         this.$created.text(moment.utc(data.created).format("D.M.YYYY HH:mm:ssZ"));
     }

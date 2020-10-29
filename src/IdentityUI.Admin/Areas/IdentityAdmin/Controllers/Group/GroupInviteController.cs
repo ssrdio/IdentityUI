@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group;
@@ -18,7 +19,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     [Route("[area]/Group/{groupId}/[controller]/[action]")]
     [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
-    public class GroupInviteController : BaseController
+    public class GroupInviteController : GroupBaseController
     {
         private readonly IGroupInviteDataService _groupInviteDataService;
 

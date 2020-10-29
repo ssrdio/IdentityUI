@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize]
+    [AuthorizeIdentityAdmin]
     [Area(PagePath.IDENTITY_ADMIN_AREA_NAME)]
     public class BaseController : Controller
     {

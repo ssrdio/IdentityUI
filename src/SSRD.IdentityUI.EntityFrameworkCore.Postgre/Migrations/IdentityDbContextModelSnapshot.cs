@@ -38,6 +38,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.Property<string>("Host")
                         .HasColumnType("text");
 
+                    b.Property<string>("Metadata")
+                        .HasColumnType("text");
+
                     b.Property<string>("ObjectIdentifier")
                         .HasColumnType("text");
 
@@ -54,6 +57,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SubjectIdentifier")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubjectMetadata")
                         .HasColumnType("text");
 
                     b.Property<int>("SubjectType")

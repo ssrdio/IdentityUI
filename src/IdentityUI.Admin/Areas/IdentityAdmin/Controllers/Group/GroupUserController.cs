@@ -1,30 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.AdminUI.Template.Models.Select2;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
-using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
-using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Services.Identity;
-using SSRD.IdentityUI.Core.Services.User.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
 {
     //TODO: change this to api controller
     [Route("[area]/Group/{groupId}/[controller]/[action]")]
     [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
-    public class GroupUserController : BaseController
+    public class GroupUserController : GroupBaseController
     {
         private readonly IGroupUserService _groupUserService;
         private readonly IGroupUserDataService _groupUserDataService;

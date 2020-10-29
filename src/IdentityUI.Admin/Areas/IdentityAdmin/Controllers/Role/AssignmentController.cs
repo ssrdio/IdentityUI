@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.AdminUI.Template.Models.Select2;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Role;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services.Role;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -18,7 +13,6 @@ using SSRD.IdentityUI.Core.Services.Role.Models;
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
     //TODO: change this to api controller
-    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     [Route("[area]/Role/{roleId:required}/[controller]/[action]")]
     public class AssignmentController : BaseController
     {

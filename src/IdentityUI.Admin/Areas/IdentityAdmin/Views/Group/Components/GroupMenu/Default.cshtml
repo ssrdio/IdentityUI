@@ -2,6 +2,9 @@
 @using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu
 @model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu.GroupMenuViewComponent.ViewModel
 
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
 <div class="custom-header">
     <div class="page-title-wrapper">
         <div class="page-title-heading">
@@ -11,26 +14,36 @@
         </div>
     </div>
     <ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityUIClaimOptions.Value))
         {
             <li class="nav-item">
-                <a role="tab" class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Users ? "active" : "") show" href="@(string.Format(PagePath.GROUP_USERS, Model.Id))" aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Users ? "true" : "false")">
+                <a role="tab" 
+                   class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Users ? "active" : "") show" 
+                   href="@(string.Format(PagePath.GROUP_USERS, Model.Id))" 
+                   aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Users ? "true" : "false")">
                     <span>Users</span>
                 </a>
             </li>
         }
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES) && SidebarSelection.UseEmailSender)
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES, _identityUIClaimOptions.Value) 
+            && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
         {
             <li class="nav-item">
-                <a role="tab" class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Invites ? "active" : "") show" href="@(string.Format(PagePath.GROUP_INVITES, Model.Id))" aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Invites ? "true" : "false")">
+                <a role="tab" 
+                   class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Invites ? "active" : "") show" 
+                   href="@(string.Format(PagePath.GROUP_INVITES, Model.Id))" 
+                   aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Invites ? "true" : "false")">
                     <span>Invites</span>
                 </a>
             </li>
         }
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES))
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES, _identityUIClaimOptions.Value))
         {
             <li class="nav-item">
-                <a role="tab" class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Attributes ? "active" : "") show" href="@(string.Format(PagePath.GROUP_ATTRIBUTES, Model.Id))" aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Attributes ? "true" : "false")">
+                <a role="tab" 
+                   class="nav-link @(Model.TabSelected == GroupMenuViewComponent.TabSelected.Attributes ? "active" : "") show" 
+                   href="@(string.Format(PagePath.GROUP_ATTRIBUTES, Model.Id))" 
+                   aria-selected="@(Model.TabSelected == GroupMenuViewComponent.TabSelected.Attributes ? "true" : "false")">
                     <span>Attributes</span>
                 </a>
             </li>

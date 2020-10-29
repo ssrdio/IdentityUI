@@ -15,6 +15,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
 
         public string SubjectType { get; set; }
         public string SubjectIdentifier { get; set; }
+        public string SubjectMetadata { get; set; }
 
         public string Host { get; set; }
         public string RemoteIp { get; set; }
@@ -22,6 +23,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
         public string UserAgent { get; set; }
         public string TraceIdentifier { get; set; }
         public string AppVersion { get; set; }
+        public string Metadata { get; set; }
 
         public string Created { get; set; }
 
@@ -33,12 +35,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
             string objectMetadata,
             string subjectType,
             string subjectIdentifier,
+            string subjectMetadata,
             string host,
             string remoteIp,
             string resourceName,
             string userAgent,
             string traceIdentifier,
             string appVersion,
+            string metadata,
             string created)
         {
             Id = id;
@@ -48,12 +52,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
             ObjectMetadata = objectMetadata;
             SubjectType = subjectType;
             SubjectIdentifier = subjectIdentifier;
+            SubjectMetadata = subjectMetadata;
             Host = host;
             RemoteIp = remoteIp;
             ResourceName = resourceName;
             UserAgent = userAgent;
             TraceIdentifier = traceIdentifier;
             AppVersion = appVersion;
+            Metadata = metadata;
             Created = created;
         }
     }

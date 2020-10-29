@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using SSRD.Audit.Data;
 using SSRD.Audit.Extensions;
 using SSRD.CommonUtils.Specifications.Interfaces;
@@ -32,6 +31,7 @@ using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services;
 using SSRD.IdentityUI.Core.Services.Auth;
 using SSRD.IdentityUI.Core.Services.Auth.Email;
+using SSRD.IdentityUI.Core.Services.Auth.Login;
 using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth;
 using SSRD.IdentityUI.Core.Services.Email;
 using SSRD.IdentityUI.Core.Services.Group;
@@ -149,6 +149,26 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddAudit();
             builder.Services.AddTransient<IAuditDbContext, IdentityDbContext>();
 
+            services.AddScoped<Audit.Services.IAuditSubjectDataService>(x =>
+            {
+                Microsoft.Extensions.Options.IOptions<Audit.Models.AuditOptions> auditOptions = x.GetRequiredService<Microsoft.Extensions.Options.IOptions<Audit.Models.AuditOptions>>();
+                Microsoft.Extensions.Options.IOptions<IdentityUIClaimOptions> identityUIClaimOptions = x.GetRequiredService<Microsoft.Extensions.Options.IOptions<IdentityUIClaimOptions>>();
+
+                Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor = x.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+                if (httpContextAccessor.HttpContext != null)
+                {
+                    return new IdentityUIAuditSubjectService(httpContextAccessor, auditOptions, identityUIClaimOptions);
+                }
+
+                Audit.Services.IBackgroundServiceContextAccessor backgroundServiceContextAccessor = x.GetRequiredService<Audit.Services.IBackgroundServiceContextAccessor>();
+                if (backgroundServiceContextAccessor.BackgroundServiceContext != null)
+                {
+                    return new Audit.Services.BackgroundServiceAuditSubjectDataService(backgroundServiceContextAccessor);
+                }
+
+                return new Audit.Services.DefaultAuditSubjectService(auditOptions);
+            });
+
             return builder;
         }
 
@@ -180,17 +200,22 @@ namespace SSRD.IdentityUI.Core
             builder.Services.Configure<SecurityStampValidatorOptions>(options =>
             {
                 options.ValidationInterval = TimeSpan.FromMinutes(1);
-                options.OnRefreshingPrincipal = context =>
-                {
-                    Claim sessionCode = context.CurrentPrincipal.FindFirst(IdentityUIClaims.SESSION_CODE);
-                    if (sessionCode != null)
-                    {
-                        context.NewPrincipal.Identities.First().AddClaim(sessionCode);
-                    }
+                //options.OnRefreshingPrincipal = context =>
+                //{
+                //    Claim sessionCode = context.CurrentPrincipal.FindFirst(IdentityUIClaims.SESSION_CODE);
+                //    if (sessionCode != null)
+                //    {
+                //        context.NewPrincipal.Identities.First().AddClaim(sessionCode);
+                //    }
 
-                    return Task.CompletedTask;
-                };
+                //    return Task.CompletedTask;
+                //};
             });
+
+            //builder.Services.Configure<IdentityUIClaimOptions>(options =>
+            //{
+
+            //});
 
 
             return builder;
@@ -408,6 +433,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IGroupRegistrationService, GroupRegistrationService>();
 
             builder.Services.AddScoped<IAddUserCallbackService, NullAddUserCallback>();
+
+            builder.Services.AddScoped<IImpersonateService, ImpersonateService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
