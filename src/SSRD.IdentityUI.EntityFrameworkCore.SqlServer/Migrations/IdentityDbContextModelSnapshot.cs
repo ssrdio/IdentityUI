@@ -35,7 +35,13 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("GroupIdentifier")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Host")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Metadata")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ObjectIdentifier")
@@ -54,6 +60,9 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubjectIdentifier")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SubjectMetadata")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SubjectType")
