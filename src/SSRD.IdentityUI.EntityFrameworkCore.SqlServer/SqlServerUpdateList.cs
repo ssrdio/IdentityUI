@@ -14,7 +14,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Providers.SqlServer
             new Update_20200824141100_InitialCreate(),
             new Update_20200901071938_UserAttributes(),
             new Update_20201012131856_AddAudit(),
-            new Update_20201020221321_AddAuditMetadata(),
         };
 
         public IEnumerable<IUpdate> Get()

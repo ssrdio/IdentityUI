@@ -38,9 +38,6 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.Migrations
                     b.Property<string>("Host")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Metadata")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ObjectIdentifier")
                         .HasColumnType("nvarchar(max)");
 
@@ -57,9 +54,6 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubjectIdentifier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SubjectMetadata")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SubjectType")
