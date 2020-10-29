@@ -293,7 +293,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
         {
             IBaseSpecification<RoleEntity, RoleListData> specification = SpecificationBuilder
                 .Create<RoleEntity>()
-                .Where(x => x.Type == Data.Enums.Entity.RoleTypes.Global)
+                .Where(x => x.Type == Data.Enums.Entity.RoleTypes.Group)
                 .Select(x => new RoleListData(
                     x.Id,
                     x.Name))

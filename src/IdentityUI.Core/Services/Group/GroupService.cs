@@ -6,6 +6,7 @@ using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
+using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
@@ -46,7 +47,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
             Result result = taskResult.Result.First();
 
-            return Core.Models.Result.Result.Fail(result.ResultMessages.Select(x => new Core.Models.Result.Result.ResultError(x.Code, x.Code)).ToList());
+            return result.ToOldResult();
         }
 
         public async Task<Result<IdStringModel>> AddAsync(AddGroupRequest addGroup)
@@ -92,7 +93,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
             Result result = taskResult.Result.First();
 
-            return Core.Models.Result.Result.Fail(result.ResultMessages.Select(x => new Core.Models.Result.Result.ResultError(x.Code, x.Code)).ToList());
+            return result.ToOldResult();
         }
 
         public async Task<Result> RemoveAsync(string id)
