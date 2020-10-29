@@ -21,6 +21,7 @@ namespace SSRD.Audit.Services
                 subjectType: Data.SubjectTypes.Machine,
                 subjectIdentifier: _backgroundServiceContextAccessor.BackgroundServiceContext.Name,
                 subjectMetadata: null,
+                groupIdentifier: null,
                 host: null,
                 remoteIp: null,
                 resourceName: null,

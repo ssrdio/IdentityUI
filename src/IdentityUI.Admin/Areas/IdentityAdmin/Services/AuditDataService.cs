@@ -115,6 +115,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
                     x.SubjectType.GetDescription(),
                     x.SubjectIdentifier,
                     x.SubjectMetadata,
+                    x.GroupIdentifier,
                     x.Host,
                     x.RemoteIp,
                     x.ResourceName,

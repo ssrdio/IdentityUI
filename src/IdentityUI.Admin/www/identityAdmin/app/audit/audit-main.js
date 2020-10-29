@@ -20,6 +20,8 @@
         this.$subjectIdentifier = this.$auditDataContiner.find('#subject-identifier-container');
         this.$subjectMetadata = this.$auditDataContiner.find('#subject-metadata-container');
 
+        this.$groupIdentifier = this.$auditDataContiner.find('#group-identifier-container');
+
         this.$resourceName = this.$auditDataContiner.find('#resource-name-container');
         this.$host = this.$auditDataContiner.find('#host-container');
         this.$remoteIp = this.$auditDataContiner.find('#remote-ip-container');
@@ -62,6 +64,8 @@
         this.$subjectIdentifier.text(null);
         this.$subjectMetadata.text(null);
 
+        this.$groupIdentifier.text(null);
+
         this.$resourceName.text(null);
         this.$host.text(null);
         this.$remoteIp.text(null);
@@ -83,6 +87,8 @@
         this.$subjectType.text(data.subjectType);
         this.$subjectIdentifier.text(data.subjectIdentifier);
         this.$subjectMetadata.jJsonViewer(data.subjectMetadata);
+
+        this.$groupIdentifier.text(data.groupIdentifier);
 
         this.$resourceName.text(data.resourceName);
         this.$host.text(data.host);

@@ -48,5 +48,10 @@ namespace SSRD.IdentityUI.Core.Services
 
             return json;
         }
+
+        public override string GetGroupIdentifier()
+        {
+            return _httpContextAccessor.HttpContext.User.GetGroupId(_identityUIClaimOptions);
+        }
     }
 }

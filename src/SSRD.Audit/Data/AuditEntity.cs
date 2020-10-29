@@ -21,6 +21,8 @@ namespace SSRD.Audit.Data
         public string SubjectIdentifier { get; set; }
         public string SubjectMetadata { get; set; }
 
+        public string GroupIdentifier { get; set; }
+
         public string Host { get; set; }
         public string RemoteIp { get; set; }
         public string ResourceName { get; set; }
@@ -58,6 +60,8 @@ namespace SSRD.Audit.Data
             SubjectType = auditSubjectData.SubjectType;
             SubjectIdentifier = auditSubjectData.SubjectIdentifier;
             SubjectMetadata = auditSubjectData.SubjectMetadata;
+
+            GroupIdentifier = auditSubjectData.GroupIdentifier;
 
             Host = auditSubjectData.Host;
             RemoteIp = auditSubjectData.RemoteIp;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
+﻿namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
 {
     public class AuditAdminDetailsModel
     {
@@ -16,6 +12,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
         public string SubjectType { get; set; }
         public string SubjectIdentifier { get; set; }
         public string SubjectMetadata { get; set; }
+
+        public string GroupIdentifier { get; set; }
 
         public string Host { get; set; }
         public string RemoteIp { get; set; }
@@ -36,6 +34,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
             string subjectType,
             string subjectIdentifier,
             string subjectMetadata,
+            string groupIdentifier,
             string host,
             string remoteIp,
             string resourceName,
@@ -53,6 +52,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
             SubjectType = subjectType;
             SubjectIdentifier = subjectIdentifier;
             SubjectMetadata = subjectMetadata;
+            GroupIdentifier = groupIdentifier;
             Host = host;
             RemoteIp = remoteIp;
             ResourceName = resourceName;
