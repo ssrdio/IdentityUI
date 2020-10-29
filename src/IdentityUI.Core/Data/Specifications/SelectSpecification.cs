@@ -7,6 +7,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Specifications
 {
+    [Obsolete("Use SSRD.CommonUtils.Specifications.BaseSpecification")]
     public class SelectSpecification<TEntity, TData> : BaseSpecification<TEntity>, ISelectSpecification<TEntity, TData> where TEntity : class, IBaseEntity
     {
         public Expression<Func<TEntity, TData>> Select { get; private set; }

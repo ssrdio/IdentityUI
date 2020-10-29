@@ -19,6 +19,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public string AcceptInvite { get; set; } = "/Account/AcceptInvite";
 
         public bool RegisterEnabled { get; set; } = true;
+        public bool GroupRegistrationEnabled { get; set; } = true;
 
         public string AuthenticatorIssuer { get; set; } = "IdentityUI";
 

@@ -6,11 +6,8 @@ using SSRD.IdentityUI.Account.Areas.Account.Models.Account;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Services
@@ -38,6 +35,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
                 returnUrl: returnUrl,
                 registrationEnabled: _identityUIEndpoints.RegisterEnabled,
                 passwordRecoveryEnabled: _identityUIEndpoints.UseEmailSender ?? false,
+                groupRegistrationEnabled: _identityUIEndpoints.GroupRegistrationEnabled,
                 error: error,
                 externalLogins: (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList());
 
@@ -77,6 +75,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
                 returnUrl: returnUrl);
 
             return Result.Ok(externalLoginRegisterViewModel);
+        }
+
+        public RegisterGroupViewModel GetRegisterGroupViewModel()
+        {
+            RegisterGroupViewModel registerGroupViewModel = new RegisterGroupViewModel(
+                recoverPasswordEnabled: _identityUIEndpoints.UseEmailSender ?? false);
+
+            return registerGroupViewModel;
         }
     }
 }

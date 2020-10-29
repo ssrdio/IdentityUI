@@ -18,6 +18,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models
         public const string LOCKOUT = AUTH + "/Lockout";
 
         public const string REGISTER = AUTH + "/Register";
+        public const string REGISTER_GROUP = AUTH + "/RegisterGroup";
         public const string REGISTER_SUCCESS = AUTH + "/RegisterSuccess";
 
         public const string RECOVER_PASSWORD = AUTH + "/RecoverPassword";

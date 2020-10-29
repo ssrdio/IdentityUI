@@ -10,7 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using SSRD.Audit.Data;
 using SSRD.Audit.Extensions;
 using SSRD.CommonUtils.Specifications.Interfaces;
+using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
+using SSRD.IdentityUI.Core.Data.Entities.User;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.DependencyInjection;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
@@ -358,7 +361,29 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddTransient(typeof(IBaseRepositoryAsync<>), typeof(BaseRepositoryAsync<>));
 
-            builder.Services.AddTransient(typeof(IBaseDAO<>), typeof(BaseDAO<>));
+            builder.Services.AddTransient<IBaseDAO<AuditEntity>, AuditBaseDAO<AuditEntity>>();
+
+            builder.Services.AddTransient<IBaseDAO<AppUserEntity>, IdentityUIBaseDAO<AppUserEntity>>();
+            builder.Services.AddTransient<IBaseDAO<RoleClaimEntity>, IdentityUIBaseDAO<RoleClaimEntity>>();
+            builder.Services.AddTransient<IBaseDAO<RoleEntity>, IdentityUIBaseDAO<RoleEntity>>();
+            builder.Services.AddTransient<IBaseDAO<UserClaimEntity>, IdentityUIBaseDAO<UserClaimEntity>>();
+            builder.Services.AddTransient<IBaseDAO<UserLoginEntity>, IdentityUIBaseDAO<UserLoginEntity>>();
+            builder.Services.AddTransient<IBaseDAO<UserRoleEntity>, IdentityUIBaseDAO<UserRoleEntity>>();
+            builder.Services.AddTransient<IBaseDAO<UserTokenEntity>, IdentityUIBaseDAO<UserTokenEntity>>();
+            
+            builder.Services.AddTransient<IBaseDAO<SessionEntity>, IdentityUIBaseDAO<SessionEntity>>();
+            builder.Services.AddTransient<IBaseDAO<UserAttributeEntity>, IdentityUIBaseDAO<UserAttributeEntity>>();
+            builder.Services.AddTransient<IBaseDAO<UserImageEntity>, IdentityUIBaseDAO<UserImageEntity>>();
+            
+            builder.Services.AddTransient<IBaseDAO<GroupAttributeEntity>, IdentityUIBaseDAO<GroupAttributeEntity>>();
+            builder.Services.AddTransient<IBaseDAO<GroupEntity>, IdentityUIBaseDAO<GroupEntity>>();
+            builder.Services.AddTransient<IBaseDAO<GroupUserEntity>, IdentityUIBaseDAO<GroupUserEntity>>();
+
+            builder.Services.AddTransient<IBaseDAO<EmailEntity>, IdentityUIBaseDAO<EmailEntity>>();
+            builder.Services.AddTransient<IBaseDAO<PermissionEntity>, IdentityUIBaseDAO<PermissionEntity>>();
+            builder.Services.AddTransient<IBaseDAO<PermissionRoleEntity>, IdentityUIBaseDAO<PermissionRoleEntity>>();
+            builder.Services.AddTransient<IBaseDAO<RoleAssignmentEntity>, IdentityUIBaseDAO<RoleAssignmentEntity>>();
+            builder.Services.AddTransient<IBaseDAO<InviteEntity>, IdentityUIBaseDAO<InviteEntity>>();
         }
 
         private static void AddSeeders(this IdentityUIServicesBuilder builder)
@@ -404,6 +429,10 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IExternalLoginService, Services.Auth.Login.ExternalLoginService>();
 
             builder.Services.AddScoped<IUserAttributeService, UserAttributeService>();
+
+            builder.Services.AddScoped<IGroupRegistrationService, GroupRegistrationService>();
+
+            builder.Services.AddScoped<IAddUserCallbackService, NullAddUserCallback>();
 
             builder.Services.AddScoped<IImpersonateService, ImpersonateService>();
         }
@@ -469,6 +498,10 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddSingleton<IValidator<Services.User.Models.Attribute.AddUserAttributeModel>, Services.User.Models.Attribute.AddUserAttributeModelValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.Attribute.UpdateUserAttributeModel>, Services.User.Models.Attribute.UpdateUserAttributeModelValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.RegisterGroupModel>, Services.Group.Models.RegisterGroupModelValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.Add.BaseRegisterRequest>, Services.User.Models.Add.BaseRegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.Add.GroupBaseUserRegisterRequest>, Services.User.Models.Add.GroupBaseUserRegisterRequestValidator>();
         }
 
         /// <summary>

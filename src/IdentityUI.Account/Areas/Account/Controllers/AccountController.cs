@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Account.Areas.Account.Models;
 using SSRD.IdentityUI.Account.Areas.Account.Models.Account;
@@ -17,6 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using SSRD.IdentityUI.Core.Services.Group.Models;
+using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -30,12 +30,19 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         private readonly ICredentialsService _credentialsService;
         private readonly IAccountDataService _accountDataService;
         private readonly IExternalLoginService _externalLoginService;
+        private readonly IGroupRegistrationService _groupRegistrationService;
 
         private readonly IdentityUIEndpoints _identityUIEndpoints;
 
-        public AccountController(ILoginService loginService, IEmailConfirmationService emailConfirmationService,
-            IAddUserService addUserService, ICredentialsService credentialsService, IAccountDataService accountDataService,
-            ITwoFactorAuthService twoFactorAuthService, IExternalLoginService externalLoginService,
+        public AccountController(
+            ILoginService loginService,
+            IEmailConfirmationService emailConfirmationService,
+            IAddUserService addUserService,
+            ICredentialsService credentialsService,
+            IAccountDataService accountDataService,
+            ITwoFactorAuthService twoFactorAuthService,
+            IExternalLoginService externalLoginService,
+            IGroupRegistrationService groupRegistrationService,
             IOptionsSnapshot<IdentityUIEndpoints> identityUIEndpoints)
         {
             _loginService = loginService;
@@ -45,6 +52,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             _accountDataService = accountDataService;
             _twoFactorAuthService = twoFactorAuthService;
             _externalLoginService = externalLoginService;
+            _groupRegistrationService = groupRegistrationService;
 
             _identityUIEndpoints = identityUIEndpoints.Value;
         }
@@ -490,6 +498,48 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
                 getViewModelResult.Value.StatusAlert = StatusAlertViewExtension.Get(result);
                 ModelState.AddErrors(result.Errors);
                 return View(getViewModelResult.Value);
+            }
+
+            return RedirectToAction(nameof(RegisterSuccess));
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult RegisterGroup()
+        {
+            if (!_identityUIEndpoints.GroupRegistrationEnabled)
+            {
+                return NotFound();
+            }
+
+            RegisterGroupViewModel registerViewModel = _accountDataService.GetRegisterGroupViewModel();
+
+            return View(registerViewModel);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> RegisterGroup(RegisterGroupModel registerGroupModel)
+        {
+            if (!_identityUIEndpoints.GroupRegistrationEnabled)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                RegisterGroupViewModel registerViewModel = _accountDataService.GetRegisterGroupViewModel();
+
+                return View(registerViewModel);
+            }
+
+            CommonUtils.Result.Result result = await _groupRegistrationService.Add(registerGroupModel);
+            if (result.Failure)
+            {
+                RegisterGroupViewModel registerViewModel = _accountDataService.GetRegisterGroupViewModel();
+
+                CommonUtils.Result.ResultExtensions.AddResultErrors(ModelState, result);
+                return View(registerViewModel);
             }
 
             return RedirectToAction(nameof(RegisterSuccess));
