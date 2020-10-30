@@ -21,6 +21,7 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -65,6 +66,11 @@ namespace SSRD.IdentityUI.Admin
             builder.Services.AddScoped<IAuditDataService, AuditDataService>();
 
             builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
+
+            builder.Services.AddScoped<SSRD.IdentityUI.Admin.Interfaces.IGroupUserDataService, Services.GroupUserDataService>();
+            builder.Services.AddScoped<SSRD.IdentityUI.Admin.Interfaces.IGroupInviteDataService, Services.GroupInviteDataService>();
+
+            builder.AddGroupAdmin();
 
             return builder;
         }

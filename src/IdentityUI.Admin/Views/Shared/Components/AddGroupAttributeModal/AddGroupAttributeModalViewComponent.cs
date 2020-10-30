@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.AddGroupAttributeModal
+namespace SSRD.IdentityUI.Admin.Views.Shared.Components.AddGroupAttributeModal
 {
     public class AddGroupAttributeModalViewComponent : ViewComponent
     {

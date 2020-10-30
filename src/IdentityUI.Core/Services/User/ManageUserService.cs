@@ -3,21 +3,20 @@ using FluentValidation.Results;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Helper;
-using SSRD.IdentityUI.Core.Interfaces.Data;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
-using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
-using SSRD.IdentityUI.Core.Data.Entities;
+using SSRD.IdentityUI.Core.Interfaces;
+using SSRD.CommonUtils.Specifications;
+using SSRD.CommonUtils.Specifications.Interfaces;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
@@ -30,6 +29,8 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IBaseRepository<UserRoleEntity> _userRoleRepository;
         private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
 
+        private readonly IGroupUserStore _groupUserStore;
+
         private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ISessionService _sessionService;
 
@@ -41,12 +42,21 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         private readonly ILogger<ManageUserService> _logger;
 
-        public ManageUserService(UserManager<AppUserEntity> userManager, IUserRepository userRepository, IRoleRepository roleRepository,
-            IBaseRepository<UserRoleEntity> userRoleRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
-            IEmailConfirmationService emailConfirmationService, ISessionService sessionService,
-            IValidator<EditUserRequest> editUserValidator, IValidator<SetNewPasswordRequest> setNewPasswordValidator,
-            IValidator<EditProfileRequest> editRequestValidator, IValidator<UnlockUserRequest> unlockUserValidator,
-            IValidator<SendEmailVerificationMailRequest> sendEmailVerificationMailValidator, ILogger<ManageUserService> logger)
+        public ManageUserService(
+            UserManager<AppUserEntity> userManager,
+            IUserRepository userRepository,
+            IRoleRepository roleRepository,
+            IBaseRepository<UserRoleEntity> userRoleRepository,
+            IBaseRepository<GroupUserEntity> groupUserRepository,
+            IGroupUserStore groupUserStore,
+            IEmailConfirmationService emailConfirmationService,
+            ISessionService sessionService,
+            IValidator<EditUserRequest> editUserValidator,
+            IValidator<SetNewPasswordRequest> setNewPasswordValidator,
+            IValidator<EditProfileRequest> editRequestValidator,
+            IValidator<UnlockUserRequest> unlockUserValidator,
+            IValidator<SendEmailVerificationMailRequest> sendEmailVerificationMailValidator,
+            ILogger<ManageUserService> logger)
         {
             _userManager = userManager;
 
@@ -54,6 +64,8 @@ namespace SSRD.IdentityUI.Core.Services.User
             _roleRepository = roleRepository;
             _userRoleRepository = userRoleRepository;
             _groupUserRepository = groupUserRepository;
+
+            _groupUserStore = groupUserStore;
 
             _emailConfirmationService = emailConfirmationService;
             _sessionService = sessionService;
@@ -68,13 +80,13 @@ namespace SSRD.IdentityUI.Core.Services.User
             _logger = logger;
         }
 
-        public async Task<Result> EditUser(string id, EditUserRequest editUserRequest, string adminId)
+        public async Task<Core.Models.Result.Result> EditUser(string id, EditUserRequest editUserRequest, string adminId)
         {
             ValidationResult validationResult = _editUserValidator.Validate(editUserRequest);
             if (!validationResult.IsValid)
             {
                 _logger.LogError($"Invalid EditUserRequest. Admin {adminId}");
-                return Result.Fail(ResultUtils.ToResultError(validationResult.Errors));
+                return Core.Models.Result.Result.Fail(ResultUtils.ToResultError(validationResult.Errors));
             }
 
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
@@ -84,7 +96,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {id}. Admin {adminId}");
-                return Result.Fail("no_user", "No User");
+                return Core.Models.Result.Result.Fail("no_user", "No User");
             }
 
             bool updateSecurityStamp = false;
@@ -134,35 +146,35 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!result)
             {
                 _logger.LogError($"Failed to save edited user data. Admin {adminId}");
-                return Result.Fail("error", "error");
+                return Core.Models.Result.Result.Fail("error", "error");
             }
 
             if (updateSecurityStamp)
             {
-                Result logoutUserResult = await _sessionService.LogoutUser(new Auth.Session.Models.LogoutUserSessionsRequest(appUser.Id), adminId);
+                Core.Models.Result.Result logoutUserResult = await _sessionService.LogoutUser(new Auth.Session.Models.LogoutUserSessionsRequest(appUser.Id), adminId);
                 if (logoutUserResult.Failure)
                 {
                     return logoutUserResult;
                 }
             }
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public async Task<Result> SetNewPassword(string userId, SetNewPasswordRequest setNewPasswordRequest, string adminId)
+        public async Task<Core.Models.Result.Result> SetNewPassword(string userId, SetNewPasswordRequest setNewPasswordRequest, string adminId)
         {
             ValidationResult validationResult = _setNewPasswordValidator.Validate(setNewPasswordRequest);
             if (!validationResult.IsValid)
             {
                 _logger.LogError($"Invlid SetNewPasswordRequest. Admin {adminId}");
-                return Result.Fail(ResultUtils.ToResultError(validationResult.Errors));
+                return Core.Models.Result.Result.Fail(ResultUtils.ToResultError(validationResult.Errors));
             }
 
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if (appUser == null)
             {
                 _logger.LogError($"No User with id {userId}. Admin {adminId}");
-                return Result.Fail("no_user", "No User");
+                return Core.Models.Result.Result.Fail("no_user", "No User");
             }
 
             _logger.LogInformation($"Seting new password for with id {userId}. Admin id {adminId}");
@@ -173,27 +185,27 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!changePasswordResult.Succeeded)
             {
                 _logger.LogError($"Faild to reset password. UserId {appUser.Id}, admin {adminId}");
-                return Result.Fail(changePasswordResult.Errors);
+                return Core.Models.Result.Result.Fail(changePasswordResult.Errors);
             }
 
 
-            Result logoutUserResult = await _sessionService.LogoutUser(new Auth.Session.Models.LogoutUserSessionsRequest(appUser.Id), adminId);
+            Core.Models.Result.Result logoutUserResult = await _sessionService.LogoutUser(new Auth.Session.Models.LogoutUserSessionsRequest(appUser.Id), adminId);
             if (logoutUserResult.Failure)
             {
                 return logoutUserResult;
             }
 
             _logger.LogInformation($"Added new password to user with id {userId}. Admin id {adminId}");
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public async Task<Result> RemoveRoles(string userId, List<string> roles, string adminId)
+        public async Task<Core.Models.Result.Result> RemoveRoles(string userId, List<string> roles, string adminId)
         {
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if (appUser == null)
             {
                 _logger.LogError($"No user {userId}");
-                return Result.Fail("no_user", "No User");
+                return Core.Models.Result.Result.Fail("no_user", "No User");
             }
 
             roles = roles.Select(x => x.ToUpper()).ToList();
@@ -221,20 +233,20 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!removeResult)
             {
                 _logger.LogError($"Failed to remove user roles. UserId {userId}. RoleNames {Newtonsoft.Json.JsonConvert.SerializeObject(roles)}");
-                return Result.Fail("failed_to_remove_user_roles", "Failed to remove user roles");
+                return Core.Models.Result.Result.Fail("failed_to_remove_user_roles", "Failed to remove user roles");
             }
 
             _logger.LogInformation($"Removed roles form user {userId}. Role names: {Newtonsoft.Json.JsonConvert.SerializeObject(existingRoles)}");
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public async Task<Result> AddRoles(string userId, List<string> roles, string adminId)
+        public async Task<Core.Models.Result.Result> AddRoles(string userId, List<string> roles, string adminId)
         {
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if (appUser == null)
             {
                 _logger.LogError($"No user {userId}");
-                return Result.Fail("no_user", "No User");
+                return Core.Models.Result.Result.Fail("no_user", "No User");
             }
 
             roles = roles.Select(x => x.ToUpper()).ToList();
@@ -263,20 +275,20 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!addRoles)
             {
                 _logger.LogError($"Failed to add user roles");
-                return Result.Fail("failed_to_add_user_roles", "Failed to add UserRoles");
+                return Core.Models.Result.Result.Fail("failed_to_add_user_roles", "Failed to add UserRoles");
             }
 
             _logger.LogInformation($"Added roles to user. UserId {userId}, Role ids: {Newtonsoft.Json.JsonConvert.SerializeObject(userRoles.Select(x => x.RoleId))}");
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public Result EditUser(string id, EditProfileRequest editProfileRequest)
+        public Core.Models.Result.Result EditUser(string id, EditProfileRequest editProfileRequest)
         {
             ValidationResult validationResult = _editProfileValidator.Validate(editProfileRequest);
             if (!validationResult.IsValid)
             {
                 _logger.LogWarning($"Invlid EditProfileRequest. UserId {id}");
-                return Result.Fail(validationResult.Errors);
+                return Core.Models.Result.Result.Fail(validationResult.Errors);
             }
 
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
@@ -286,7 +298,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {id}");
-                return Result.Fail("no_user", "No user");
+                return Core.Models.Result.Result.Fail("no_user", "No user");
             }
 
             appUser.FirstName = editProfileRequest.FirstName;
@@ -302,19 +314,19 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!updateResult)
             {
                 _logger.LogError($"Faild to update user. UserId {id}");
-                return Result.Fail("error", "Error");
+                return Core.Models.Result.Result.Fail("error", "Error");
             }
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public Result UnlockUser(UnlockUserRequest request, string adminId)
+        public Core.Models.Result.Result UnlockUser(UnlockUserRequest request, string adminId)
         {
             ValidationResult validationResult = _unlockUserValidator.Validate(request);
             if (!validationResult.IsValid)
             {
                 _logger.LogWarning($"Invlid UnlockUserRequest. AdminId {adminId}");
-                return Result.Fail(validationResult.Errors);
+                return Core.Models.Result.Result.Fail(validationResult.Errors);
             }
 
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
@@ -324,7 +336,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {request.UserId}, AdminId {adminId}");
-                return Result.Fail("no_user", "No user");
+                return Core.Models.Result.Result.Fail("no_user", "No user");
             }
 
             appUser.AccessFailedCount = 0;
@@ -334,19 +346,19 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!result)
             {
                 _logger.LogError($"Faild to unlock user. AdminId {adminId}");
-                return Result.Fail("error", "Error");
+                return Core.Models.Result.Result.Fail("error", "Error");
             }
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public async Task<Result> SendEmilVerificationMail(SendEmailVerificationMailRequest request, string adminId)
+        public async Task<Core.Models.Result.Result> SendEmilVerificationMail(SendEmailVerificationMailRequest request, string adminId)
         {
             ValidationResult validationResult = _sendEmailVerificationMailValidator.Validate(request);
             if (!validationResult.IsValid)
             {
                 _logger.LogWarning($"Invlid SendEmailVerificationMailRequest. AdminId {adminId}");
-                return Result.Fail(validationResult.Errors);
+                return Core.Models.Result.Result.Fail(validationResult.Errors);
             }
 
             BaseSpecification<AppUserEntity> userSpecification = new BaseSpecification<AppUserEntity>();
@@ -356,17 +368,17 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {request.UserId}, AdminId {adminId}");
-                return Result.Fail("no_user", "No user");
+                return Core.Models.Result.Result.Fail("no_user", "No user");
             }
 
             string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
 
             await _emailConfirmationService.SendVerificationMail(appUser, code);
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public async Task<Result> RemoveRole(string userId, string roleId)
+        public async Task<Core.Models.Result.Result> RemoveRole(string userId, string roleId)
         {
             BaseSpecification<RoleEntity> getRoleSpecification = new BaseSpecification<RoleEntity>();
             getRoleSpecification.AddFilter(x => x.Id == roleId);
@@ -375,7 +387,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (role == null)
             {
                 _logger.LogError($"No role. RoleId {roleId}");
-                return Result.Fail("no_role", "No Role");
+                return Core.Models.Result.Result.Fail("no_role", "No Role");
             }
 
             switch (role.Type)
@@ -391,31 +403,31 @@ namespace SSRD.IdentityUI.Core.Services.User
                 default:
                     {
                         _logger.LogError($"Invalid Role type. RoleId {roleId}");
-                        return Result.Fail("invalid_role_type", "Invalid role type");
+                        return Core.Models.Result.Result.Fail("invalid_role_type", "Invalid role type");
                     }
             }
         }
 
-        private async Task<Result> RemoveGlobalRole(string userId, string roleName)
+        private async Task<Core.Models.Result.Result> RemoveGlobalRole(string userId, string roleName)
         {
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if (appUser == null)
             {
                 _logger.LogWarning($"No User. UserId {userId}.");
-                return Result.Fail("no_user", "No User");
+                return Core.Models.Result.Result.Fail("no_user", "No User");
             }
 
             IdentityResult removeRoleResult = await _userManager.RemoveFromRoleAsync(appUser, roleName);
             if (!removeRoleResult.Succeeded)
             {
                 _logger.LogError($"Failed to remove global role. UserId {userId}, RoleName {roleName}");
-                return Result.Fail("failed_to_remove_role", "Failed to remove role");
+                return Core.Models.Result.Result.Fail("failed_to_remove_role", "Failed to remove role");
             }
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        private Result RemoveGroupRole(string userId, string roleId)
+        private Core.Models.Result.Result RemoveGroupRole(string userId, string roleId)
         {
             BaseSpecification<GroupUserEntity> baseSpecification = new BaseSpecification<GroupUserEntity>();
             baseSpecification.AddFilter(x => x.UserId == userId);
@@ -425,7 +437,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (groupUser == null)
             {
                 _logger.LogError($"No GroupUser. UserId {userId}, roleId {roleId}");
-                return Result.Fail("no_group_user", "No GroupUser");
+                return Core.Models.Result.Result.Fail("no_group_user", "No GroupUser");
             }
 
             groupUser.UpdateRole(null);
@@ -434,10 +446,74 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!updateResult)
             {
                 _logger.LogError($"Failed to update GroupUser. UserId {userId}, roleId {roleId}");
-                return Result.Fail("failed_to_update_group_user", "Failed to update GroupUser");
+                return Core.Models.Result.Result.Fail("failed_to_update_group_user", "Failed to update GroupUser");
             }
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
+        }
+
+        public async Task<CommonUtils.Result.Result> EditUser(long groupUserId, EditUserRequest editUserRequest)
+        {
+            IBaseSpecification<GroupUserEntity, GroupUserEntity> specification = SpecificationBuilder
+                .Create<GroupUserEntity>()
+                .Where(x => x.Id == groupUserId)
+                .Include(x => x.User)
+                .Build();
+
+            CommonUtils.Result.Result<GroupUserEntity> getGroupUserResult = await _groupUserStore.SingleOrDefault(specification);
+            if(getGroupUserResult.Failure)
+            {
+                return CommonUtils.Result.Result.Fail(getGroupUserResult);
+            }
+
+            //TODO: change so that Edit takes AppUserEntity as parameter
+            Core.Models.Result.Result updateResult = await EditUser(getGroupUserResult.Value.UserId, editUserRequest, "");
+
+            return updateResult.ToNewResult();
+        }
+
+        public async Task<CommonUtils.Result.Result> UnlockUser(long groupUserId)
+        {
+            IBaseSpecification<GroupUserEntity, GroupUserEntity> specification = SpecificationBuilder
+                .Create<GroupUserEntity>()
+                .Where(x => x.Id == groupUserId)
+                .Include(x => x.User)
+                .Build();
+
+            CommonUtils.Result.Result<GroupUserEntity> getGroupUserResult = await _groupUserStore.SingleOrDefault(specification);
+            if (getGroupUserResult.Failure)
+            {
+                return CommonUtils.Result.Result.Fail(getGroupUserResult);
+            }
+
+            UnlockUserRequest unlockUserRequest = new UnlockUserRequest(
+                userId: getGroupUserResult.Value.UserId);
+
+            Core.Models.Result.Result resuilt = UnlockUser(unlockUserRequest, "");
+
+            return resuilt.ToNewResult();
+        }
+
+        public async Task<CommonUtils.Result.Result> SendEmilVerificationMail(long groupUserId)
+        {
+            IBaseSpecification<GroupUserEntity, GroupUserEntity> specification = SpecificationBuilder
+                .Create<GroupUserEntity>()
+                .Where(x => x.Id == groupUserId)
+                .Include(x => x.User)
+                .Build();
+
+            CommonUtils.Result.Result<GroupUserEntity> getGroupUserResult = await _groupUserStore.SingleOrDefault(specification);
+            if (getGroupUserResult.Failure)
+            {
+                return CommonUtils.Result.Result.Fail(getGroupUserResult);
+            }
+
+            SendEmailVerificationMailRequest sendEmailVerificationMailRequest = new SendEmailVerificationMailRequest(
+                userId: getGroupUserResult.Value.UserId);
+
+            Core.Models.Result.Result result = await SendEmilVerificationMail(sendEmailVerificationMailRequest, "");
+
+            return result.ToNewResult();
         }
     }
 }

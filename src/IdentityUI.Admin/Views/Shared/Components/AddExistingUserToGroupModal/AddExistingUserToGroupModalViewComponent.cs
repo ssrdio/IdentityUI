@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.AddExistingUserToGroupModal
+namespace SSRD.IdentityUI.Admin.Views.Shared.Components.AddExistingUserToGroupModal
 {
     public class AddExistingUserToGroupModalViewComponent : ViewComponent
     {

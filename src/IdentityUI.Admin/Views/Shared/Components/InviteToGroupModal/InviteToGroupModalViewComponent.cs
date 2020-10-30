@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.InviteToGroupModal
+namespace SSRD.IdentityUI.Admin.Views.Shared.Components.InviteToGroupModal
 {
     public class InviteToGroupModalViewComponent : ViewComponent
     {

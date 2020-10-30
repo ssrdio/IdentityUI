@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using SSRD.AdminUI.Template.Models.Select2;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
@@ -11,11 +10,9 @@ using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
-using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models.Result;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
 {
@@ -29,6 +26,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
 
         private readonly ILogger<GroupUserDataService> _logger;
 
+        [Obsolete("Use SSRD.IdentityUI.Admin.Services.GroupUserDataService")]
         public GroupUserDataService(IBaseRepository<AppUserEntity> userRepository, IBaseRepository<GroupUserEntity> groupUserRepository,
             IValidator<DataTableRequest> dataTableValidator, IValidator<Select2Request> select2Validator,
             ILogger<GroupUserDataService> logger)

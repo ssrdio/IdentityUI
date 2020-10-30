@@ -1,11 +1,10 @@
-﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu
-@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User.UserDetailsViewModel
-
-@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+﻿@model SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User.GroupAdminUserDetailsViewModel
 
 @{
-    SidebarSelection.SelectedOption = SidebarOptions.User;
+    GroupAdminSidebarSelection.SelectedOption = GroupAdminSidebarOptions.User;
 }
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
 
 @{
     ViewData["Title"] = "Users";
@@ -15,7 +14,7 @@
     <script>
         $(document).ready(function () {
 
-            new UserDetails('@Model.Id');
+            new UserDetails('@Model.GroupUserId');
         });
 
         class UserDetails {
@@ -40,14 +39,44 @@
 
                 $('#impersonateButton').on('click', () => {
                     this.impersonate();
+                });
+
+                $('#unlockUserButton').on('click', () => {
+                    this.unlock();
+                })
+
+                $('#verifyEmail').on('click', () => {
+                    this.sendVereficationMain();
                 })
             }
 
             impersonate() {
-                Api.get(`/IdentityAdmin/Impersonation/Start/${this.userId}`)
+                Api.get(`/api/GroupAdmin/User/StartImpersonation/${this.userId}`)
                     .done(() => {
                         window.open(`/`);
                         location.reload();
+                    })
+                    .fail((response) => {
+                        this.statusAlert.showErrors(response.responseJSON);
+                    });
+            }
+
+            unlock() {
+                Api.get(`/api/GroupAdmin/User/Unlock/${this.userId}`)
+                    .done(() => {
+
+                        //TODO: clear loceked date
+                        this.statusAlert.showSuccess('User was unlocked');
+                    })
+                    .fail((response) => {
+                        this.statusAlert.showErrors(response.responseJSON);
+                    });
+            }
+
+            sendVereficationMain() {
+                Api.get(`/api/GroupAdmin/User/SendVereficationMain/${this.userId}`)
+                    .done(() => {
+                        this.statusAlert.showSuccess('Email verification mail was sent');
                     })
                     .fail((response) => {
                         this.statusAlert.showErrors(response.responseJSON);
@@ -58,8 +87,6 @@
 }
 
 <div>
-    @(await Component.InvokeAsync("UserMenu", new { userId = Model.Id, tabSelected = UserMenuViewComponent.TabSelected.Details, userName = Model.UserName }))
-
     <div id="status-alert">
         @await Component.InvokeAsync("IdentityStatusAlertJs")
     </div>
@@ -74,12 +101,7 @@
                 </div>
                 <form class="custom-form" method="post">
                     <div class="form-group">
-                        <label asp-for="Id" class="control-label"></label>
-                        <input asp-for="Id" class="form-control disabled" disabled />
-                        <span asp-validation-for="Id" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="UserName" class="control-label"></label>
+                        <label asp-for="UserName" class="control-label">Username</label>
                         <input asp-for="UserName" class="form-control disabled" disabled />
                         <span asp-validation-for="UserName" class="text-danger"></span>
                     </div>
@@ -89,27 +111,27 @@
                         {
                             <div class="verify-email">
                                 <input asp-for="Email" class="form-control" />
-                                <button type="submit" class="btn btn-primary" asp-controller="User" asp-action="SendVerifyEmail" asp-route-id="@Model.Id">Verify Email</button>
+                                <button type="button" id="verifyEmail" class="btn btn-primary">Verify Email</button>
                             </div>
                         }
                         else
                         {
-                             <input asp-for="Email" class="form-control" />
+                            <input asp-for="Email" class="form-control" />
                         }
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="FirstName" class="control-label"></label>
+                        <label asp-for="FirstName" class="control-label">First Name</label>
                         <input asp-for="FirstName" class="form-control" />
                         <span asp-validation-for="FirstName" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="LastName" class="control-label"></label>
+                        <label asp-for="LastName" class="control-label">Last Name</label>
                         <input asp-for="LastName" class="form-control" />
                         <span asp-validation-for="LastName" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="PhoneNumber" class="control-label"></label>
+                        <label asp-for="PhoneNumber" class="control-label">Phone Number</label>
                         <input asp-for="PhoneNumber" class="form-control" />
                         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                     </div>
@@ -117,13 +139,13 @@
                         <div class="form-group form-check">
                             <div class="custom-control custom-switch">
                                 <input asp-for="EmailConfirmed" type="checkbox" class="custom-control-input" id="customSwitches4">
-                                <label class="custom-control-label" for="customSwitches4"> @Html.DisplayNameFor(model => model.EmailConfirmed)</label>
+                                <label asp-for="EmailConfirmed" for="customSwitches4" class="custom-control-label">Email Confirmed</label>
                             </div>
                         </div>
                         <div class="form-group form-check">
                             <div class="custom-control custom-switch">
                                 <input asp-for="PhoneNumberConfirmed" type="checkbox" class="custom-control-input" id="customSwitches">
-                                <label class="custom-control-label" for="customSwitches">@Html.DisplayNameFor(model => model.PhoneNumberConfirmed)</label>
+                                <label asp-for="PhoneNumberConfirmed" for="customSwitches" class="custom-control-label">Phone Number Confirmed</label>
                             </div>
                         </div>
                         <div class="form-group form-check">
@@ -136,13 +158,13 @@
                                 {
                                     <input asp-for="TwoFactorEnabled" type="checkbox" class="custom-control-input" id="customSwitches2" disabled>
                                 }
-                                <label class="custom-control-label" for="customSwitches2">@Html.DisplayNameFor(model => model.TwoFactorEnabled)</label>
+                                <label asp-for="TwoFactorEnabled" for="customSwitches2" class="custom-control-label">TwoFactor Enabled</label>
                             </div>
                         </div>
                         <div class="form-group form-check">
                             <div class="custom-control custom-switch">
                                 <input asp-for="Enabled" type="checkbox" class="custom-control-input" id="customSwitches3">
-                                <label class="custom-control-label" for="customSwitches3">@Html.DisplayNameFor(model => model.Enabled)</label>
+                                <label asp-for="Enabled" for="customSwitches3" class="custom-control-label"></label>
                             </div>
                         </div>
                     </div>
@@ -152,14 +174,14 @@
                             <div>
                                 <label class="control-label text-danger lockout-text">Lockout ends: </label> <label class="control-label lockout-text lockout-text-padding"> @Model.LockoutEnd</label>
                             </div>
-                            <button type="submit" class="btn btn-primary main-card ml-2 lockout-button" asp-controller="User" asp-action="Unlock" asp-route-id="@Model.Id">Unlock user</button>
+                            <button type="button" id="unlockUserButton" class="btn btn-primary main-card ml-2 lockout-button">Unlock user</button>
                         </div>
                     }
 
                     <div class="button-holder">
                         <button type="button" id="impersonateButton" class="btn btn-primary custom-submit">Impersonate</button>
 
-                        <button type="submit" class="btn btn-primary custom-submit" asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id">Save</button>
+                        <button type="submit" class="btn btn-primary custom-submit" asp-area="GroupAdmin" asp-controller="User" asp-action="Details" asp-route-id="@Model.GroupUserId">Save</button>
                     </div>
                 </form>
             </div>

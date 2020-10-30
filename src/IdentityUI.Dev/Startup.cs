@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using SSRD.Audit.Filters;
 using SSRD.IdentityUI.Account;
 using SSRD.IdentityUI.Admin;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin;
 using SSRD.IdentityUI.Core;
 using SSRD.IdentityUI.EntityFrameworkCore.Postgre.DependencyInjection;
 using SSRD.IdentityUI.EntityFrameworkCore.SqlServer.DependencyInjection;
@@ -148,6 +149,7 @@ namespace IdentityUI.Dev
             {
                 endpoints.MapAccountManagement();
                 endpoints.MapIdentityAdmin();
+                endpoints.MapGroupAdmin();
 
                 endpoints.MapControllerRoute(
                     name: "default",

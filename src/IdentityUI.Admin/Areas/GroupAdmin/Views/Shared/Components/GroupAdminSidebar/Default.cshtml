@@ -1,0 +1,53 @@
+﻿
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityClaimOptions;
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
+<nav class="sidebar sidebar-offcanvas menu-line-color" id="sidebar">
+    <ul class="nav">
+        @if (User.HasGroupPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Dashboard ? "active" : "")">
+                <a class="nav-link" href="@GroupAdminPaths.DASHBOARD">
+                    <i class="fas fa-chart-line sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Dashboard</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.User ? "active" : "")">
+                <a class="nav-link" href="@GroupAdminPaths.USER">
+                    <i class="fas fa-user sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">User</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES, _identityClaimOptions.Value) && (_identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Invite ? "active" : "")">
+                <a class="nav-link" href="@GroupAdminPaths.INVITE">
+                    <i class="far fa-envelope sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Invite</span>
+                </a>
+            </li>
+        }
+        @*@if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Attributes ? "active" : "")">
+                <a class="nav-link" href="@GroupAdminPaths.ATTRIBUTE">
+                    <i class="fas fa-book sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Attribute</span>
+                </a>
+            </li>
+        }*@
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Audit ? "active" : "")">
+                <a class="nav-link" href="@GroupAdminPaths.AUDIT">
+                    <i class="fas fa-book sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Audit</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
