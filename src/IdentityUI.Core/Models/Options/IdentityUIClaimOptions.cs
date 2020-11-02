@@ -27,6 +27,11 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public string ImpersonatorRole { get; set; } = IdentityUIClaims.IMPERSONATOR_ROLE;
         public string ImpersonatorPermission { get; set; } = IdentityUIClaims.IMPERSONATOR_PERMISSION;
 
+        public string ImpersonatorGroupId { get; set; } = IdentityUIClaims.IMPERSONATOR_GROUP_ID;
+        public string ImpersonatorGroupName { get; set; } = IdentityUIClaims.IMPERSONATOR_GROUP_NAME;
+        public string ImpersonatorGroupRole { get; set; } = IdentityUIClaims.IMPERSONATOR_GROUP_ROLE;
+        public string ImpersonatorGroupPermission { get; set; } = IdentityUIClaims.IMPERSONATOR_GROUP_PERMISSION;
+
         public string UserIdentityName { get; set; } = "Identity.Application";
         public string ImpersonatorIdentityName { get; set; } = "Identity.Impersonator";
         public string SecurityStamp { get; set; } = "AspNet.Identity.SecurityStamp";

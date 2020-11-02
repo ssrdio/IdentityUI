@@ -21,7 +21,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes
             bool isImpersonized = context.HttpContext.IsImpersonized();
             if(isImpersonized)
             {
-                bool impersonizerHasRole = context.HttpContext.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE);
+                bool impersonizerHasRole = context.HttpContext.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE);
                 if(impersonizerHasRole)
                 {
                     return;

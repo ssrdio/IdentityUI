@@ -8,5 +8,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces
     {
         Task<Result<GroupAdminUserIndexViewModel>> GetIndexViewModel();
         Task<Result<GroupAdminUserDetailsViewModel>> GetDetailsViewModel(long groupUserId);
+
+        Task<Result<GroupAdminUserDetailsModel>> Get(long groupUserId);
     }
 }

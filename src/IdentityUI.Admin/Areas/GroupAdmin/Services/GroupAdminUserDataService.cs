@@ -4,8 +4,10 @@ using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
+using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Models.Options;
@@ -30,6 +32,28 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
             _groupUserStore = groupUserStore;
             _httpContextAccessor = httpContextAccessor;
             _identityUIClaimOptions = identityUIClaimOptions.Value;
+        }
+
+        public Task<Result<GroupAdminUserDetailsModel>> Get(long groupUserId)
+        {
+            IBaseSpecification<GroupUserEntity, GroupAdminUserDetailsModel> specification = SpecificationBuilder
+                .Create<GroupUserEntity>()
+                .Where(x => x.Id == groupUserId)
+                .Select(x => new GroupAdminUserDetailsModel(
+                    x.Id,
+                    x.User.UserName,
+                    x.User.Email,
+                    x.User.FirstName,
+                    x.User.LastName,
+                    x.User.PhoneNumber,
+                    x.User.EmailConfirmed,
+                    x.User.PhoneNumberConfirmed,
+                    x.User.TwoFactorEnabled,
+                    x.User.Enabled,
+                    x.User.LockoutEnd.HasValue ? x.User.LockoutEnd.Value.ToString("o") : null))
+                .Build();
+
+            return _groupUserStore.SingleOrDefault(specification);
         }
 
         public Task<Result<GroupAdminUserDetailsViewModel>> GetDetailsViewModel(long groupUserId)

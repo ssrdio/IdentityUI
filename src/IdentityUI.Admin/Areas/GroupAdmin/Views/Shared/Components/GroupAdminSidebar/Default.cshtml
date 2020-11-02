@@ -4,7 +4,7 @@
 
 <nav class="sidebar sidebar-offcanvas menu-line-color" id="sidebar">
     <ul class="nav">
-        @if (User.HasGroupPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS, _identityClaimOptions.Value))
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS, _identityClaimOptions.Value))
         {
             <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Dashboard ? "active" : "")">
                 <a class="nav-link" href="@GroupAdminPaths.DASHBOARD">
@@ -13,7 +13,7 @@
                 </a>
             </li>
         }
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityClaimOptions.Value))
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityClaimOptions.Value))
         {
             <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.User ? "active" : "")">
                 <a class="nav-link" href="@GroupAdminPaths.USER">
@@ -22,7 +22,7 @@
                 </a>
             </li>
         }
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES, _identityClaimOptions.Value) && (_identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value))
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES, _identityClaimOptions.Value) && (_identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value))
         {
             <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Invite ? "active" : "")">
                 <a class="nav-link" href="@GroupAdminPaths.INVITE">
@@ -40,7 +40,7 @@
                 </a>
             </li>
         }*@
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT, _identityClaimOptions.Value))
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT, _identityClaimOptions.Value))
         {
             <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Audit ? "active" : "")">
                 <a class="nav-link" href="@GroupAdminPaths.AUDIT">

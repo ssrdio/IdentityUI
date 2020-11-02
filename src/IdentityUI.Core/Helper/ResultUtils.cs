@@ -113,7 +113,30 @@ namespace SSRD.IdentityUI.Core.Helper
         {
             if(result.Failure)
             {
-                return Result.Fail(result.Errors.Select(x => new ResultMessage(x.Code, ResultMessageLevels.Error)));
+                List<ResultMessage> newResultMessages = new List<ResultMessage>();
+
+                foreach(Models.Result.Result.ResultError oldResult in result.Errors)
+                {
+                    if (!string.IsNullOrEmpty(oldResult.PropertyName))
+                    {
+                        ResultMessage resultMessage = new PropertyResultMessage(
+                            code: oldResult.Message,
+                            level: ResultMessageLevels.Error,
+                            propertyName: oldResult.PropertyName);
+
+                        newResultMessages.Add(resultMessage);
+                    }
+                    else
+                    {
+                        ResultMessage resultMessage = new ResultMessage(
+                            code: oldResult.Code,
+                            level: ResultMessageLevels.Error);
+
+                        newResultMessages.Add(resultMessage);
+                    }
+                }
+
+                return Result.Fail(newResultMessages);
             }
 
             return Result.Ok();

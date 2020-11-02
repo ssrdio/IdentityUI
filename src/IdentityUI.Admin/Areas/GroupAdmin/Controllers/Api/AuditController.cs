@@ -5,14 +5,17 @@ using SSRD.AdminUI.Template.Models.DataTables;
 using SSRD.AdminUI.Template.Models.Select2;
 using SSRD.Audit.Data;
 using SSRD.CommonUtils.Result;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 {
+    [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT)]
     public class AuditController : GroupAdminApiBaseController
     {
         private readonly IGroupAdminAuditDataService _groupAdminAuditDataService;

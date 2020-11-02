@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SSRD.AdminUI.Template.Models.DataTables;
 using SSRD.CommonUtils.Result;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Interfaces;
 using SSRD.IdentityUI.Admin.Models.Group;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Options;
@@ -30,6 +32,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
             _identityUIClaimOptions = identityUIClaimOptions.Value;
         }
 
+        [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupInviteTableModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get([FromQuery] DataTableRequest dataTableRequest)
@@ -39,6 +42,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
             return result.ToApiResult();
         }
 
+        [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)]
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> Add([FromBody] InviteToGroupRequest request)
@@ -48,14 +52,14 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
             return result.ToNewResult().ToApiResult();
         }
 
+        [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
         [HttpPost("{id}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public IActionResult Remove([FromRoute] string id)
+        public async Task<IActionResult> Remove([FromRoute] string id)
         {
-            //TODO: check if invite belong to user group
-            Core.Models.Result.Result result = _inviteService.Remove(id);
+            Result result = await _inviteService.Remove(User.GetGroupId(_identityUIClaimOptions), id);
 
-            return result.ToNewResult().ToApiResult();
+            return result.ToApiResult();
         }
     }
 }

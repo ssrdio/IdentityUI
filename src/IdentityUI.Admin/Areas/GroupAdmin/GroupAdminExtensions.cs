@@ -16,6 +16,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin
             builder.Services.AddScoped<IGroupAdminDashboardService, GroupAdminDashboardDataService>();
             builder.Services.AddScoped<IGroupAdminUserDataService, GroupAdminUserDataService>();
             builder.Services.AddScoped<IGroupAdminAuditDataService, GroupAdminAuditDataService>();
+            builder.Services.AddScoped<IGroupAdminInviteDataService, GroupAdminInviteDataService>();
 
             builder.Services.AddTransient<IValidator<GroupAdminAuditTableRequest>, GroupAdminAuditTableRequestValidator>();
 

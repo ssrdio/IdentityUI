@@ -86,7 +86,7 @@
             }
 
             getGraph() {
-                Api.get(`/api/GroupAdmin/Dashboard/GetRegistrationStatistics?from=${this.fromDate.toISOString()}&to=${this.toDate.toISOString()}`)
+                Api.get(`/api/GroupAdmin/Dashboard/GetActivityStatistics?from=${this.fromDate.toISOString()}&to=${this.toDate.toISOString()}`)
                     .done((data) => {
                         let series = data.map((e) => {
                             let r = { x: e.date, y: e.count }
@@ -170,7 +170,7 @@
 <div class="main-card mb-3 card fullWidthCard">
     <div class="card-body">
         <div class="card-title-space">
-            <h5 class="card-title">Number of registrations per day</h5>
+            <h5 class="card-title">Number of user activities per day</h5>
         </div>
         <div class="graph-holder">
             <div id="chart-apex-area"></div>

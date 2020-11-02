@@ -19,10 +19,10 @@
                 '@User.GetUserId(_identityUIClaimOptions.Value)',
                 '@Json.Serialize(Model.CanMangeGroupRoles)',
                 '@Json.Serialize(Model.CanAssigneGroupRoles)',
-                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES, _identityUIClaimOptions.Value)' === 'True',
-                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS, _identityUIClaimOptions.Value)' === 'True',
+                '@User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES, _identityUIClaimOptions.Value)' === 'True',
+                '@User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS, _identityUIClaimOptions.Value)' === 'True',
                 '@Model.CanChangeOwnRole' === 'True',
-                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ACCESS_USER_DETAILS, _identityUIClaimOptions.Value)' === 'True')
+                '@User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ACCESS_USER_DETAILS, _identityUIClaimOptions.Value)' === 'True')
         });
 
         class GroupUsers {
@@ -177,7 +177,7 @@
                                         return `
                                             <div>
                                                 <button class="btn btn-danger table-button leave">Leave</button>
-                                                <button class="btn btn-primary table-button details data-id=${data.id}">Details</button>
+                                                <button class="btn btn-primary table-button details" data-id=${data.id}>Details</button>
                                             </div>`
                                     }
                                     else {
@@ -215,8 +215,10 @@
                 this.$usersTable.on('click', 'button.leave', () => {
                     this.confirmationModal.show({ key: 'leave' }, 'Are you sure that you want to leave the Group?');
                 });
-                this.$usersTable.on('click', 'button.details', () => {
+
+                this.$usersTable.on('click', 'button.details', (event) => {
                     let id = $(event.target).data("id");
+
                     window.location = `/GroupAdmin/User/Details/${id}`;
                 });
 
@@ -329,6 +331,7 @@
 
                 this.$rolesSelect.select2({
                     data: data,
+                    placeholder: 'Select Group Role'
                 });
 
                 this.rolesSelectComponent.selectOption(null);
@@ -419,6 +422,7 @@
 
                 this.$rolesSelect.select2({
                     data: data,
+                    placeholder: 'Select Group Role'
                 });
 
                 this.rolesSelectComponent.selectOption(null);
@@ -474,12 +478,12 @@
 
 @section modal{
     <div id="modal-container">
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS, _identityUIClaimOptions.Value))
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS, _identityUIClaimOptions.Value))
         {
             @await Component.InvokeAsync("AddExistingUserToGroupModal")
         }
 
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value)
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value)
            && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
         {
             @await Component.InvokeAsync("InviteToGroupModal")
@@ -501,12 +505,12 @@
                     <h5 class="card-title">
                         Users
                     </h5>
-                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS, _identityUIClaimOptions.Value))
+                    @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS, _identityUIClaimOptions.Value))
                     {
                         <button id="add-existing-user-button" class="header-button">Add Existing User</button>
                     }
 
-                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value)
+                    @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value)
                       && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
                     {
                         <button id="invite-user-button" class="header-button">Invite User</button>

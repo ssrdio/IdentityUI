@@ -136,18 +136,48 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 .Any();
         }
 
-        public static bool ImpersonizerHasRole(this HttpContext context, string role)
+        public static bool ImpersonatorHasRole(this HttpContext context, string role)
         {
             IdentityUIClaimOptions identityUIClaimOptions = context.RequestServices.GetRequiredService<IOptions<IdentityUIClaimOptions>>().Value;
 
-            return context.User.ImpersonizerHasRole(role, identityUIClaimOptions);
+            return context.User.ImpersonatorHasRole(role, identityUIClaimOptions);
         }
 
-        public static bool ImpersonizerHasRole(this ClaimsPrincipal claimsPrincipal, string role, IdentityUIClaimOptions identityUIClaimOptions)
+        public static bool ImpersonatorHasRole(this ClaimsPrincipal claimsPrincipal, string role, IdentityUIClaimOptions identityUIClaimOptions)
         {
             return claimsPrincipal.Claims
                 .Where(x => x.Type == identityUIClaimOptions.ImpersonatorRole)
                 .Where(x => x.Value == role)
+                .Any();
+        }
+
+        public static bool ImpersonatorHasGroupPermission(this HttpContext context, string permission)
+        {
+            IdentityUIClaimOptions identityUIClaimOptions = context.RequestServices.GetRequiredService<IOptions<IdentityUIClaimOptions>>().Value;
+
+            return context.User.ImpersonatorHasGroupPermission(permission, identityUIClaimOptions);
+        }
+
+        public static bool ImpersonatorHasGroupPermission(this ClaimsPrincipal claimsPrincipal, string permission, IdentityUIClaimOptions identityUIClaimOptions)
+        {
+            return claimsPrincipal.Claims
+                .Where(x => x.Type == identityUIClaimOptions.ImpersonatorGroupPermission || x.Type == identityUIClaimOptions.ImpersonatorPermission)
+                .Where(x => x.Value == permission)
+                .Any();
+        }
+
+        public static bool ImpersonatorHasPermission(this HttpContext context, string permission)
+        {
+            IdentityUIClaimOptions identityUIClaimOptions = context.RequestServices.GetRequiredService<IOptions<IdentityUIClaimOptions>>().Value;
+
+            return context.User.ImpersonatorHasPermission(permission, identityUIClaimOptions);
+        }
+
+        public static bool ImpersonatorHasPermission(this ClaimsPrincipal claimsPrincipal, string permission, IdentityUIClaimOptions identityUIClaimOptions)
+        {
+            return claimsPrincipal.Claims
+                .Where(x => x.Type == identityUIClaimOptions.ImpersonatorPermission)
+                .Where(x => x.Value == permission)
                 .Any();
         }
 
@@ -259,6 +289,33 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 .Where(x => x.Type == identityUIClaimOptions.Permission || x.Type == identityUIClaimOptions.GroupPermission)
                 .Where(x => x.Value == permission)
                 .Any();
+        }
+
+        public static bool HasGroupPermissionOrImpersonatorHasPermission(this HttpContext context, string permission)
+        {
+            IdentityUIClaimOptions identityUIClaimOptions = context.RequestServices.GetRequiredService<IOptions<IdentityUIClaimOptions>>().Value;
+
+            return context.User.HasGroupPermissionOrImpersonatorHasPermission(permission, identityUIClaimOptions);
+        }
+
+        public static bool HasGroupPermissionOrImpersonatorHasPermission(
+            this ClaimsPrincipal claimsPrincipal,
+            string permission,
+            IdentityUIClaimOptions identityUIClaimOptions)
+        {
+            bool hasPermission = claimsPrincipal.HasGroupPermission(permission, identityUIClaimOptions);
+            if(hasPermission)
+            {
+                return true;
+            }
+
+            bool ImpersonatorHasPermission = claimsPrincipal.ImpersonatorHasGroupPermission(permission, identityUIClaimOptions);
+            if(ImpersonatorHasPermission)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

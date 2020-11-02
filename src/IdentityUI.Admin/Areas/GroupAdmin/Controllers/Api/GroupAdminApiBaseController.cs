@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Net.Mime;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 {
-    [ApiExplorerSettings(IgnoreApi = false)]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
 #if NET_CORE2
     [Produces("application/json")]
 #elif NET_CORE3

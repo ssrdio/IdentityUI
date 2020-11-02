@@ -39,16 +39,6 @@ namespace SSRD.IdentityUI.Admin.Services
             _logger = logger;
         }
 
-        public async Task<Result<GroupAdminInviteViewModel>> GetGroupAdminInviteViewModel()
-        {
-            List<RoleListData> canAssigneRoles = await _userStore.CanAssigneRoles();
-
-            GroupAdminInviteViewModel groupAdminInviteViewModel = new GroupAdminInviteViewModel(
-                canAssignRoles: canAssigneRoles);
-
-            return Result.Ok(groupAdminInviteViewModel);
-        }
-
         public async Task<Result<DataTableResult<GroupInviteTableModel>>> Get(string groupId, DataTableRequest dataTableRequest)
         {
             ValidationResult validationResult = _dataTableRequestValidator.Validate(dataTableRequest);

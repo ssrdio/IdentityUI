@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Core.Data.Models.Constants
 {
@@ -19,7 +17,10 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
         public const string GROUP_ADMIN_ACCESS = "group_admin_access";
         public const string GROUP_CAN_ACCESS_DASHBOARD = "group_can_access_dashboard";
         public const string GROUP_CAN_VIEW_AUDIT = "group_can_view_audit";
+
         public const string GROUP_CAN_ACCESS_USER_DETAILS = "group_can_access_user_details";
+        public const string GROUP_CAN_MANAGE_USER_DETAILS = "group_can_manage_user_details";
+        public const string GROUP_CAN_IMPERSONATE_USER = "group_can_impersonate_user";
 
         public static readonly string[] ALL_GROUP = new string[]
         {
@@ -34,7 +35,10 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             GROUP_ADMIN_ACCESS,
             GROUP_CAN_ACCESS_DASHBOARD,
             GROUP_CAN_VIEW_AUDIT,
+
             GROUP_CAN_ACCESS_USER_DETAILS,
+            GROUP_CAN_MANAGE_USER_DETAILS,
+            GROUP_CAN_IMPERSONATE_USER,
         };
 
         public static readonly string[] ALL = new string[]
@@ -52,7 +56,10 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             GROUP_ADMIN_ACCESS,
             GROUP_CAN_ACCESS_DASHBOARD,
             GROUP_CAN_VIEW_AUDIT,
+
             GROUP_CAN_ACCESS_USER_DETAILS,
+            GROUP_CAN_MANAGE_USER_DETAILS,
+            GROUP_CAN_IMPERSONATE_USER,
         };
 
         internal static readonly List<PermissionSeedModel> ALL_DATA = new List<PermissionSeedModel>
@@ -90,6 +97,15 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             new PermissionSeedModel(
                 name: GROUP_CAN_VIEW_AUDIT,
                 description: "User can view audit logs for the group"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_ACCESS_USER_DETAILS,
+                description: "User can access another user details"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_MANAGE_USER_DETAILS,
+                description: "User can manage another user details"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_IMPERSONATE_USER,
+                description: "User can impersonate another user"),
         };
     }
 }

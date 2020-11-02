@@ -11,5 +11,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces
     {
         Task<GroupedStatisticsViewModel> GetIndexViewModel();
         Task<Result<List<RegistrationsViewModel>>> GetRegistrationStatistics(DateTimeOffset from, DateTimeOffset to);
+
+        Task<Result<List<RegistrationsViewModel>>> GetActivityStatistics(DateTimeOffset from, DateTimeOffset to);
     }
 }

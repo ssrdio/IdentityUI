@@ -107,6 +107,23 @@ namespace SSRD.IdentityUI.Core.Services.Identity
                 }
             }
 
+            GroupData group = userData.Groups.SingleOrDefault();
+            if (group != null)
+            {
+                claimsIdentity.AddClaim(new Claim(_identityUIClaimOptions.ImpersonatorGroupId, group.GroupId));
+                claimsIdentity.AddClaim(new Claim(_identityUIClaimOptions.ImpersonatorGroupName, group.GroupName));
+
+                if (!string.IsNullOrEmpty(group.RoleName))
+                {
+                    claimsIdentity.AddClaim(new Claim(_identityUIClaimOptions.ImpersonatorGroupRole, group.RoleName));
+                }
+
+                foreach (string permission in group.Permissions)
+                {
+                    claimsIdentity.AddClaim(new Claim(_identityUIClaimOptions.ImpersonatorGroupPermission, permission));
+                }
+            }
+
             return claimsIdentity;
         }
 

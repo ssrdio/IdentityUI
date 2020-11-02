@@ -5,8 +5,8 @@
 
 <nav class="sidebar sidebar-offcanvas menu-line-color" id="sidebar">
     <ul class="nav">
-        @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Dashboard ? "active" : "")">
                 <a class="nav-link" href="@PagePath.DASHBOARD">
@@ -16,7 +16,7 @@
             </li>
         }
         @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.User ? "active" : "")">
                 <a class="nav-link" href="@PagePath.USER">
@@ -26,7 +26,7 @@
             </li>
         }
         @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Role ? "active" : "")">
                 <a class="nav-link" href="@PagePath.ROLE">
@@ -36,7 +36,7 @@
             </li>
         }
         @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Permission ? "active" : "")">
                 <a class="nav-link" href="@PagePath.PERMISSION">
@@ -66,7 +66,7 @@
             </li>
         }
         @if ((User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
             && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Invite ? "active" : "")">
@@ -77,7 +77,7 @@
             </li>
         }
         @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Audit ? "active" : "")">
                 <a class="nav-link" href="@PagePath.AUDIT">
@@ -87,7 +87,7 @@
             </li>
         }
         @if (User.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value)
-            || User.ImpersonizerHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
+            || User.ImpersonatorHasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE, _identityUIClaimOptions.Value))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Setting ? "active" : "")">
                 <a class="nav-link" href="@PagePath.SETTING">

@@ -3,6 +3,8 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SSRD.CommonUtils.Specifications;
+using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
@@ -26,9 +28,14 @@ namespace SSRD.IdentityUI.Core.Services.User
 {
     internal class InviteService : IInviteService
     {
+        private const string FAILED_TO_REMOVE_INVITE = "failed_to_remove_invite";
+        public const string INVITE_NOT_FOUND = "invite_not_found";
+
         private readonly IBaseRepository<AppUserEntity> _userRepository;
         private readonly IBaseRepository<InviteEntity> _inviteRepository;
         private readonly IBaseRepository<RoleEntity> _roleRepository;
+
+        private readonly IBaseDAO<InviteEntity> _inviteDAO;
 
         private readonly IGroupStore _groupStore;
         private readonly IGroupUserStore _groupUserStore;
@@ -43,15 +50,25 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IdentityUIOptions _identityManagementOptions;
         private readonly IdentityUIEndpoints _identityManagementEndpoints;
 
-        public InviteService(IBaseRepository<AppUserEntity> userRepository, IBaseRepository<InviteEntity> inviteRepository,
-            IBaseRepository<RoleEntity> roleRepository, IGroupStore groupStore, IGroupUserStore groupUserStore, IEmailService mailService,
-            IValidator<InviteToGroupRequest> inviteToGroupRequestValidator, IValidator<InviteRequest> inviteRequestValidator,
-            ILogger<InviteService> logger, IOptionsSnapshot<IdentityUIOptions> identityManagementOptions,
+        public InviteService(
+            IBaseRepository<AppUserEntity> userRepository,
+            IBaseRepository<InviteEntity> inviteRepository,
+            IBaseRepository<RoleEntity> roleRepository,
+            IBaseDAO<InviteEntity> inviteDAO,
+            IGroupStore groupStore,
+            IGroupUserStore groupUserStore,
+            IEmailService mailService,
+            IValidator<InviteToGroupRequest> inviteToGroupRequestValidator,
+            IValidator<InviteRequest> inviteRequestValidator,
+            ILogger<InviteService> logger,
+            IOptionsSnapshot<IdentityUIOptions> identityManagementOptions,
             IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
         {
             _userRepository = userRepository;
             _inviteRepository = inviteRepository;
             _roleRepository = roleRepository;
+
+            _inviteDAO = inviteDAO;
 
             _groupStore = groupStore;
             _groupUserStore = groupUserStore;
@@ -277,6 +294,19 @@ namespace SSRD.IdentityUI.Core.Services.User
             return Result.Ok();
         }
 
+        private async Task<CommonUtils.Result.Result> Remove(InviteEntity invite)
+        {
+            bool removeResult = _inviteRepository.Remove(invite);
+            if (!removeResult)
+            {
+                _logger.LogError($"Failed to remove invite");
+                return CommonUtils.Result.Result.Fail(FAILED_TO_REMOVE_INVITE);
+            }
+
+            return CommonUtils.Result.Result.Ok();
+        }
+
+        [Obsolete("Use Remove(string groupId, string inviteId)")]
         public Result Remove(string id)
         {
             _logger.LogInformation($"Removing Invite. InviteId {id}");
@@ -291,14 +321,27 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail("no_invite", "No Invite");
             }
 
-            bool removeResult = _inviteRepository.Remove(invite);
-            if (!removeResult)
+            Task<CommonUtils.Result.Result[]> result = Task.WhenAll(Remove(invite));
+
+            return result.Result.First().ToOldResult();
+        }
+
+        public async Task<CommonUtils.Result.Result> Remove(string groupId, string inviteId)
+        {
+            IBaseSpecification<InviteEntity, InviteEntity> specification = SpecificationBuilder
+                .Create<InviteEntity>()
+                .Where(x => x.Id == inviteId)
+                .Where(x => x.GroupId == groupId)
+                .Build();
+
+            InviteEntity invite = await _inviteDAO.SingleOrDefault(specification);
+            if(invite == null)
             {
-                _logger.LogError($"Failed to remove invite. InviteId {id}");
-                return Result.Fail("failed_to_remove_invite", "Failed to remove invite");
+                _logger.LogError($"Invite not found. InviteId {inviteId}, GroupId {groupId}");
+                return CommonUtils.Result.Result.Fail(INVITE_NOT_FOUND);
             }
 
-            return Result.Ok();
+            return await Remove(invite);
         }
     }
 }

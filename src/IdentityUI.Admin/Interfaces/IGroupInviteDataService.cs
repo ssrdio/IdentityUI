@@ -8,8 +8,6 @@ namespace SSRD.IdentityUI.Admin.Interfaces
 {
     public interface IGroupInviteDataService
     {
-        Task<Result<GroupAdminInviteViewModel>> GetGroupAdminInviteViewModel();
-
         Task<Result<DataTableResult<GroupInviteTableModel>>> Get(string groupId, DataTableRequest dataTableRequest);
     }
 }
