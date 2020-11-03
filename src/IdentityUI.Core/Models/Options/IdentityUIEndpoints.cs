@@ -18,6 +18,9 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public string ResetPassword { get; set; } = "/Account/ResetPassword";
         public string AcceptInvite { get; set; } = "/Account/AcceptInvite";
 
+        public string ProfileImage { get; set; } = "/Account/Manage/GetProfileImage";
+        public string Logo { get; set; } = "/adminUI/template/images/logo.png";
+
         public bool RegisterEnabled { get; set; } = true;
         public bool GroupRegistrationEnabled { get; set; } = true;
 
@@ -45,5 +48,10 @@ namespace SSRD.IdentityUI.Core.Models.Options
         /// If user can see his own audit
         /// </summary>
         public bool ShowAuditToUser { get; set; } = false;
+
+        public bool CanChangeGroupName { get; set; } = true;
+        public bool CanRemoveGroup { get; set; } = true;
+
+        public bool CanRemoveUser { get; set; } = true;
     }
 }

@@ -12,18 +12,17 @@
     <!-- Disable tap highlight on IE -->
     <meta name="msapplication-tap-highlight" content="no">
 
-    <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/adminUI/template/css/style.css" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/adminUI/template/css/base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/vendors/fontawesome-free-5.14.0-web/css/all.css" asp-append-version="true" />
 
     @RenderSection("style", required: false)
 
 </head>
 
 <body>
-    <div class="container-scroller">
-        @RenderBody()
-    </div>
+    @RenderBody()
 
     <script src="~/adminUI/app/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
     <script src="~/adminUI/app/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>

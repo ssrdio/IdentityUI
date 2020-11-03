@@ -27,5 +27,10 @@ namespace SSRD.IdentityUI.Core.Data.Entities
             BlobImage = blobImage;
             FileName = fileName;
         }
+
+        public UserImageEntity(long id)
+        {
+            Id = id;
+        }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models
+﻿namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models
 {
     public static class GroupAdminPaths
     {
@@ -20,10 +16,6 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models
 
         public const string AUDIT = GROUP_ADMIN_AREA + "/Audit";
 
-        public const string PROFILE_IMAGE = "/Account/Manage/GetProfileImage";
-
-        public static string LOGOUT;
-        public static string MANAGE;
-        public static string HOME;
+        public const string SETTINGS = GROUP_ADMIN_AREA + "/Settings";
     }
 }

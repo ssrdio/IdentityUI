@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models
+﻿namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models
 {
     public class GroupAdminSidebarSelection
     {
@@ -16,5 +12,6 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models
         Invite = 3,
         Attributes = 4,
         Audit = 5,
+        Settings = 6,
     }
 }

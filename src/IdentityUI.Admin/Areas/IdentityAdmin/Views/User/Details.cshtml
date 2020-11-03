@@ -14,7 +14,6 @@
 @section script{
     <script>
         $(document).ready(function () {
-
             new UserDetails('@Model.Id');
         });
 
@@ -38,9 +37,26 @@
                     </text>
                 }
 
+                this.confirmationModal = new conformationModal(
+                    $(`#modalContainer`),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeUser') {
+                            this.remove();
+                        }
+                    }
+                );
+
                 $('#impersonateButton').on('click', () => {
                     this.impersonate();
-                })
+                });
+
+                $('#remove-button').on('click', () => {
+                    this.confirmationModal.show({ key: 'removeUser' }, 'Are you sure you want to remove user?');
+                });
             }
 
             impersonate() {
@@ -53,8 +69,25 @@
                         this.statusAlert.showErrors(response.responseJSON);
                     });
             }
+
+            remove() {
+                Api.delete(`/IdentityAdmin/User/Delete/${this.userId}`)
+                    .done(() => {
+                        window.location.href = `/IdentityAdmin/User`;
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showErrors(resp.responseJSON['']);
+                    });
+            }
+
         }
     </script>
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
 }
 
 <div>
@@ -94,7 +127,7 @@
                         }
                         else
                         {
-                             <input asp-for="Email" class="form-control" />
+                            <input asp-for="Email" class="form-control" />
                         }
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
@@ -160,6 +193,11 @@
                         <button type="button" id="impersonateButton" class="btn btn-primary custom-submit">Impersonate</button>
 
                         <button type="submit" class="btn btn-primary custom-submit" asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id">Save</button>
+
+                        @if (_identityUIEndpoints.Value.CanRemoveUser)
+                        {
+                            <button type="button" id="remove-button" class="btn btn-danger remove-button">Delete</button>
+                        }
                     </div>
                 </form>
             </div>

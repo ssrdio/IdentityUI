@@ -2,11 +2,13 @@
 using SSRD.CommonUtils.Result;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Attribute;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Dashboard;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Invite;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
+using SSRD.IdentityUI.Core.Services.Identity;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
@@ -17,17 +19,20 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
         private readonly IGroupAdminDashboardService _groupAdminDashboardService;
         private readonly IGroupAdminInviteDataService _groupAdminInviteDataService;
         private readonly IGroupAdminUserDataService _groupAdminUserDataService;
+        private readonly IGroupAdminAttributeDataService _groupAdminAttributeDataService;
 
         public GroupAdminViewController(
             IGroupAdminAuditDataService groupAdminAuditDataService,
             IGroupAdminDashboardService groupAdminDashboardService,
             IGroupAdminInviteDataService groupAdminInviteDataService,
-            IGroupAdminUserDataService groupAdminUserDataService)
+            IGroupAdminUserDataService groupAdminUserDataService,
+            IGroupAdminAttributeDataService groupAdminAttributeDataService)
         {
             _groupAdminAuditDataService = groupAdminAuditDataService;
             _groupAdminDashboardService = groupAdminDashboardService;
             _groupAdminInviteDataService = groupAdminInviteDataService;
             _groupAdminUserDataService = groupAdminUserDataService;
+            _groupAdminAttributeDataService = groupAdminAttributeDataService;
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT)]
@@ -86,6 +91,26 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
             }
 
             return View(result.Value);
+        }
+
+        [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
+        [HttpGet("/[area]/[action]")]
+        public async Task<IActionResult> Attribute()
+        {
+            Result<GroupAdminAttributeViewModel> result = await _groupAdminAttributeDataService.GetViewModel(User.GetGroupId());
+            if(result.Failure)
+            {
+                return NotFoundView();
+            }
+
+            return View(result.Value);
+        }
+
+        [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_SETTINGS)]
+        [HttpGet("/[area]/[action]")]
+        public IActionResult Settings()
+        {
+            return View();
         }
     }
 }

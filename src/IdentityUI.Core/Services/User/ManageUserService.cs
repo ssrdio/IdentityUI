@@ -17,11 +17,16 @@ using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
+using SSRD.CommonUtils.Result;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
     internal class ManageUserService : IManageUserService
     {
+        private const string USER_NOT_FOUND = "user_not_found";
+        private const string FAILED_TO_REMOVE_USER = "failed_to_remove_user";
+        private const string FAILED_TO_UPDATE_USER = "failed_to_update_user";
+
         private readonly UserManager<AppUserEntity> _userManager;
 
         private readonly IUserRepository _userRepository;
@@ -29,10 +34,13 @@ namespace SSRD.IdentityUI.Core.Services.User
         private readonly IBaseRepository<UserRoleEntity> _userRoleRepository;
         private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
 
+        private readonly IBaseDAO<AppUserEntity> _userDAO;
+
         private readonly IGroupUserStore _groupUserStore;
 
         private readonly IEmailConfirmationService _emailConfirmationService;
         private readonly ISessionService _sessionService;
+        private readonly IProfileImageService _profileImageService;
 
         private readonly IValidator<EditUserRequest> _editUserValidator;
         private readonly IValidator<SetNewPasswordRequest> _setNewPasswordValidator;
@@ -48,9 +56,11 @@ namespace SSRD.IdentityUI.Core.Services.User
             IRoleRepository roleRepository,
             IBaseRepository<UserRoleEntity> userRoleRepository,
             IBaseRepository<GroupUserEntity> groupUserRepository,
+            IBaseDAO<AppUserEntity> userDAO,
             IGroupUserStore groupUserStore,
             IEmailConfirmationService emailConfirmationService,
             ISessionService sessionService,
+            IProfileImageService profileImageService,
             IValidator<EditUserRequest> editUserValidator,
             IValidator<SetNewPasswordRequest> setNewPasswordValidator,
             IValidator<EditProfileRequest> editRequestValidator,
@@ -65,10 +75,14 @@ namespace SSRD.IdentityUI.Core.Services.User
             _userRoleRepository = userRoleRepository;
             _groupUserRepository = groupUserRepository;
 
+            _userDAO = userDAO;
+
             _groupUserStore = groupUserStore;
 
             _emailConfirmationService = emailConfirmationService;
             _sessionService = sessionService;
+
+            _profileImageService = profileImageService;
 
             _editUserValidator = editUserValidator;
             _setNewPasswordValidator = setNewPasswordValidator;
@@ -515,5 +529,64 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             return result.ToNewResult();
         }
+
+        public async Task<Result> RemoveUser(string userId)
+        {
+            _logger.LogInformation($"Removing user. UserId {userId}");
+
+            IBaseSpecification<AppUserEntity, AppUserEntity> getUserSpecification = SpecificationBuilder
+                .Create<AppUserEntity>()
+                .Where(x => x.Id == userId)
+                .Build();
+
+            AppUserEntity appUser = await _userDAO.SingleOrDefault(getUserSpecification);
+            if (appUser == null)
+            {
+                _logger.LogWarning($"No User. UserId {userId}");
+                return Result.Fail(USER_NOT_FOUND);
+            }
+
+            Result removeUserImageResult = await _profileImageService.Remove(userId);
+            if (removeUserImageResult.Failure)
+            {
+                return Result.Fail(removeUserImageResult);
+            }
+
+            appUser.FirstName = null;
+            appUser.LastName = null;
+
+            Guid guid = Guid.NewGuid();
+
+            appUser.Email = $"deleted_email_{guid}";
+            appUser.UserName = $"deleted_username_{guid}";
+            appUser.SecurityStamp = Guid.NewGuid().ToString();
+
+#if NET_CORE2
+            appUser.NormalizedEmail = _userManager.NormalizeKey(appUser.Email);
+            appUser.NormalizedEmail = _userManager.NormalizeKey(appUser.UserName);
+#elif NET_CORE3
+            appUser.NormalizedEmail = _userManager.NormalizeEmail(appUser.Email);
+            appUser.NormalizedUserName = _userManager.NormalizeName(appUser.UserName);
+#endif
+
+            bool updateResult = await _userDAO.Update(appUser);
+            if (!updateResult)
+            {
+                _logger.LogError($"Failed to update user. UserId {userId}");
+                return Result.Fail(FAILED_TO_UPDATE_USER);
+            }
+
+            bool removeResult = _userRepository.Remove(appUser);
+            if (!removeResult)
+            {
+                _logger.LogError($"Failed to remove user. UserId {userId}");
+                return Result.Fail(FAILED_TO_REMOVE_USER);
+            }
+
+            _logger.LogInformation($"User was removed. UserId {userId}");
+
+            return Result.Ok();
+        }
+
     }
 }

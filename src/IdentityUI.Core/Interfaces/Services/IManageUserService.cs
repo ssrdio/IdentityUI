@@ -22,5 +22,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
         Task<Result> SendEmilVerificationMail(long groupUserId);
 
         Task<Core.Models.Result.Result> RemoveRole(string userId, string roleId);
+
+        Task<Result> RemoveUser(string userId);
     }
 }

@@ -351,5 +351,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.User
 
             return Ok(new EmptyResult());
         }
+
+        [HttpDelete("[area]/[controller]/[action]/{userId}")]
+        public async Task<IActionResult> Delete([FromRoute] string userId)
+        {
+            CommonUtils.Result.Result result = await _manageUserService.RemoveUser(userId);
+
+            return CommonUtils.Result.ActionResultExtensions.ToApiResult(result);
+        }
     }
 }

@@ -22,6 +22,8 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
         public const string GROUP_CAN_MANAGE_USER_DETAILS = "group_can_manage_user_details";
         public const string GROUP_CAN_IMPERSONATE_USER = "group_can_impersonate_user";
 
+        public const string GROUP_CAN_MANAGE_SETTINGS = "group_can_manage_settings";
+
         public static readonly string[] ALL_GROUP = new string[]
         {
             GROUP_CAN_SEE_USERS,
@@ -39,6 +41,8 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             GROUP_CAN_ACCESS_USER_DETAILS,
             GROUP_CAN_MANAGE_USER_DETAILS,
             GROUP_CAN_IMPERSONATE_USER,
+
+            GROUP_CAN_MANAGE_SETTINGS,
         };
 
         public static readonly string[] ALL = new string[]
@@ -60,6 +64,8 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             GROUP_CAN_ACCESS_USER_DETAILS,
             GROUP_CAN_MANAGE_USER_DETAILS,
             GROUP_CAN_IMPERSONATE_USER,
+
+            GROUP_CAN_MANAGE_SETTINGS,
         };
 
         internal static readonly List<PermissionSeedModel> ALL_DATA = new List<PermissionSeedModel>
@@ -106,6 +112,9 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             new PermissionSeedModel(
                 name: GROUP_CAN_IMPERSONATE_USER,
                 description: "User can impersonate another user"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_MANAGE_SETTINGS,
+                description: "User can view/change group settings"),
         };
     }
 }

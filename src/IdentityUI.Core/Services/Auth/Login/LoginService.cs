@@ -256,13 +256,6 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
         public async Task<Result> Logout(string userId, string sessionCode)
         {
-            AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
-            if (appUser == null)
-            {
-                _logger.LogInformation($"No user. User id {userId}");
-                return Result.Fail("error", "Error");
-            }
-
             await _signInManager.SignOutAsync();
 
             _sessionService.Logout(sessionCode, userId, SessionEndTypes.Logout);

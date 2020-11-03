@@ -274,10 +274,10 @@
                 </div>
 
                 <div id="details-loader">
-                    @await Component.InvokeAsync("AdminUIDotLoader")
+                    @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
                 </div>
 
-                <div id="details-form" class="custom-form">
+                <div id="details-form" class="custom-form" style="display:none;">
                     <div id="username-input" class="form-group">
                         <label class="control-label">Username</label>
                         <input class="form-control disabled" disabled />

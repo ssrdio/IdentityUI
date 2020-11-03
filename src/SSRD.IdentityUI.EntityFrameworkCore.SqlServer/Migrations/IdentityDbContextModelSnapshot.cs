@@ -154,6 +154,9 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.Migrations
                     b.Property<DateTimeOffset?>("_CreatedDate")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<DateTimeOffset?>("_DeletedDate")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<DateTimeOffset?>("_ModifiedDate")
                         .HasColumnType("datetimeoffset");
 
@@ -268,6 +271,9 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.Migrations
                         .HasMaxLength(256);
 
                     b.Property<DateTimeOffset?>("_CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("_DeletedDate")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset?>("_ModifiedDate")

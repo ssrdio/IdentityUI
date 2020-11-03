@@ -475,6 +475,7 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<AddRoleAssignmentRequest>, AddRoleAssignmentRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Group.Models.AddGroupRequest>, Services.Group.Models.AddGroupRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.UpdateGroupModel>, Services.Group.Models.UpdateGroupModelValidator>();
 
             builder.Services.AddSingleton<IValidator<AddRolePermissionRequest>, Services.Role.Models.AddRolePermissionRequestValidator>();
 

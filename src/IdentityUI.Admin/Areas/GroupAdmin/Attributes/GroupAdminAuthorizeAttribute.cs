@@ -24,6 +24,13 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+            string groupId = context.HttpContext.GetGroupId();
+            if(string.IsNullOrEmpty(groupId))
+            {
+                context.Result = new ForbidResult();
+                return;
+            }
+
             bool hasGroupPermission = context.HttpContext.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_ADMIN_ACCESS);
             if (!hasGroupPermission)
             {

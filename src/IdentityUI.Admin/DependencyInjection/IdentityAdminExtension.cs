@@ -67,8 +67,9 @@ namespace SSRD.IdentityUI.Admin
 
             builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
 
-            builder.Services.AddScoped<SSRD.IdentityUI.Admin.Interfaces.IGroupUserDataService, Services.GroupUserDataService>();
-            builder.Services.AddScoped<SSRD.IdentityUI.Admin.Interfaces.IGroupInviteDataService, Services.GroupInviteDataService>();
+            builder.Services.AddScoped<Interfaces.IGroupUserDataService, Services.GroupUserDataService>();
+            builder.Services.AddScoped<Interfaces.IGroupInviteDataService, Services.GroupInviteDataService>();
+            builder.Services.AddScoped<Interfaces.IGroupAttributeDataService, Services.GroupAttributeDataService>();
 
             builder.AddGroupAdmin();
 

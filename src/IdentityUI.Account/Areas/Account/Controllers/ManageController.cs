@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using SSRD.IdentityUI.Account.Areas.Account.Models;
 using SSRD.IdentityUI.Account.Areas.Account.Models.Manage;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
-using SSRD.IdentityUI.Core.Models.Result;
-using SSRD.IdentityUI.Core.Services.Auth.Credentials.Models;
-using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
-using Microsoft.AspNetCore.Http;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.Audit.Attributes;
+using SSRD.CommonUtils.Result;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -40,7 +34,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpGet("/[area]/[controller]/[action]")]
         public IActionResult Profile()
         {
-            Result<ProfileViewModel> result = _manageDataService.GetProfile(GetUserId());
+            Core.Models.Result.Result<ProfileViewModel> result = _manageDataService.GetProfile(GetUserId());
             if (result.Failure)
             {
                 ModelState.AddErrors(result.Errors);
@@ -58,9 +52,9 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
                 return RedirectToAction(nameof(Profile));
             }
 
-            Result editResult = _manageUserService.EditUser(GetUserId(), request);
+            Core.Models.Result.Result editResult = _manageUserService.EditUser(GetUserId(), request);
 
-            Result<ProfileViewModel> getResult = _manageDataService.GetProfile(GetUserId());
+            Core.Models.Result.Result<ProfileViewModel> getResult = _manageDataService.GetProfile(GetUserId());
             if (getResult.Failure)
             {
                 ModelState.AddErrors(getResult.Errors);
@@ -82,7 +76,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [HttpPost("/[area]/[controller]/[action]")]
         public async Task<IActionResult> ProfileImage([FromForm] UploadProfileImageRequest uploadImageRequest)
         {
-            Result result = await _profileImageService.UpdateProfileImage(GetUserId(), uploadImageRequest);
+            Core.Models.Result.Result result = await _profileImageService.UpdateProfileImage(GetUserId(), uploadImageRequest);
             if (result.Failure)
             {
                 ModelState.AddErrors(result);
@@ -97,7 +91,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [AuditIgnore]
         public async Task<IActionResult> GetProfileImage()
         {
-            Result<FileData> result = await _profileImageService.GetProfileImage(GetUserId());
+            Core.Models.Result.Result<FileData> result = await _profileImageService.GetProfileImage(GetUserId());
             if (result.Failure)
             {
                 return NotFound();
@@ -111,6 +105,14 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             }
 
             return File(result.Value.File, contentType, result.Value.FileName);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete()
+        {
+            Result result = await _manageUserService.RemoveUser(GetUserId());
+
+            return result.ToApiResult();
         }
     }
 }
