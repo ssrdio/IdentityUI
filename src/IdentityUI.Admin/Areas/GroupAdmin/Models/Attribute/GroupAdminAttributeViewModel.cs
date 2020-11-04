@@ -1,12 +1,9 @@
 ﻿namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Attribute
 {
-    public class GroupAdminAttributeViewModel
+    public class GroupAdminAttributeViewModel : GroupAdminViewModel
     {
-        public string Id { get; set; }
-
-        public GroupAdminAttributeViewModel(string id)
+        public GroupAdminAttributeViewModel(string groupId) : base(groupId)
         {
-            Id = id;
         }
     }
 }

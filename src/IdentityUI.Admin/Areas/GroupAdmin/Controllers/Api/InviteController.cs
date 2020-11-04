@@ -10,7 +10,6 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Options;
-using SSRD.IdentityUI.Core.Services.Identity;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using System.Threading.Tasks;
 
@@ -35,9 +34,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupInviteTableModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get([FromQuery] DataTableRequest dataTableRequest)
+        public async Task<IActionResult> Get([FromRoute] string groupId, [FromQuery] DataTableRequest dataTableRequest)
         {
-            Result<DataTableResult<GroupInviteTableModel>> result = await _groupInviteDataService.Get(User.GetGroupId(_identityUIClaimOptions), dataTableRequest);
+            Result<DataTableResult<GroupInviteTableModel>> result = await _groupInviteDataService.Get(
+                groupId,
+                dataTableRequest);
 
             return result.ToApiResult();
         }
@@ -45,9 +46,9 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)]
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Add([FromBody] InviteToGroupRequest request)
+        public async Task<IActionResult> Add([FromRoute] string groupId, [FromBody] InviteToGroupRequest request)
         {
-            Core.Models.Result.Result result = await _inviteService.InviteToGroup(User.GetGroupId(_identityUIClaimOptions), request);
+            Core.Models.Result.Result result = await _inviteService.InviteToGroup(groupId, request);
 
             return result.ToNewResult().ToApiResult();
         }
@@ -55,9 +56,9 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
         [HttpPost("{id}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Remove([FromRoute] string id)
+        public async Task<IActionResult> Remove([FromRoute] string groupId, [FromRoute] string id)
         {
-            Result result = await _inviteService.Remove(User.GetGroupId(_identityUIClaimOptions), id);
+            Result result = await _inviteService.Remove(groupId, id);
 
             return result.ToApiResult();
         }

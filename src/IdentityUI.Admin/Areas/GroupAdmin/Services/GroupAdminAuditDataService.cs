@@ -42,7 +42,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
             _logger = logger;
         }
 
-        public AuditIndexViewModel GetIndexViewModel()
+        public Task<Result<AuditIndexViewModel>> GetIndexViewModel(string groupId)
         {
             List<Select2ItemBase<long?>> actionTypes = Enum.GetValues(typeof(ActionTypes))
                 .Cast<ActionTypes>()
@@ -59,10 +59,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
                 .ToList();
 
             AuditIndexViewModel auditIndexViewModel = new AuditIndexViewModel(
+                groupId: groupId,
                 actionTypes: actionTypes,
                 subjectTypes: subjectTypes);
 
-            return auditIndexViewModel;
+            return Task.FromResult(Result.Ok(auditIndexViewModel));
         }
 
         public Task<Result<Select2Result<Select2Item>>> GetObjectTypes(string groupId, Select2Request select2Request)

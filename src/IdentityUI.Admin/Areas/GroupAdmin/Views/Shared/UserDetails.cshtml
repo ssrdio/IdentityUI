@@ -18,11 +18,12 @@
     <script>
         $(document).ready(function () {
 
-            new UserDetails('@Model.GroupUserId');
+            new UserDetails('@Model.GroupId', '@Model.GroupUserId');
         });
 
         class UserDetails {
-            constructor(userId) {
+            constructor(groupId, userId) {
+                this.groupId = groupId;
                 this.userId = userId;
 
                 const $form = $('#details-form');
@@ -162,7 +163,7 @@
                 this.loader.show();
                 this.reset();
 
-                Api.get(`/api/GroupAdmin/User/Get/${this.userId}`)
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/Get/${this.userId}`)
                     .done((data) => {
                         this.showUser(data);
                     })
@@ -194,7 +195,7 @@
 
                 const data = this.getData();
 
-                Api.post(`/api/GroupAdmin/User/Update/${this.userId}`, data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/User/Update/${this.userId}`, data)
                     .done(() => {
                         this.statusAlert.showSuccess('User Update');
                         this.get();
@@ -210,7 +211,7 @@
                 this.loader.show();
                 this.statusAlert.hide();
 
-                Api.get(`/api/GroupAdmin/User/StartImpersonation/${this.userId}`)
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/StartImpersonation/${this.userId}`)
                     .done(() => {
                         window.open(`/`);
                         location.reload();
@@ -227,7 +228,7 @@
                 this.loader.show();
                 this.statusAlert.hide();
 
-                Api.get(`/api/GroupAdmin/User/Unlock/${this.userId}`)
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/Unlock/${this.userId}`)
                     .done(() => {
                         this.$lockedOutToContainer.hide();
                         this.statusAlert.showSuccess('User was unlocked');
@@ -244,7 +245,7 @@
                 this.loader.show();
                 this.statusAlert.hide();
 
-                Api.get(`/api/GroupAdmin/User/SendVereficationMain/${this.userId}`)
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/SendVereficationMain/${this.userId}`)
                     .done(() => {
                         this.statusAlert.showSuccess('Email verification mail was sent');
                     })

@@ -10,7 +10,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
         public Task<Result<GroupAdminAttributeViewModel>> GetViewModel(string groupId)
         {
             GroupAdminAttributeViewModel viewModel = new GroupAdminAttributeViewModel(
-                id: groupId);
+                groupId: groupId);
 
             return Task.FromResult(Result.Ok(viewModel));
         }

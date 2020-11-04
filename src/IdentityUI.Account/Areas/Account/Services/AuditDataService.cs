@@ -12,6 +12,7 @@ using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using SSRD.IdentityUI.Account.Areas.Account.Models.Audit;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Helper;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
     internal class AuditDataService : IAuditDataService
     {
         private readonly IBaseDAO<AuditEntity> _auditDAO;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly IValidator<DataTableRequest> _dataTableRequestValidator;
         private readonly IValidator<AuditTableRequest> _auditTableRequestValidator;
@@ -32,13 +33,13 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
 
         public AuditDataService(
             IBaseDAO<AuditEntity> auditDAO,
-            IHttpContextAccessor httpContextAccessor,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             IValidator<DataTableRequest> dataTableRequestValidator,
             IValidator<AuditTableRequest> auditTableRequestValidator,
             ILogger<AuditDataService> logger)
         {
             _auditDAO = auditDAO;
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
 
             _dataTableRequestValidator = dataTableRequestValidator;
             _auditTableRequestValidator = auditTableRequestValidator;
@@ -65,7 +66,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
                 .Create<AuditEntity>()
                 .WithActionType(auditTableRequest.ActionType)
                 .InRange(auditTableRequest.From?.UtcDateTime, auditTableRequest.To?.UtcDateTime)
-                .WithUser(_httpContextAccessor.HttpContext.User.GetUserId());
+                .WithUser(_identityUIUserInfoService.GetUserId());
 
             IBaseSpecification<AuditEntity, AuditTableModel> selectSpecification = baseSpecification
                 .OrderBy(x => x.Created, auditTableRequest.OrderBy.Value)
@@ -91,7 +92,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
 
         public async Task<Result<AuditDetailsModel>> Get(long id)
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            string userId = _identityUIUserInfoService.GetUserId();
 
             IBaseSpecification<AuditEntity, AuditDetailsModel> selectSpecification = SpecificationBuilder
                 .Create<AuditEntity>()

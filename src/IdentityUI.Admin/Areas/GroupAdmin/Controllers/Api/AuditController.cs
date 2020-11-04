@@ -38,10 +38,10 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupAdminAuditTableModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get([FromQuery] DataTableRequest dataTableRequest, [FromQuery] GroupAdminAuditTableRequest auditTableRequest)
+        public async Task<IActionResult> Get([FromRoute] string groupId, [FromQuery] DataTableRequest dataTableRequest, [FromQuery] GroupAdminAuditTableRequest auditTableRequest)
         {
             Result<DataTableResult<GroupAdminAuditTableModel>> result = await _groupAdminAuditDataService.Get(
-                User.GetGroupId(_identityUIClaimOptions),
+                groupId,
                 dataTableRequest,
                 auditTableRequest);
 
@@ -50,28 +50,31 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 
         [HttpGet("{auditId}")]
         [ProducesResponseType(typeof(GroupAdminAuditDetailsModel), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get([FromRoute] long auditId)
+        public async Task<IActionResult> Get([FromRoute] string groupId, [FromRoute] long auditId)
         {
-            Result<GroupAdminAuditDetailsModel> result = await _groupAdminAuditDataService.Get(User.GetGroupId(_identityUIClaimOptions), auditId);
+            Result<GroupAdminAuditDetailsModel> result = await _groupAdminAuditDataService.Get(groupId, auditId);
 
             return result.ToApiResult();
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(Select2Result<Select2Item>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetObjectTypes([FromQuery] Select2Request select2Request)
+        public async Task<IActionResult> GetObjectTypes([FromRoute] string groupId, [FromQuery] Select2Request select2Request)
         {
-            Result<Select2Result<Select2Item>> result = await _groupAdminAuditDataService.GetObjectTypes(User.GetGroupId(_identityUIClaimOptions),select2Request);
+            Result<Select2Result<Select2Item>> result = await _groupAdminAuditDataService.GetObjectTypes(groupId,select2Request);
 
             return result.ToApiResult();
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(Select2Result<Select2Item>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetObjectIdentifiers([FromQuery] Select2Request select2Request, [FromQuery] string objectType)
+        public async Task<IActionResult> GetObjectIdentifiers(
+            [FromRoute] string groupId,
+            [FromQuery] Select2Request select2Request,
+            [FromQuery] string objectType)
         {
             Result<Select2Result<Select2Item>> result = await _groupAdminAuditDataService.GetObjectIdentifiers(
-                User.GetGroupId(_identityUIClaimOptions),
+                groupId,
                 select2Request,
                 objectType);
 
@@ -80,10 +83,13 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 
         [HttpGet]
         [ProducesResponseType(typeof(Select2Result<Select2Item>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetSubjectIdentifiers([FromQuery] Select2Request select2Request, [FromQuery] SubjectTypes? subjectType)
+        public async Task<IActionResult> GetSubjectIdentifiers(
+            [FromRoute] string groupId,
+            [FromQuery] Select2Request select2Request,
+            [FromQuery] SubjectTypes? subjectType)
         {
             Result<Select2Result<Select2Item>> result = await _groupAdminAuditDataService.GetSubjectIdentifiers(
-                User.GetGroupId(_identityUIClaimOptions),
+                groupId,
                 select2Request,
                 subjectType);
 
@@ -92,10 +98,10 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 
         [HttpGet]
         [ProducesResponseType(typeof(Select2Result<Select2Item>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetResourceNames([FromQuery] Select2Request select2Request)
+        public async Task<IActionResult> GetResourceNames([FromRoute] string groupId, [FromQuery] Select2Request select2Request)
         {
             Result<Select2Result<Select2Item>> result = await _groupAdminAuditDataService.GetResourceNames(
-                User.GetGroupId(_identityUIClaimOptions),
+                groupId,
                 select2Request);
 
             return result.ToApiResult();

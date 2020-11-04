@@ -3,21 +3,17 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using SSRD.IdentityUI.Core.Interfaces;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Login.Models;
 using SSRD.IdentityUI.Core.Services.Identity;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Login
@@ -27,7 +23,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
         private readonly SignInManager<AppUserEntity> _signInManager;
         private readonly UserManager<AppUserEntity> _userManager;
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
         private readonly IUrlGenerator _urlGenerator;
         private readonly ISessionService _sessionService;
 
@@ -37,15 +33,20 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 
         private readonly ILogger<ExternalLoginService> _logger;
 
-        public ExternalLoginService(SignInManager<AppUserEntity> signInManager, UserManager<AppUserEntity> userManager,
-            IHttpContextAccessor httpContextAccessor, IUrlGenerator urlGenerator, ISessionService sessionService,
-            IOptions<IdentityUIEndpoints> identityOptions, IValidator<ExternalLoginRequest> externalLoginRequestValidator,
+        public ExternalLoginService(
+            SignInManager<AppUserEntity> signInManager,
+            UserManager<AppUserEntity> userManager,
+            IIdentityUIUserInfoService identityUIUserInfoService,
+            IUrlGenerator urlGenerator,
+            ISessionService sessionService,
+            IOptions<IdentityUIEndpoints> identityOptions,
+            IValidator<ExternalLoginRequest> externalLoginRequestValidator,
             ILogger<ExternalLoginService> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
 
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
             _urlGenerator = urlGenerator;
             _sessionService = sessionService;
 
@@ -96,7 +97,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
                 return Result.Ok(SignInResult.Failed);
             }
 
-            string sessionCode = _httpContextAccessor.HttpContext.User.GetSessionCode();
+            string sessionCode = _identityUIUserInfoService.GetSessionCode();
             if (sessionCode != null)
             {
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.Expired);

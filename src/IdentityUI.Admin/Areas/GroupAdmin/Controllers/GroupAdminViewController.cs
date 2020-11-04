@@ -6,6 +6,7 @@ using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Attribute;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Dashboard;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Invite;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Settings;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Services.Identity;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
 {
+    //[Route("/[area]/{groupId}/[action]")]
     public class GroupAdminViewController : GroupAdminBaseController
     {
         private readonly IGroupAdminAuditDataService _groupAdminAuditDataService;
@@ -20,45 +22,55 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
         private readonly IGroupAdminInviteDataService _groupAdminInviteDataService;
         private readonly IGroupAdminUserDataService _groupAdminUserDataService;
         private readonly IGroupAdminAttributeDataService _groupAdminAttributeDataService;
+        private readonly IGroupAdminSettingsDataService _groupAdminSettingsDataService;
 
         public GroupAdminViewController(
             IGroupAdminAuditDataService groupAdminAuditDataService,
             IGroupAdminDashboardService groupAdminDashboardService,
             IGroupAdminInviteDataService groupAdminInviteDataService,
             IGroupAdminUserDataService groupAdminUserDataService,
-            IGroupAdminAttributeDataService groupAdminAttributeDataService)
+            IGroupAdminAttributeDataService groupAdminAttributeDataService,
+            IGroupAdminSettingsDataService groupAdminSettingsDataService)
         {
             _groupAdminAuditDataService = groupAdminAuditDataService;
             _groupAdminDashboardService = groupAdminDashboardService;
             _groupAdminInviteDataService = groupAdminInviteDataService;
             _groupAdminUserDataService = groupAdminUserDataService;
             _groupAdminAttributeDataService = groupAdminAttributeDataService;
+            _groupAdminSettingsDataService = groupAdminSettingsDataService;
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT)]
-        [HttpGet("/[area]/[action]")]
-        public IActionResult Audit()
+        [HttpGet("/[area]/{groupId}/[action]")]
+        public async Task<IActionResult> Audit([FromRoute] string groupId)
         {
-            AuditIndexViewModel viewModel = _groupAdminAuditDataService.GetIndexViewModel();
+            Result<AuditIndexViewModel> result = await _groupAdminAuditDataService.GetIndexViewModel(groupId);
+            if(result.Failure)
+            {
+                return NotFoundView();
+            }
 
-            return View(viewModel);
+            return View(result.Value);
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_ACCESS_DASHBOARD)]
-        [HttpGet("/[area]")]
-        [HttpGet("/[area]/[action]")]
-        public async Task<IActionResult> Dashboard()
+        [HttpGet("/[area]/{groupId}/[action]")]
+        public async Task<IActionResult> Dashboard([FromRoute] string groupId)
         {
-            GroupedStatisticsViewModel viewModel = await _groupAdminDashboardService.GetIndexViewModel();
+            Result<GroupedStatisticsViewModel> result = await _groupAdminDashboardService.GetIndexViewModel(groupId);
+            if(result.Failure)
+            {
+                return NotFoundView();
+            }
 
-            return View(viewModel);
+            return View(result.Value);
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES)]
-        [HttpGet("/[area]/[action]")]
-        public async Task<IActionResult> Invite()
+        [HttpGet("/[area]/{groupId}/[action]")]
+        public async Task<IActionResult> Invite([FromRoute] string groupId)
         {
-            Result<GroupAdminInviteViewModel> result = await _groupAdminInviteDataService.GetInviteViewModel();
+            Result<GroupAdminInviteViewModel> result = await _groupAdminInviteDataService.GetInviteViewModel(groupId);
             if (result.Failure)
             {
                 return NotFoundView();
@@ -68,10 +80,10 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
-        [HttpGet("/[area]/User")]
-        public async Task<IActionResult> Users()
+        [HttpGet("/[area]/{groupId}/User")]
+        public async Task<IActionResult> Users([FromRoute] string groupId)
         {
-            Result<GroupAdminUserIndexViewModel> result = await _groupAdminUserDataService.GetIndexViewModel();
+            Result<GroupAdminUserIndexViewModel> result = await _groupAdminUserDataService.GetIndexViewModel(groupId);
             if (result.Failure)
             {
                 return NotFoundView();
@@ -81,10 +93,10 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_ACCESS_USER_DETAILS)]
-        [HttpGet("/[area]/User/Details/{groupUserId}")]
-        public async Task<IActionResult> UserDetails([FromRoute] long groupUserId)
+        [HttpGet("/[area]/{groupId}/User/Details/{groupUserId}")]
+        public async Task<IActionResult> UserDetails([FromRoute] string groupId, [FromRoute] long groupUserId)
         {
-            Result<GroupAdminUserDetailsViewModel> result = await _groupAdminUserDataService.GetDetailsViewModel(groupUserId);
+            Result<GroupAdminUserDetailsViewModel> result = await _groupAdminUserDataService.GetDetailsViewModel(groupId, groupUserId);
             if (result.Failure)
             {
                 return NotFoundView();
@@ -94,10 +106,10 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES)]
-        [HttpGet("/[area]/[action]")]
-        public async Task<IActionResult> Attribute()
+        [HttpGet("/[area]/{groupId}/[action]")]
+        public async Task<IActionResult> Attribute([FromRoute] string groupId)
         {
-            Result<GroupAdminAttributeViewModel> result = await _groupAdminAttributeDataService.GetViewModel(User.GetGroupId());
+            Result<GroupAdminAttributeViewModel> result = await _groupAdminAttributeDataService.GetViewModel(groupId);
             if(result.Failure)
             {
                 return NotFoundView();
@@ -107,10 +119,16 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_SETTINGS)]
-        [HttpGet("/[area]/[action]")]
-        public IActionResult Settings()
+        [HttpGet("/[area]/{groupId}/[action]")]
+        public async Task<IActionResult> Settings([FromRoute] string groupId)
         {
-            return View();
+            Result<GroupAdminSettingsViewModel> result = await _groupAdminSettingsDataService.GetViewModel(groupId);
+            if (result.Failure)
+            {
+                return NotFoundView();
+            }
+
+            return View(result.Value);
         }
     }
 }

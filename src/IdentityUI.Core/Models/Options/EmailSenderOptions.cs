@@ -11,6 +11,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public string UserName { get; set; }
         public string Password { get; set; }
         public string SenderName { get; set; }
+        public bool UseSSL { get; set; }
 
         public EmailSenderOptions()
         {

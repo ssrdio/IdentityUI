@@ -3,16 +3,17 @@ using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User
 {
-    public class GroupAdminUserIndexViewModel
+    public class GroupAdminUserIndexViewModel : GroupAdminViewModel
     {
-        public string GroupId { get; set; }
-
         public List<RoleListData> CanMangeGroupRoles { get; set; }
         public List<RoleListData> CanAssigneGroupRoles { get; set; }
 
         public bool CanChangeOwnRole { get; set; }
 
-        public GroupAdminUserIndexViewModel(string groupId, List<RoleListData> canMangeGroupRoles, List<RoleListData> canAssigneGroupRoles, bool canChangeOwnRole)
+        public GroupAdminUserIndexViewModel(string groupId,
+            List<RoleListData> canMangeGroupRoles,
+            List<RoleListData> canAssigneGroupRoles,
+            bool canChangeOwnRole) : base(groupId)
         {
             GroupId = groupId;
 

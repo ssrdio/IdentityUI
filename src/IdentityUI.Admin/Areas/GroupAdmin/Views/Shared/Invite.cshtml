@@ -12,11 +12,12 @@
 @section script{
     <script>
         $(document).ready(function () {
-            new GroupInvites('@Json.Serialize(Model.CanAssignRoles)');
+            new GroupInvites('@Model.GroupId', '@Json.Serialize(Model.CanAssignRoles)');
         });
 
         class GroupInvites {
-            constructor(canAssignRoles) {
+            constructor(groupId, canAssignRoles) {
+                this.groupId = groupId;
                 this.canAssignRoles = JSON.parse(canAssignRoles);
 
                 this.$inviteTable = $('#invite-table');
@@ -54,7 +55,7 @@
                     "bSort": false,
                     "order": [],
                     ajax: {
-                        url: `/api/GroupAdmin/Invite/Get`,
+                        url: `/api/GroupAdmin/${this.groupId}/Invite/Get`,
                         type: 'GET'
                     },
                     columns: [
@@ -108,7 +109,7 @@
             remove(id) {
                 this.statusAlert.hide();
 
-                Api.post(`/api/GroupAdmin/Invite/Remove/${id}`)
+                Api.post(`/api/GroupAdmin/${this.groupId}/Invite/Remove/${id}`)
                     .done(() => {
                         this.reloadTable();
                         this.statusAlert.showSuccess('Invite was removed');
@@ -194,7 +195,7 @@
                 this.hideErrors();
                 const data = this.getData();
 
-                Api.post(`/api/GroupAdmin/Invite/Add`, data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/Invite/Add`, data)
                     .done(() => {
                         this.$inviteUserModal.modal('hide');
 

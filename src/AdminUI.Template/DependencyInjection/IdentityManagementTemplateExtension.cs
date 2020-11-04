@@ -1,11 +1,9 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SSRD.AdminUI.Template.DependencyInjection;
+using SSRD.AdminUI.Template.Models;
 using SSRD.AdminUI.Template.Models.DataTables;
 using SSRD.AdminUI.Template.Models.Select2;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.AdminUI.Template
 {
@@ -21,6 +19,8 @@ namespace SSRD.AdminUI.Template
 
             services.AddSingleton<IValidator<Select2Request>, Select2RequestValidator>();
             services.AddSingleton<IValidator<DataTableRequest>, DataTableRequestValidator>();
+
+            services.AddSingleton<IValidator<TimeRangeRequest>, TimeRangeRequestValidator>();
         }
     }
 }

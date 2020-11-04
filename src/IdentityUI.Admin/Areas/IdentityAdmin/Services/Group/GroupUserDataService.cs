@@ -91,7 +91,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group
 
             if (!string.IsNullOrEmpty(select2Request.Term))
             {
-                selectSpecification.AddFilter(x => x.NormalizedUserName.Contains(select2Request.Term));
+                selectSpecification.AddFilter(x => x.NormalizedUserName.Contains(select2Request.Term.ToUpper()));
             }
 
             selectSpecification.AddSelect(x => new Select2ItemBase(

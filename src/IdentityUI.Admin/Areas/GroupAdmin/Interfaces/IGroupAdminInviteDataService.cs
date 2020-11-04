@@ -6,6 +6,6 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces
 {
     public interface IGroupAdminInviteDataService
     {
-        Task<Result<GroupAdminInviteViewModel>> GetInviteViewModel();
+        Task<Result<GroupAdminInviteViewModel>> GetInviteViewModel(string groupId);
     }
 }

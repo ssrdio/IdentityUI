@@ -267,7 +267,8 @@ class AddExistingUser {
                 type: 'GET',
                 dataType: 'json',
                 delay: 250
-            }
+            },
+            placeholder: 'Select User'
         });
     }
 
@@ -281,6 +282,7 @@ class AddExistingUser {
 
         this.$rolesSelect.select2({
             data: data,
+            placeholder: 'Select Group Role'
         });
 
         this.rolesSelectComponent.selectOption(null);

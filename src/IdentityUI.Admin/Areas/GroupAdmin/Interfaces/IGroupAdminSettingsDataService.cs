@@ -6,6 +6,8 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces
 {
     public interface IGroupAdminSettingsDataService
     {
+        Task<Result<GroupAdminSettingsViewModel>> GetViewModel(string groupId);
+
         Task<Result<GroupAdminSettingsDetailsModel>> Get(string groupId);
     }
 }

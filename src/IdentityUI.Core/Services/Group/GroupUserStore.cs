@@ -12,6 +12,7 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private readonly IdentityUIClaimOptions _identityUIClaimOptions;
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
         private readonly ILogger<GroupUserStore> _logger;
 
         public GroupUserStore(
@@ -46,7 +47,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
             IBaseDAO<RoleAssignmentEntity> roleAssignmentDAO,
             IBaseDAO<RoleEntity> roleDAO,
             IOptions<IdentityUIClaimOptions> identityUIClaimOptions,
-            IHttpContextAccessor httpContextAccessor,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             ILogger<GroupUserStore> logger)
         {
             _groupUserRepository = groupUserRepository;
@@ -59,7 +60,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
             _identityUIClaimOptions = identityUIClaimOptions.Value;
 
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
 
             _logger = logger;
         }
@@ -67,12 +68,13 @@ namespace SSRD.IdentityUI.Core.Services.Group
         private TSpecification ApplayGroupUserFilter<TSpecification>(TSpecification specification)
             where TSpecification : BaseSpecification<GroupUserEntity>
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
             {
             }
-            else if (_httpContextAccessor.HttpContext.User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+            else if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS)
+                    && _identityUIUserInfoService.GetGroupId() != null)
             {
-                specification.AddFilter(x => x.GroupId == _httpContextAccessor.HttpContext.User.GetGroupId());
+                specification.AddFilter(x => x.GroupId == _identityUIUserInfoService.GetGroupId());
             }
             else
             {
@@ -132,10 +134,10 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private List<RoleListData> CanAssigneRolesOld()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
-            string groupId = _httpContextAccessor.HttpContext.User.GetGroupId();
+            string userId = _identityUIUserInfoService.GetUserId();
+            string groupId = _identityUIUserInfoService.GetGroupId();
 
-            bool hasGlobalAccess = _httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
+            bool hasGlobalAccess = _identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
 
             List<RoleListData> roles;
 
@@ -235,7 +237,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         public bool CanChangeOwnRole()
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES))
+            if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES))
             {
                 return true;
             }
@@ -245,12 +247,13 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private IBaseSpecification<GroupUserEntity, TData> ApplayGroupUserFilter<TData>(IBaseSpecification<GroupUserEntity, TData> specification)
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityUIClaimOptions))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
             {
             }
-            else if (_httpContextAccessor.HttpContext.User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityUIClaimOptions))
+            else if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS)
+                    && _identityUIUserInfoService.GetGroupId() != null)
             {
-                specification.Filters.Add(x => x.GroupId == _httpContextAccessor.HttpContext.User.GetGroupId(_identityUIClaimOptions));
+                specification.Filters.Add(x => x.GroupId == _identityUIUserInfoService.GetGroupId());
             }
             else
             {
@@ -311,17 +314,10 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private async Task<List<RoleListData>> GetRoleAssignments()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId(_identityUIClaimOptions);
-            string groupId = _httpContextAccessor.HttpContext.User.GetGroupId(_identityUIClaimOptions);
+            string userId = _identityUIUserInfoService.GetUserId();
+            string groupId = _identityUIUserInfoService.GetGroupId();
 
-            bool hasGlobalAccess = _httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES, _identityUIClaimOptions);
-
-            if(_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
-            {
-                //TODO:think about this. Maybe create two different methods one that overrides user id
-                //with impersonator id and one that does not
-                userId = _httpContextAccessor.HttpContext.User.GetImpersonatorId(_identityUIClaimOptions);
-            }
+            bool hasGlobalAccess = _identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
 
             List<RoleListData> roles;
 

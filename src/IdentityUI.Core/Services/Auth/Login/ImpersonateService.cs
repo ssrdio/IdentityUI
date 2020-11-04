@@ -7,6 +7,7 @@ using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using SSRD.IdentityUI.Core.Interfaces;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System;
@@ -18,7 +19,6 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 {
     public class ImpersonateService : IImpersonateService
     {
-        public const string NO_HTTP_CONTEXT = "no_http_context";
         public const string USER_NOT_FOUND = "user_not_found";
         public const string FAILED_TO_ADD_SESSION = "failed_to_add_session";
 
@@ -28,7 +28,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
         private readonly IGroupUserStore _groupUserStore;
 
         private readonly ISessionService _sessionService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly ILogger<ImpersonateService> _logger;
 
@@ -37,7 +37,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
             UserManager<AppUserEntity> userManager,
             IGroupUserStore groupUserStore,
             ISessionService sessionService,
-            IHttpContextAccessor httpContextAccessor,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             ILogger<ImpersonateService> logger)
         {
             _signInManager = signInManager;
@@ -46,7 +46,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
             _groupUserStore = groupUserStore;
 
             _sessionService = sessionService;
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
 
             _logger = logger;
         }
@@ -55,13 +55,13 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
         {
             appUser.SessionCode = Guid.NewGuid().ToString();
 
-            IdentityUI.Core.Models.Result.Result addSessionResult = _sessionService.Add(appUser.SessionCode, appUser.Id, _httpContextAccessor.HttpContext.GetRemoteIp());
+            Result addSessionResult = await _sessionService.Add(appUser.SessionCode, appUser.Id);
             if (addSessionResult.Failure)
             {
                 return Result.Fail(FAILED_TO_ADD_SESSION);
             }
 
-            string loggedInUserId = _httpContextAccessor.HttpContext.GetUserId();
+            string loggedInUserId = _identityUIUserInfoService.GetGroupId();
 
             appUser.ImpersonatorId = loggedInUserId;
 
@@ -75,12 +75,6 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 
         public async Task<Result> Start(string userId)
         {
-            if(_httpContextAccessor.HttpContext == null)
-            {
-                _logger.LogError($"No HttpContext");
-                return Result.Fail(NO_HTTP_CONTEXT);
-            }
-
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if(appUser == null)
             {
@@ -110,13 +104,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 
         public async Task<Result> Stop()
         {
-            if (_httpContextAccessor.HttpContext == null)
-            {
-                _logger.LogError($"No HttpContext");
-                return Result.Fail(NO_HTTP_CONTEXT);
-            }
-
-            string impersonatorId = _httpContextAccessor.HttpContext.GetImpersonatorId();
+            string impersonatorId = _identityUIUserInfoService.GetImpersonatorId();
 
             AppUserEntity appUser = await _userManager.FindByIdAsync(impersonatorId);
             if(appUser == null)
@@ -127,14 +115,14 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 
             appUser.SessionCode = Guid.NewGuid().ToString();
 
-            IdentityUI.Core.Models.Result.Result addSessionResult = _sessionService.Add(appUser.SessionCode, appUser.Id, _httpContextAccessor.HttpContext.GetRemoteIp());
+            Result addSessionResult = await _sessionService.Add(appUser.SessionCode, appUser.Id);
             if (addSessionResult.Failure)
             {
                 return Result.Fail(FAILED_TO_ADD_SESSION);
             }
 
-            string userId = _httpContextAccessor.HttpContext.GetUserId();
-            string sessionCode = _httpContextAccessor.HttpContext.GetSessionCode();
+            string userId = _identityUIUserInfoService.GetUserId();
+            string sessionCode = _identityUIUserInfoService.GetSessionCode();
 
             await _signInManager.SignOutAsync();
 
@@ -142,7 +130,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 
             await _signInManager.SignInAsync(appUser, false); //TODO: save this when starting impersonating
 
-            _logger.LogInformation($"User is stoped to impersonate another user. ImpersnonazerId {impersonatorId}, user to be impersonalized {userId}");
+            _logger.LogInformation($"User is stopped to impersonate another user. ImpersnonazerId {impersonatorId}, user to be impersonalized {userId}");
 
             return Result.Ok();
         }

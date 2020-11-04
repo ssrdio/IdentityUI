@@ -33,5 +33,13 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
 
             return _groupStore.SingleOrDefault(specification);
         }
+
+        public Task<Result<GroupAdminSettingsViewModel>> GetViewModel(string groupId)
+        {
+            GroupAdminSettingsViewModel viewModel = new GroupAdminSettingsViewModel(
+                groupId: groupId);
+
+            return Task.FromResult(Result.Ok(viewModel));
+        }
     }
 }

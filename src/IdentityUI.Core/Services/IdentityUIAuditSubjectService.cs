@@ -2,30 +2,33 @@
 using Microsoft.Extensions.Options;
 using SSRD.Audit.Models;
 using SSRD.Audit.Services;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Services
 {
     public class IdentityUIAuditSubjectService : HttpContextAuditDataService
     {
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
+
         private readonly IdentityUIClaimOptions _identityUIClaimOptions;
 
         public IdentityUIAuditSubjectService(
             IHttpContextAccessor httpContextAccessor,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             IOptions<AuditOptions> auditOptions,
             IOptions<IdentityUIClaimOptions> identityUIClaimOptions) : base(httpContextAccessor, auditOptions)
         {
+            _identityUIUserInfoService = identityUIUserInfoService;
+
             _identityUIClaimOptions = identityUIClaimOptions.Value;
         }
 
         public override string GetUserId()
         {
-            return _httpContextAccessor.HttpContext.User.GetUserId(_identityUIClaimOptions);
+            return _identityUIUserInfoService.GetUserId();
         }
 
         public override string GetSubjectMetadata()
@@ -51,7 +54,7 @@ namespace SSRD.IdentityUI.Core.Services
 
         public override string GetGroupIdentifier()
         {
-            return _httpContextAccessor.HttpContext.User.GetGroupId(_identityUIClaimOptions);
+            return _identityUIUserInfoService.GetUserId();
         }
     }
 }

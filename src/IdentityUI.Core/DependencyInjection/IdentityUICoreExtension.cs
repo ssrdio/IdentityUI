@@ -155,9 +155,12 @@ namespace SSRD.IdentityUI.Core
                 Microsoft.Extensions.Options.IOptions<IdentityUIClaimOptions> identityUIClaimOptions = x.GetRequiredService<Microsoft.Extensions.Options.IOptions<IdentityUIClaimOptions>>();
 
                 Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor = x.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+
+                IIdentityUIUserInfoService identityUIUserInfoService = x.GetRequiredService<IIdentityUIUserInfoService>();
+
                 if (httpContextAccessor.HttpContext != null)
                 {
-                    return new IdentityUIAuditSubjectService(httpContextAccessor, auditOptions, identityUIClaimOptions);
+                    return new IdentityUIAuditSubjectService(httpContextAccessor, identityUIUserInfoService, auditOptions, identityUIClaimOptions);
                 }
 
                 Audit.Services.IBackgroundServiceContextAccessor backgroundServiceContextAccessor = x.GetRequiredService<Audit.Services.IBackgroundServiceContextAccessor>();
@@ -435,6 +438,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IAddUserCallbackService, NullAddUserCallback>();
 
             builder.Services.AddScoped<IImpersonateService, ImpersonateService>();
+
+            builder.Services.AddScoped<IIdentityUIUserInfoService, HttpContextUserInfoService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)

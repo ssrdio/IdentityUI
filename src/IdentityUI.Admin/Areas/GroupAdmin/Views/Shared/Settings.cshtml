@@ -54,11 +54,12 @@
     <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
     <script>
         $(document).ready(function () {
-            new GroupSettingsClass();
+            new GroupSettingsClass('@Model.GroupId');
         });
 
         class GroupSettingsClass {
-            constructor() {
+            constructor(groupId) {
+                this.groupId = groupId;
                 const $form = $('#settings-form');
 
                 this.groupNameInput = new InputComponent($form, '#group-name-input');
@@ -106,7 +107,7 @@
                 this.loader.show();
                 this.statusAlert.hide();
 
-                Api.get('/api/GroupAdmin/Settings/Get')
+                Api.get(`/api/GroupAdmin/${this.groupId}/Settings/Get`)
                     .done((data) => {
                         this.showData(data);
                     })
@@ -130,7 +131,7 @@
 
                 const data = this.getData();
 
-                Api.post('/api/GroupAdmin/Settings/Update', data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/Settings/Update`, data)
                     .done(() => {
                         this.statusAlert.showSuccess('Setings were updated');
                         this.get();
@@ -145,7 +146,7 @@
                 this.loader.show();
                 this.statusAlert.hide();
 
-                Api.delete('/api/GroupAdmin/Settings/Delete')
+                Api.delete(`/api/GroupAdmin/${this.groupId}/Settings/Delete`)
                     .done(() => {
                         window.location.href = '/';
                     })

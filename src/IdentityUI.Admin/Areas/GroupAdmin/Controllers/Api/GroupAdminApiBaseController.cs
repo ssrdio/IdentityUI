@@ -12,7 +12,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 #elif NET_CORE3
     [Produces(MediaTypeNames.Application.Json)]
 #endif
-    [Route("api/[area]/[controller]/[action]")]
+    [Route("api/[area]/{groupId}/[controller]/[action]")]
     public class GroupAdminApiBaseController : GroupAdminBaseController
     {
     }

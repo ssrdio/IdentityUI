@@ -270,17 +270,17 @@
     <script>
 
         $(document).ready(function () {
-            new AuditTable(@Json.Serialize(Model.ActionTypes), @Json.Serialize(Model.SubjectTypes));
+            new AuditTable('@Model.GroupId', @Json.Serialize(Model.ActionTypes), @Json.Serialize(Model.SubjectTypes));
         });
 
         class AuditDetailsModal {
-            constructor(actionTypes) {
+            constructor(groupId) {
+                this.groupId = groupId;
+
                 this.$modal = $('#audit-details-modal');
                 this.$modal.on('hidden.bs.modal', () => {
                     this.reset();
                 });
-
-                this.actionTypes = actionTypes;
 
                 this.$auditDataContiner = this.$modal.find('#audit-data-container');
                 this.$loader = this.$modal.find('#audit-data-loader');
@@ -379,7 +379,7 @@
             get(id) {
                 this.showLoader();
 
-                Api.get(`/api/GroupAdmin/Audit/Get/${id}`)
+                Api.get(`/api/GroupAdmin/${this.groupId}/Audit/Get/${id}`)
                     .done((data) => {
                         this.set(data)
                     })
@@ -393,14 +393,16 @@
         }
 
         class AuditTable {
-            constructor(actionTypes, subjectTypes) {
+            constructor(groupId, actionTypes, subjectTypes) {
+                this.groupId = groupId;
+
                 this.$auditTable = $('#audit-table');
                 this.actionTypes = actionTypes;
 
                 this.statusAlert = new StatusAlertComponent('#status-alert-container');
 
-                this.auditDetailsModal = new AuditDetailsModal();
-                this.auditTableFilters = new AuditTableFilters(subjectTypes, actionTypes, this.statusAlert, () => {
+                this.auditDetailsModal = new AuditDetailsModal(groupId);
+                this.auditTableFilters = new AuditTableFilters(groupId, subjectTypes, actionTypes, this.statusAlert, () => {
                     this.reloadTable();
                 });
 
@@ -421,7 +423,7 @@
                     pageLength: 20,
                     searching: false,
                     ajax: {
-                        url: '/api/GroupAdmin/Audit/Get',
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/Get`,
                         type: 'GET',
                         data: (params) => {
                             const orderByTypes = Object.freeze({
@@ -517,7 +519,9 @@
         }
 
         class AuditTableFilters {
-            constructor(subjectTypes, actionTypes, statusAlert, onChange) {
+            constructor(groupId, subjectTypes, actionTypes, statusAlert, onChange) {
+                this.groupId = groupId;
+
                 this.onChange = onChange;
                 this.statusAlert = statusAlert;
 
@@ -620,7 +624,7 @@
             initObjectTypeSelect() {
                 this.$objectTypeSelect.select2({
                     ajax: {
-                        url: `/api/GroupAdmin/Audit/GetObjectTypes`,
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetObjectTypes`,
                         delay: 100,
                         data: (params) => {
                             params.page = params.page ?? 1;
@@ -644,7 +648,7 @@
             initObjectIdentifierSelect() {
                 this.$objectIdentifierSelect.select2({
                     ajax: {
-                        url: `/api/GroupAdmin/Audit/GetObjectIdentifiers`,
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetObjectIdentifiers`,
                         delay: 100,
                         data: (params) => {
                             params.page = params.page ?? 1;
@@ -680,7 +684,7 @@
             initSubjectIdentifierSelect() {
                 this.$subjectIdentifierSelect.select2({
                     ajax: {
-                        url: `/api/GroupAdmin/Audit/GetSubjectIdentifiers`,
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetSubjectIdentifiers`,
                         delay: 100,
                         data: (params) => {
                             params.page = params.page ?? 1;
@@ -714,7 +718,7 @@
             initResourceNameSelect() {
                 this.$resourceNameSelect.select2({
                     ajax: {
-                        url: `/api/GroupAdmin/Audit/GetResourceNames`,
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetResourceNames`,
                         delay: 100,
                         data: (params) => {
                             params.page = params.page ?? 1;

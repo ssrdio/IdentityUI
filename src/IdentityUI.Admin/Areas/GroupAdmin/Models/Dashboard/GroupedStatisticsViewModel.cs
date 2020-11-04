@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Dashboard
 {
-    public class GroupedStatisticsViewModel
+    public class GroupedStatisticsViewModel : GroupAdminViewModel
     {
         public int UsersCount { get; set; }
         public int ActiveUsersCount { get; set; }
@@ -12,10 +12,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Dashboard
         public int DisabledUsersCount { get; set; }
 
         public GroupedStatisticsViewModel(
+            string groupId,
             int usersCount,
             int activeUsersCount,
             int unconfirmedUsersCount,
-            int disabledUsersCount)
+            int disabledUsersCount) : base(groupId)
         {
             UsersCount = usersCount;
             ActiveUsersCount = activeUsersCount;

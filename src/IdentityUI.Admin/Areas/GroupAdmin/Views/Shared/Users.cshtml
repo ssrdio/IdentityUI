@@ -84,7 +84,7 @@
                     "bSort": false,
                     "order": [],
                     ajax: {
-                        url: `/api/GroupAdmin/User/Get`,
+                        url: `/api/GroupAdmin/${this.groupId}/User/Get`,
                         type: 'GET'
                     },
                     columns: [
@@ -219,7 +219,7 @@
                 this.$usersTable.on('click', 'button.details', (event) => {
                     let id = $(event.target).data("id");
 
-                    window.location = `/GroupAdmin/User/Details/${id}`;
+                    window.location = `/GroupAdmin/${this.groupId}/User/Details/${id}/`;
                 });
 
                 this.$usersTable.on('change', 'select', (event) => {
@@ -242,7 +242,7 @@
             remove(id) {
                 this.statusAlert.hide();
 
-                Api.post(`/api/GroupAdmin/User/Remove/${id}`)
+                Api.post(`/api/GroupAdmin/${this.groupId}/User/Remove/${id}`)
                     .done(() => {
                         this.reloadTable();
                         this.statusAlert.showSuccess('User was removed from group');
@@ -256,7 +256,7 @@
             leave() {
                 this.statusAlert.hide();
 
-                Api.post(`/api/GroupAdmin/User/Leave`)
+                Api.post(`/api/GroupAdmin/${this.groupId}/User/Leave`)
                     .done(() => {
                         window.location.href = '/';
                     })
@@ -268,7 +268,7 @@
             changeRole(id, roleId) {
                 this.statusAlert.hide();
 
-                Api.post(`/api/GroupAdmin/User/ChangeRole/${id}?roleId=${roleId}`)
+                Api.post(`/api/GroupAdmin/${this.groupId}/User/ChangeRole/${id}?roleId=${roleId}`)
                     .done(() => {
                         this.reloadTable();
                         this.statusAlert.showSuccess('User role was changed');
@@ -313,11 +313,12 @@
             initUserSelect() {
                 this.$userSelect.select2({
                     ajax: {
-                        url: `/api/GroupAdmin/User/GetAvailable`,
+                        url: `/api/GroupAdmin/${this.groupId}/User/GetAvailable`,
                         type: 'GET',
                         dataType: 'json',
                         delay: 250
-                    }
+                    },
+                    placeholder: 'Select User'
                 });
             }
 
@@ -370,7 +371,7 @@
 
                 console.log(data);
 
-                Api.post(`/api/GroupAdmin/User/AddExisting`, data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/User/AddExisting`, data)
                     .done(() => {
                         this.$addExisingUserModal.modal('hide');
 
@@ -459,7 +460,7 @@
                 this.hideErrors();
                 const data = this.getData();
 
-                Api.post(`/api/GroupAdmin/Invite/Add`, data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/Invite/Add`, data)
                     .done(() => {
                         this.$inviteUserModal.modal('hide');
 

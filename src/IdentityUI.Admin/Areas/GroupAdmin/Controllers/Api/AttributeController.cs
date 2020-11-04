@@ -28,36 +28,36 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupAttributeTableModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get([FromQuery] DataTableRequest request)
+        public async Task<IActionResult> Get([FromRoute] string groupId, [FromQuery] DataTableRequest request)
         {
-            Result<DataTableResult<GroupAttributeTableModel>> result = await _groupAttributeDataService.Get(User.GetGroupId(), request);
+            Result<DataTableResult<GroupAttributeTableModel>> result = await _groupAttributeDataService.Get(groupId, request);
 
             return result.ToApiResult();
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public Task<IActionResult> Add([FromBody] AddGroupAttributeRequest request)
+        public Task<IActionResult> Add([FromRoute] string groupId, [FromBody] AddGroupAttributeRequest request)
         {
-            Core.Models.Result.Result result = _groupAttributeService.Add(User.GetGroupId(), request);
+            Core.Models.Result.Result result = _groupAttributeService.Add(groupId, request);
 
             return Task.FromResult(result.ToNewResult().ToApiResult());
         }
 
         [HttpPost("{groupAttributeId}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public Task<IActionResult> Update([FromRoute] long groupAttributeId, [FromBody] EditGroupAttributeRequest request)
+        public Task<IActionResult> Update([FromRoute] string groupId, [FromRoute] long groupAttributeId, [FromBody] EditGroupAttributeRequest request)
         {
-            Core.Models.Result.Result result = _groupAttributeService.Edit(User.GetGroupId(), groupAttributeId, request);
+            Core.Models.Result.Result result = _groupAttributeService.Edit(groupId, groupAttributeId, request);
 
             return Task.FromResult(result.ToNewResult().ToApiResult());
         }
 
         [HttpDelete("{groupAttributeId}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public Task<IActionResult> Delete([FromRoute] long groupAttributeId)
+        public Task<IActionResult> Delete([FromRoute] string groupId, [FromRoute] long groupAttributeId)
         {
-            Core.Models.Result.Result result = _groupAttributeService.Remove(User.GetGroupId(), groupAttributeId);
+            Core.Models.Result.Result result = _groupAttributeService.Remove(groupId, groupAttributeId);
 
             return Task.FromResult(result.ToNewResult().ToApiResult());
         }

@@ -31,7 +31,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
         private readonly IEmailService _emailService;
         private readonly ILoginService _loginService;
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly IValidator<RecoverPasswordRequest> _forgotPasswordValidator;
         private readonly IValidator<ResetPasswordRequest> _recoverPasswordValidator;
@@ -43,18 +43,25 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
         private readonly IdentityUIOptions _identityManagementOptions;
         private readonly IdentityUIEndpoints _identityManagementEndpoints;
 
-        public CredentialsService(UserManager<AppUserEntity> userManager, IEmailService emailService, ILoginService loginService,
-            IHttpContextAccessor httpContextAccessor, IValidator<RecoverPasswordRequest> forgotPasswordValidator,
-            IValidator<ResetPasswordRequest> recoverPasswordValidator, IValidator<ChangePasswordRequest> changePasswordValidator,
-            IValidator<CreatePasswordRequest> createPasswordValidator, ILogger<CredentialsService> logger,
-            IOptionsSnapshot<IdentityUIOptions> identityManagementOptions, IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
+        public CredentialsService(
+            UserManager<AppUserEntity> userManager,
+            IEmailService emailService,
+            ILoginService loginService,
+            IIdentityUIUserInfoService identityUIUserInfoService,
+            IValidator<RecoverPasswordRequest> forgotPasswordValidator,
+            IValidator<ResetPasswordRequest> recoverPasswordValidator,
+            IValidator<ChangePasswordRequest> changePasswordValidator,
+            IValidator<CreatePasswordRequest> createPasswordValidator,
+            ILogger<CredentialsService> logger,
+            IOptionsSnapshot<IdentityUIOptions> identityManagementOptions,
+            IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
         {
             _userManager = userManager;
 
             _emailService = emailService;
             _loginService = loginService;
 
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
 
             _forgotPasswordValidator = forgotPasswordValidator;
             _recoverPasswordValidator = recoverPasswordValidator;
@@ -191,7 +198,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
                 return Result.Fail(validationResult.Errors);
             }
 
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            string userId = _identityUIUserInfoService.GetUserId();
 
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if(appUser == null)
@@ -220,7 +227,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
 
         public async Task<Result> RemoveExternalLogin()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            string userId = _identityUIUserInfoService.GetUserId();
 
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if (appUser == null)

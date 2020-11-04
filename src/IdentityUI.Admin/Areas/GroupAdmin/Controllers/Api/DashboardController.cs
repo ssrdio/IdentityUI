@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SSRD.AdminUI.Template.Models;
 using SSRD.CommonUtils.Result;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Attributes;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces;
-using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Dashboard;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
-using System;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,33 +15,32 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
     {
         private readonly IGroupAdminDashboardService _groupAdminDashboardService;
 
-        public DashboardController(IGroupAdminDashboardService groupAdminDashboardService)
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
+
+        public DashboardController(
+            IGroupAdminDashboardService groupAdminDashboardService,
+            IIdentityUIUserInfoService identityUIUserInfoService)
         {
             _groupAdminDashboardService = groupAdminDashboardService;
+            _identityUIUserInfoService = identityUIUserInfoService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRegistrationStatistics([FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
+        public async Task<IActionResult> GetRegistrationStatistics([FromRoute] string groupId, [FromQuery] TimeRangeRequest timeRangeRequest)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Result<List<RegistrationsViewModel>> result = await _groupAdminDashboardService.GetRegistrationStatistics(from, to);
+            Result<List<TimeRangeStatisticsModel>> result = await _groupAdminDashboardService.GetRegistrationStatistics(
+                groupId,
+                timeRangeRequest);
 
             return result.ToApiResult();
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetActivityStatistics([FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
+        public async Task<IActionResult> GetActivityStatistics([FromRoute] string groupId, [FromQuery] TimeRangeRequest timeRangeRequest)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Result<List<RegistrationsViewModel>> result = await _groupAdminDashboardService.GetActivityStatistics(from, to);
+            Result<List<TimeRangeStatisticsModel>> result = await _groupAdminDashboardService.GetActivityStatistics(
+                groupId,
+                timeRangeRequest);
 
             return result.ToApiResult();
         }

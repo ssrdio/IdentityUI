@@ -12,7 +12,7 @@
     <script src="~/identityAdmin/app/group/attribute.js"></script>
     <script>
         $(document).ready(() => {
-            new GroupAdminAttributes('@Model.Id')
+            new GroupAdminAttributes('@Model.GroupId')
         });
 
         class GroupAdminAttributes {
@@ -66,7 +66,7 @@
                     "bSort": false,
                     "order": [],
                     ajax: {
-                        url: `/api/GroupAdmin/Attribute/Get`,
+                        url: `/api/GroupAdmin/${this.groupId}/Attribute/Get`,
                         type: 'GET'
                     },
                     columns: [
@@ -145,7 +145,7 @@
                 this.hideModalErrors();
                 let data = this.getAddData();
 
-                Api.post(`/api/GroupAdmin/Attribute/Add`, data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/Attribute/Add`, data)
                     .done(() => {
                         this.$addAttributeModal.modal('hide');
                         this.statusAlert.showSuccess('Attribute was added');
@@ -169,7 +169,7 @@
 
                 let data = this.getEditData(id);
 
-                Api.post(`/api/GroupAdmin/Attribute/Update/${id}`, data)
+                Api.post(`/api/GroupAdmin/${this.groupId}/Attribute/Update/${id}`, data)
                     .done(() => {
                         this.statusAlert.showSuccess('Attribute was updated');
                         this.reloadAttributeTable();
@@ -182,7 +182,7 @@
             remove(id) {
                 this.statusAlert.hide();
 
-                Api.delete(`/api/GroupAdmin/Attribute/Delete/${id}`)
+                Api.delete(`/api/GroupAdmin/${this.groupId}/Attribute/Delete/${id}`)
                     .done(() => {
                         this.statusAlert.showSuccess('Attribute was deleted');
                         this.reloadAttributeTable();

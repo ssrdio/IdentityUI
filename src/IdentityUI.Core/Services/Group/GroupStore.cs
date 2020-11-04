@@ -8,6 +8,7 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System;
 using System.Threading.Tasks;
@@ -21,30 +22,30 @@ namespace SSRD.IdentityUI.Core.Services.Group
         private readonly IBaseRepository<GroupEntity> _groupRepository;
         private readonly IBaseDAO<GroupEntity> _groupDAO;
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly ILogger<GroupStore> _logger;
 
         public GroupStore(IBaseRepository<GroupEntity> groupRepository,
             IBaseDAO<GroupEntity> groupDAO,
-            IHttpContextAccessor httpContextAccessor,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             ILogger<GroupStore> logger)
         {
             _groupRepository = groupRepository;
             _groupDAO = groupDAO;
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
             _logger = logger;
         }
 
         private TSpecification ApplayGroupFilter<TSpecification>(TSpecification specification)
             where TSpecification : BaseSpecification<GroupEntity>
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
             {
             }
-            else if(_httpContextAccessor.HttpContext.User.GetGroupId() != null)
+            else if(_identityUIUserInfoService.GetGroupId() != null)
             {
-                specification.AddFilter(x => x.Id == _httpContextAccessor.HttpContext.User.GetGroupId()); // TODO check for duplication
+                specification.AddFilter(x => x.Id == _identityUIUserInfoService.GetGroupId());
             }
             else
             {
@@ -114,12 +115,12 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private IBaseSpecification<GroupEntity, TValue> ApplayGroupFilter<TValue>(IBaseSpecification<GroupEntity, TValue> specification)
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
             {
             }
-            else if (_httpContextAccessor.HttpContext.User.GetGroupId() != null)
+            else if (_identityUIUserInfoService.GetGroupId() != null)
             {
-                specification.Filters.Add(x => x.Id == _httpContextAccessor.HttpContext.User.GetGroupId());
+                specification.Filters.Add(x => x.Id == _identityUIUserInfoService.GetGroupId());
             }
             else
             {

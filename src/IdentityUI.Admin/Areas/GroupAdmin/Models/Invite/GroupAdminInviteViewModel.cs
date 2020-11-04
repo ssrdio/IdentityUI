@@ -5,11 +5,11 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Invite
 {
-    public class GroupAdminInviteViewModel
+    public class GroupAdminInviteViewModel : GroupAdminViewModel
     {
         public List<RoleListData> CanAssignRoles { get; set; }
 
-        public GroupAdminInviteViewModel(List<RoleListData> canAssignRoles)
+        public GroupAdminInviteViewModel(string groupId, List<RoleListData> canAssignRoles) : base(groupId)
         {
             CanAssignRoles = canAssignRoles;
         }

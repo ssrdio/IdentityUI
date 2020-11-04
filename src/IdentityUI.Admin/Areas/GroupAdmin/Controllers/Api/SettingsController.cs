@@ -34,37 +34,37 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 
         [HttpGet]
         [ProducesResponseType(typeof(GroupAdminSettingsDetailsModel), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromRoute] string groupId)
         {
-            Result<GroupAdminSettingsDetailsModel> result = await _groupAdminSettingsDataService.Get(User.GetGroupId());
+            Result<GroupAdminSettingsDetailsModel> result = await _groupAdminSettingsDataService.Get(groupId);
 
             return result.ToApiResult();
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update([FromBody] UpdateGroupModel updateGroupModel)
+        public async Task<IActionResult> Update([FromRoute] string groupId, [FromBody] UpdateGroupModel updateGroupModel)
         {
             if(!_identityUIEndpoints.CanChangeGroupName)
             {
                 return NotFound();
             }
 
-            Result result = await _groupService.Update(User.GetGroupId(), updateGroupModel);
+            Result result = await _groupService.Update(groupId, updateGroupModel);
 
             return result.ToApiResult();
         }
 
         [HttpDelete]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Delete([FromBody] UpdateGroupModel updateGroupModel)
+        public async Task<IActionResult> Delete([FromRoute] string groupId, [FromBody] UpdateGroupModel updateGroupModel)
         {
             if (!_identityUIEndpoints.CanRemoveGroup)
             {
                 return NotFound();
             }
 
-            Result result = await _groupService.RemoveAsync(User.GetGroupId());
+            Result result = await _groupService.RemoveAsync(groupId);
 
             return result.ToApiResult();
         }

@@ -39,7 +39,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
             _smtpClient = new SmtpClient(emailSender.Ip, emailSender.Port)
             {
                 DeliveryFormat = SmtpDeliveryFormat.International,
-                Credentials = new NetworkCredential(emailSender.UserName, emailSender.Password)
+                Credentials = new NetworkCredential(emailSender.UserName, emailSender.Password),
+                EnableSsl = emailSender.UseSSL,
             };
 
             _senderName = emailSender.SenderName;

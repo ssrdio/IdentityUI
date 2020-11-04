@@ -12,7 +12,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Interfaces
 {
     public interface IGroupAdminAuditDataService
     {
-        AuditIndexViewModel GetIndexViewModel();
+        Task<Result<AuditIndexViewModel>> GetIndexViewModel(string groupId);
         Task<Result<Select2Result<Select2Item>>> GetObjectTypes(string groupId, Select2Request select2Request);
         Task<Result<Select2Result<Select2Item>>> GetObjectIdentifiers(string groupId, Select2Request select2Request, string objectType);
         Task<Result<Select2Result<Select2Item>>> GetSubjectIdentifiers(string groupId, Select2Request select2Request, SubjectTypes? subjectType);

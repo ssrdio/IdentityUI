@@ -23,6 +23,8 @@ namespace SSRD.IdentityUI.Core.Services
 
         public string GenerateActionUrl(string action, string controller, object values)
         {
+            //TODO: fix this so it uses BaseURL or looks in headers for host 
+
             return _urlHelper.Action(action, controller, values, _httpContextAccessor.HttpContext.Request.Scheme, _httpContextAccessor.HttpContext.Request.Host.ToString());
         }
     }

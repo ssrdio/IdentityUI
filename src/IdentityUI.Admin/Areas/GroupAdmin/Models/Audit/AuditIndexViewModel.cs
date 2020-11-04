@@ -5,12 +5,15 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit
 {
-    public class AuditIndexViewModel
+    public class AuditIndexViewModel : GroupAdminViewModel
     {
         public List<Select2ItemBase<long?>> ActionTypes { get; set; }
         public List<Select2ItemBase<long?>> SubjectTypes { get; set; }
 
-        public AuditIndexViewModel(List<Select2ItemBase<long?>> actionTypes, List<Select2ItemBase<long?>> subjectTypes)
+        public AuditIndexViewModel(
+            string groupId,
+            List<Select2ItemBase<long?>> actionTypes,
+            List<Select2ItemBase<long?>> subjectTypes) : base(groupId)
         {
             ActionTypes = actionTypes;
             SubjectTypes = subjectTypes;

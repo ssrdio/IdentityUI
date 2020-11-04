@@ -18,6 +18,7 @@ using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Services.Identity;
 using SSRD.IdentityUI.Core.Services.User.Models;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
@@ -55,9 +56,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupUserTableModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get([FromQuery] DataTableRequest dataTableRequest)
+        public async Task<IActionResult> Get([FromRoute] string groupId, [FromQuery] DataTableRequest dataTableRequest)
         {
-            Result<DataTableResult<GroupUserTableModel>> result = await _groupUserDataService.Get(User.GetGroupId(_identityUIClaimOptions), dataTableRequest);
+            Result<DataTableResult<GroupUserTableModel>> result = await _groupUserDataService.Get(
+                groupId,
+                dataTableRequest);
 
             return result.ToApiResult();
         }
@@ -65,7 +68,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS)]
         [HttpGet]
         [ProducesResponseType(typeof(DataTableResult<GroupUserTableModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAvailable([FromQuery] Select2Request select2Request)
+        public async Task<IActionResult> GetAvailable([FromRoute] string groupId, [FromQuery] Select2Request select2Request)
         {
             Result<Select2Result<Select2ItemBase>> result = await _groupUserDataService.GetAvailableUsers(select2Request);
 
@@ -75,9 +78,9 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS)]
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public IActionResult AddExisting([FromBody] AddExistingUserRequest addExistingUserRequest)
+        public IActionResult AddExisting([FromRoute] string groupId, [FromBody] AddExistingUserRequest addExistingUserRequest)
         {
-            Core.Models.Result.Result result = _groupUserService.AddExisting(User.GetGroupId(_identityUIClaimOptions), addExistingUserRequest);
+            Core.Models.Result.Result result = _groupUserService.AddExisting(groupId, addExistingUserRequest);
             if(result.Failure)
             {
                 ModelState.AddErrors(result);
@@ -90,7 +93,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)]
         [HttpPost("{groupUserId}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public IActionResult ChangeRole([FromRoute] long groupUserId, [FromQuery] string roleId)
+        public IActionResult ChangeRole([FromRoute] string groupId, [FromRoute] long groupUserId, [FromQuery] string roleId)
         {
             Core.Models.Result.Result result = _groupUserService.ChangeRole(groupUserId, roleId, User.GetUserId(_identityUIClaimOptions));
             if (result.Failure)
@@ -104,9 +107,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
 
         [HttpPost]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public IActionResult Leave()
+        public IActionResult Leave([FromRoute] string groupId)
         {
-            Core.Models.Result.Result result = _groupUserService.Leave(User.GetUserId(_identityUIClaimOptions), User.GetGroupId(_identityUIClaimOptions));
+            //TODO: change for impersonation
+
+            Core.Models.Result.Result result = _groupUserService.Leave(User.GetUserId(_identityUIClaimOptions), groupId);
             if (result.Failure)
             {
                 ModelState.AddErrors(result);

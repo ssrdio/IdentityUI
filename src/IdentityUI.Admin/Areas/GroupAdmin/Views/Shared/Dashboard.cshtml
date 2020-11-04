@@ -15,11 +15,13 @@
     <script>
 
         $(document).ready(function () {
-            new registarionsGraph();
+            new registarionsGraph('@Model.GroupId');
         });
 
         class registarionsGraph {
-            constructor() {
+            constructor(groupId) {
+                this.groupId = groupId;
+
                 this.fromDate = moment.utc().startOf('month');
                 this.toDate = moment.utc().add(1, 'M').startOf('month');
 
@@ -86,16 +88,16 @@
             }
 
             getGraph() {
-                Api.get(`/api/GroupAdmin/Dashboard/GetActivityStatistics?from=${this.fromDate.toISOString()}&to=${this.toDate.toISOString()}`)
+                Api.get(`/api/GroupAdmin/${this.groupId}/Dashboard/GetActivityStatistics?from=${this.fromDate.toISOString()}&to=${this.toDate.toISOString()}`)
                     .done((data) => {
                         let series = data.map((e) => {
-                            let r = { x: e.date, y: e.count }
+                            let r = { x: e.dateTime, y: e.value }
 
                             return r;
                         });
 
                         this.chart.updateSeries([{
-                            name: 'Registarions',
+                            name: 'Activities',
                             data: series
                         }]);
 

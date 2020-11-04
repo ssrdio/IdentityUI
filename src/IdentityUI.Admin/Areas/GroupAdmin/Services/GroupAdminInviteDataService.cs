@@ -17,11 +17,12 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
             _groupUserStore = groupUserStore;
         }
 
-        public async Task<Result<GroupAdminInviteViewModel>> GetInviteViewModel()
+        public async Task<Result<GroupAdminInviteViewModel>> GetInviteViewModel(string groupId)
         {
             List<RoleListData> canAssigneRoles = await _groupUserStore.CanAssigneRoles();
 
             GroupAdminInviteViewModel groupAdminInviteViewModel = new GroupAdminInviteViewModel(
+                groupId: groupId,
                 canAssignRoles: canAssigneRoles);
 
             return Result.Ok(groupAdminInviteViewModel);

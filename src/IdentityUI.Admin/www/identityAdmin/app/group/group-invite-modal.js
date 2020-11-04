@@ -36,6 +36,7 @@
 
         this.$rolesSelect.select2({
             data: data,
+            placeholder: 'Select Group Role'
         });
 
         this.rolesSelectComponent.selectOption(null);
