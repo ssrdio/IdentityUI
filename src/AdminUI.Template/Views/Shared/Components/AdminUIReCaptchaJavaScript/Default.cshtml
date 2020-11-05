@@ -13,14 +13,16 @@
 
             $('form').submit(function (event) {
                 if (reCaptchaRetries > 5) {
+                    reCaptchaRetries = 0;
                     return;
                 }
 
-                $form = $(event.target);
-                let recapchatToken = $form.find('#recaptcha-token-input').val();
+                let $form = $(event.target);
+                let $reCaptchaInput = $form.find('#recaptcha-token-input');
+                let reCaptchaToken = $reCaptchaInput.val();
 
-                if (recapchatToken !== undefined && recapchatToken !== null && recapchatToken !== '') {
-                    reCaptchaRetries++;
+                if (reCaptchaToken !== undefined && reCaptchaToken !== null && reCaptchaToken !== '') {
+                    reCaptchaRetries = 0;
                     return;
                 }
 
@@ -28,10 +30,12 @@
                 grecaptcha.ready(() => {
                     grecaptcha.execute('6LdsvcYZAAAAAAU1gZ0rrAT8hf1H8ZJnhQ40nx-u', { action: '@Model.Action' })
                         .then((token) => {
-                            $('#recaptcha-token-input').val(token);
+                            $reCaptchaInput.val(token);
                             $form.trigger('submit');
                         });
                 });
+
+                reCaptchaRetries++;
             });
         })
     </script>

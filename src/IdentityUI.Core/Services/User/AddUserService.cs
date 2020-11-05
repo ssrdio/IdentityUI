@@ -199,6 +199,8 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Core.Models.Result.Result.Fail("no_invite", "No Invite");
             }
 
+            acceptInvite.Email = inviteEntity.Email;
+
             CommonUtils.Result.Result<AppUserEntity> addUserResult = await AddUser(acceptInvite, sendConfirmationMail: false, emailConfirmed: true);
             if(addUserResult.Failure)
             {

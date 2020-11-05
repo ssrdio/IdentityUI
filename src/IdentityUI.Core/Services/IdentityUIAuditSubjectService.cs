@@ -54,7 +54,7 @@ namespace SSRD.IdentityUI.Core.Services
 
         public override string GetGroupIdentifier()
         {
-            return _identityUIUserInfoService.GetUserId();
+            return _identityUIUserInfoService.GetGroupId();
         }
     }
 }
