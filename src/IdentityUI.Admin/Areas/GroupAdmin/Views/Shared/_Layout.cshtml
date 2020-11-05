@@ -1,5 +1,4 @@
 ﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
-@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
 
 <!DOCTYPE html>
 <html>
@@ -8,15 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - IdentityUI</title>
 
-    @if (!string.IsNullOrEmpty(_identityUIEndpoints.Value.FaviconIcno))
-    {
-        <link rel="icon" type="image/png" href="@_identityUIEndpoints.Value.FaviconIcno" />
-    }
-
-    @if (!string.IsNullOrEmpty(_identityUIEndpoints.Value.FaviconPng))
-    {
-        <link rel="icon" type="image/png" href="@_identityUIEndpoints.Value.FaviconPng" />
-    }
+    @await Component.InvokeAsync("AdminUIFavicon")
 
     <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />

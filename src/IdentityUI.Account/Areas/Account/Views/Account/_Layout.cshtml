@@ -1,6 +1,4 @@
-﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
-
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 
 <head>
@@ -13,15 +11,8 @@
 
     <!-- Disable tap highlight on IE -->
     <meta name="msapplication-tap-highlight" content="no">
-    @if (!string.IsNullOrEmpty(_identityUIEndpoints.Value.FaviconIcno))
-    {
-        <link rel="icon" type="image/png" href="@_identityUIEndpoints.Value.FaviconIcno" />
-    }
 
-    @if (!string.IsNullOrEmpty(_identityUIEndpoints.Value.FaviconPng))
-    {
-        <link rel="icon" type="image/png" href="@_identityUIEndpoints.Value.FaviconPng" />
-    }
+    @await Component.InvokeAsync("AdminUIFavicon")
 
     <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/adminUI/template/css/style.css" asp-append-version="true" />

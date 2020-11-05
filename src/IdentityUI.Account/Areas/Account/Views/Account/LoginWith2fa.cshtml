@@ -7,6 +7,8 @@
 @section script {
 
     <script type="text/javascript" src="~/account/app/components/twoFactor/2faFormScript.js"></script>
+
+    @await Component.InvokeAsync("AdminUIReCaptchaJavaScript", new { action = "login2fa" })
 }
 
 <div class="app-container">
@@ -24,6 +26,7 @@
                                         <span>Please write the code you received in the form below.</span>
                                     </h4>
                                 </div>
+                                @await Component.InvokeAsync("AdminUIReCaptchaInput")
                                 <input asp-for="RememberMe" type="hidden" />
                                 <div id="form2fa">
                                     <div class="form-row">

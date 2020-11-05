@@ -1,15 +1,15 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using SSRD.AdminUI.Template.Services;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Login.Models
 {
-    public class LoginRequest
+    public class LoginRequest : IReCaptchaRequest
     {
         public string UserName { get; set; }
         public string Password { get; set; }
         public bool RememberMe { get; set; }
+
+        public string ReCaptchaToken { get; set; }
     }
 
     internal class LoginRequestValidator : AbstractValidator<LoginRequest>

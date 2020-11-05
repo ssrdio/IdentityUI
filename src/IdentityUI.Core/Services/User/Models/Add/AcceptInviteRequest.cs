@@ -1,11 +1,14 @@
 ﻿using FluentValidation;
+using SSRD.AdminUI.Template.Services;
 using SSRD.IdentityUI.Core.Services.User.Models.Add;
 
 namespace SSRD.IdentityUI.Core.Services.User.Models
 {
-    public class AcceptInviteRequest : BaseRegisterRequest
+    public class AcceptInviteRequest : BaseRegisterRequest, IReCaptchaRequest
     {
         public string Code { get; set; }
+
+        public string ReCaptchaToken { get; set; }
     }
 
     internal class AcceptInviteRequestValidator : AbstractValidator<AcceptInviteRequest>

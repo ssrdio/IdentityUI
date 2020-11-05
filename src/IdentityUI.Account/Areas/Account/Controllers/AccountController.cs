@@ -17,6 +17,10 @@ using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
+using System.Net.Http;
+using System;
+using System.Collections.Generic;
+using SSRD.AdminUI.Template.Atttributes;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -68,6 +72,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest, string returnUrl = null)
         {
             if (!ModelState.IsValid)
@@ -116,6 +121,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "login2fa")]
         public async Task<IActionResult> LoginWith2fa(LoginWith2faRequest loginWith2FaRequest, string returnUrl = null)
         {
             if (!ModelState.IsValid)
@@ -154,6 +160,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "loginRecoveryCode")]
         public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeRequest loginWithRecoveryCode, string returnUrl = null)
         {
             if (!ModelState.IsValid)
@@ -216,6 +223,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "register")]
         public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
             if(!_identityUIEndpoints.RegisterEnabled)
@@ -268,6 +276,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "resetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
             if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
@@ -318,6 +327,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "recoverPassword")]
         public async Task<IActionResult> RecoverPassword(RecoverPasswordRequest request)
         {
             if (!_identityUIEndpoints.UseEmailSender.HasValue || !_identityUIEndpoints.UseEmailSender.Value)
@@ -383,6 +393,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "acceptInvite")]
         public async Task<IActionResult> AcceptInvite(AcceptInviteRequest acceptInvite)
         {
             if (!ModelState.IsValid)
@@ -475,6 +486,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "externalLoginRegister")]
         public async Task<IActionResult> ExternalLoginRegister(ExternalLoginRegisterRequest externalLoginRegisterRequest, string returnUrl)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -519,6 +531,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [ValidateReCaptcha(requiredScore: 0.8d, action: "registerGroup")]
         public async Task<IActionResult> RegisterGroup(RegisterGroupModel registerGroupModel)
         {
             if (!_identityUIEndpoints.GroupRegistrationEnabled)

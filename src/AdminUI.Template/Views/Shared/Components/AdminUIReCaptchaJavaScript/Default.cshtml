@@ -1,0 +1,38 @@
+﻿@model SSRD.AdminUI.Template.Views.Shared.Components.AdminUIReCaptchaJavaScript.AdminUIReCaptchaJavaScriptViewComponent.ViewModel
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.AdminUI.Template.Models.ReCaptchaOptions> _reCaptchaOptions;
+
+@if (_reCaptchaOptions.Value.UseReCaptcha)
+{
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdsvcYZAAAAAAU1gZ0rrAT8hf1H8ZJnhQ40nx-u"></script>
+
+    <script>
+        $(document).ready(() => {
+
+            var reCaptchaRetries = 0;
+
+            $('form').submit(function (event) {
+                if (reCaptchaRetries > 5) {
+                    return;
+                }
+
+                $form = $(event.target);
+                let recapchatToken = $form.find('#recaptcha-token-input').val();
+
+                if (recapchatToken !== undefined && recapchatToken !== null && recapchatToken !== '') {
+                    reCaptchaRetries++;
+                    return;
+                }
+
+                event.preventDefault();
+                grecaptcha.ready(() => {
+                    grecaptcha.execute('6LdsvcYZAAAAAAU1gZ0rrAT8hf1H8ZJnhQ40nx-u', { action: '@Model.Action' })
+                        .then((token) => {
+                            $('#recaptcha-token-input').val(token);
+                            $form.trigger('submit');
+                        });
+                });
+            });
+        })
+    </script>
+}

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SSRD.AdminUI.Template.Models;
 using SSRD.Audit.Data;
 using SSRD.Audit.Extensions;
 using SSRD.CommonUtils.Specifications.Interfaces;
@@ -84,6 +85,12 @@ namespace SSRD.IdentityUI.Core
                 options.EmailSender = identityUIOptions.EmailSender;
             });
 
+            services.Configure<ReCaptchaOptions>(options =>
+            {
+                options.SiteKey = identityUIOptions.ReCaptcha?.SiteKey;
+                options.SiteSecret = identityUIOptions.ReCaptcha?.SiteSecret;
+            });
+
             DatabaseOptions databaseOptions = new DatabaseOptions
             {
                 Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory,
@@ -134,10 +141,24 @@ namespace SSRD.IdentityUI.Core
                 options.ResetPassword = identityManagementEndpoints.ResetPassword;
                 options.AcceptInvite = identityManagementEndpoints.AcceptInvite;
 
+                options.ProfileImage = identityManagementEndpoints.ProfileImage;
+                options.Logo = identityManagementEndpoints.Logo;
+
                 options.RegisterEnabled = identityManagementEndpoints.RegisterEnabled;
+                options.GroupRegistrationEnabled = identityManagementEndpoints.GroupRegistrationEnabled;
+
+                options.AuthenticatorIssuer = identityManagementEndpoints.AuthenticatorIssuer;
+
                 options.UseEmailSender = identityManagementEndpoints.UseEmailSender;
                 options.UseSmsGateway = identityManagementEndpoints.UseSmsGateway;
                 options.InviteValidForTimeSpan = identityManagementEndpoints.InviteValidForTimeSpan;
+
+                options.BypassTwoFactorOnExternalLogin = identityManagementEndpoints.BypassTwoFactorOnExternalLogin;
+                options.UseEmailAsUsername = identityManagementEndpoints.UseEmailAsUsername;
+                options.ShowAuditToUser = identityManagementEndpoints.ShowAuditToUser;
+                options.CanChangeGroupName = identityManagementEndpoints.CanChangeGroupName;
+                options.CanRemoveGroup = identityManagementEndpoints.CanRemoveGroup;
+                options.CanRemoveUser = identityManagementEndpoints.CanRemoveUser;
             });
 
             IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, databaseOptions, configuration);
