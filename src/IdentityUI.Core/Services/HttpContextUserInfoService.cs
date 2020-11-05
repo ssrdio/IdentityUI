@@ -55,16 +55,87 @@ namespace SSRD.IdentityUI.Core.Services
                 }
             }
 
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/GroupAdmin")
+                || _httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/api/GroupAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.GetImpersonatorId(_identityUIClaimOptions);
+                }
+            }
+
             return _httpContextAccessor.HttpContext.User.GetUserId(_identityUIClaimOptions);
+        }
+
+        public string GetUsername()
+        {
+            ClaimsPrincipal user = _httpContextAccessor.HttpContext.User;
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/IdentityAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.GetImpersonatorUsername(_identityUIClaimOptions);
+                }
+            }
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/GroupAdmin")
+                || _httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/api/GroupAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.GetImpersonatorUsername(_identityUIClaimOptions);
+                }
+            }
+
+            return user.GetUsername(_identityUIClaimOptions);
         }
 
         public bool HasGroupPermission(string permission)
         {
+            ClaimsPrincipal user = _httpContextAccessor.HttpContext.User;
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/IdentityAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.ImpersonatorHasGroupPermission(permission, _identityUIClaimOptions);
+                }
+            }
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/GroupAdmin")
+                || _httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/api/GroupAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.ImpersonatorHasGroupPermission(permission, _identityUIClaimOptions);
+                }
+            }
+
             return _httpContextAccessor.HttpContext.User.HasGroupPermission(permission, _identityUIClaimOptions);
         }
 
         public bool HasPermission(string permission)
         {
+            ClaimsPrincipal user = _httpContextAccessor.HttpContext.User;
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/IdentityAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.ImpersonatorHasPermission(permission, _identityUIClaimOptions);
+                }
+            }
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/GroupAdmin")
+                || _httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/api/GroupAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.ImpersonatorHasPermission(permission, _identityUIClaimOptions);
+                }
+            }
+
             return _httpContextAccessor.HttpContext.User.HasPermission(permission, _identityUIClaimOptions);
         }
     }

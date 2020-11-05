@@ -1,6 +1,6 @@
 ﻿@model SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User.GroupAdminUserIndexViewModel
 
-@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
+@inject SSRD.IdentityUI.Core.Interfaces.Services.IIdentityUIUserInfoService _identityUIUserInfoService;
 @inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
 
 @{
@@ -16,13 +16,13 @@
         $(document).ready(function () {
             new GroupUsers(
                 '@Model.GroupId',
-                '@User.GetUserId(_identityUIClaimOptions.Value)',
+                '@_identityUIUserInfoService.GetUserId()',
                 '@Json.Serialize(Model.CanMangeGroupRoles)',
                 '@Json.Serialize(Model.CanAssigneGroupRoles)',
-                '@User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES, _identityUIClaimOptions.Value)' === 'True',
-                '@User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS, _identityUIClaimOptions.Value)' === 'True',
+                '@_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True',
+                '@_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True',
                 '@Model.CanChangeOwnRole' === 'True',
-                '@User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ACCESS_USER_DETAILS, _identityUIClaimOptions.Value)' === 'True')
+                '@_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ACCESS_USER_DETAILS)' === 'True')
         });
 
         class GroupUsers {
@@ -479,12 +479,12 @@
 
 @section modal{
     <div id="modal-container">
-        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS, _identityUIClaimOptions.Value))
+        @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
         {
             @await Component.InvokeAsync("AddExistingUserToGroupModal")
         }
 
-        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value)
+        @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)
            && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
         {
             @await Component.InvokeAsync("InviteToGroupModal")
@@ -506,12 +506,12 @@
                     <h5 class="card-title">
                         Users
                     </h5>
-                    @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS, _identityUIClaimOptions.Value))
+                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
                     {
                         <button id="add-existing-user-button" class="header-button">Add Existing User</button>
                     }
 
-                    @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value)
+                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)
                       && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
                     {
                         <button id="invite-user-button" class="header-button">Invite User</button>

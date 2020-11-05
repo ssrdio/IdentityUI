@@ -14,5 +14,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
 
         bool HasPermission(string permission);
         bool HasGroupPermission(string permission);
+
+        string GetUsername();
     }
 }

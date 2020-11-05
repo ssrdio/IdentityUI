@@ -61,7 +61,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
                 return Result.Fail(FAILED_TO_ADD_SESSION);
             }
 
-            string loggedInUserId = _identityUIUserInfoService.GetGroupId();
+            string loggedInUserId = _identityUIUserInfoService.GetUserId();
 
             appUser.ImpersonatorId = loggedInUserId;
 
