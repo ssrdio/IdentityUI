@@ -4,7 +4,7 @@
 
 @if (_reCaptchaOptions.Value.UseReCaptcha)
 {
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdsvcYZAAAAAAU1gZ0rrAT8hf1H8ZJnhQ40nx-u"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=@_reCaptchaOptions.Value.SiteKey"></script>
 
     <script>
         $(document).ready(() => {
@@ -28,7 +28,7 @@
 
                 event.preventDefault();
                 grecaptcha.ready(() => {
-                    grecaptcha.execute('6LdsvcYZAAAAAAU1gZ0rrAT8hf1H8ZJnhQ40nx-u', { action: '@Model.Action' })
+                    grecaptcha.execute('@_reCaptchaOptions.Value.SiteKey', { action: '@Model.Action' })
                         .then((token) => {
                             $reCaptchaInput.val(token);
                             $form.trigger('submit');
