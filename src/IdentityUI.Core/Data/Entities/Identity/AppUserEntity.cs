@@ -49,7 +49,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
         public string ImpersonatorId { get; set; }
         public DateTimeOffset? _DeletedDate { get; set; }
 
-        protected AppUserEntity()
+        public AppUserEntity()
         {
         }
 

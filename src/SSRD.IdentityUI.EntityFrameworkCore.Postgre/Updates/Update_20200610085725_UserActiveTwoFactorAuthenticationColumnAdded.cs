@@ -1,5 +1,7 @@
-﻿using SSRD.IdentityUI.Core.Data.Entities.Identity;
+﻿using Microsoft.EntityFrameworkCore;
+using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
+using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using SSRD.IdentityUI.EntityFrameworkCore.Postgre;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,34 +14,12 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.Postgre.Updates
 
         public override void AfterSchemaChange(IdentityDbContext context)
         {
-            int start = 0;
-            int take = 1000;
+            RawSqlString updateScript = $@"
+                UPDATE ""Users""
+                SET ""TwoFactor""={(int)TwoFactorAuthenticationType.Authenticator}
+                WHERE ""TwoFactorEnabled""=true";
 
-            while (true)
-            {
-                List<AppUserEntity> appUsers = context.Users
-                    .Where(x => x.TwoFactorEnabled == true)
-                    .Skip(start)
-                    .Take(take)
-                    .ToList();
-
-                foreach (AppUserEntity appUser in appUsers)
-                {
-                    appUser.TwoFactor = Core.Services.Auth.TwoFactorAuth.Models.TwoFactorAuthenticationType.Authenticator;
-                    context.Users.Update(appUser);
-                }
-
-                int changes = context.SaveChanges();
-                if (changes != appUsers.Count)
-                {
-                    throw new System.Exception("Failed to update users authenticator");
-                }
-
-                if (appUsers.Count != take)
-                {
-                    break;
-                }
-            }
+            context.Database.ExecuteSqlCommand(updateScript);
         }
     }
 }

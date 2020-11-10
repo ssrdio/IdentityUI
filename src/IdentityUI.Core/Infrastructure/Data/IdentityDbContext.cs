@@ -83,7 +83,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         public override int SaveChanges()
         {
             SoftDelete();
-            AddAuditInfo();
+            AddTimestampInfo();
 
             ProccessChangeTrackerResult proccessChangeTrackerResult = ChangeTrackerAuditService.ProccessChangeTracker(ChangeTracker);
             if(proccessChangeTrackerResult.RequiresCustomBatch)
@@ -137,7 +137,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         public async override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             SoftDelete();
-            AddAuditInfo();
+            AddTimestampInfo();
 
             ProccessChangeTrackerResult proccessChangeTrackerResult = ChangeTrackerAuditService.ProccessChangeTracker(ChangeTracker);
             if (proccessChangeTrackerResult.RequiresCustomBatch)
@@ -196,7 +196,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             }
         }
 
-        private void AddAuditInfo()
+        private void AddTimestampInfo()
         {
             IEnumerable<EntityEntry> entities = ChangeTracker
                 .Entries()

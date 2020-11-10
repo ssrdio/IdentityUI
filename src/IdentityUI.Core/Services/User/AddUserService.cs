@@ -379,6 +379,18 @@ namespace SSRD.IdentityUI.Core.Services.User
                 validationResult = _baseRegisterValidator.Validate(baseRegisterRequest, ruleSet: BaseRegisterRequestValidator.REQUIRE_EMAIL_USERNAME);
             }
 
+            if(setPassword)
+            {
+                ValidationResult setPasswordValidationResult = _baseRegisterValidator.Validate(baseRegisterRequest, ruleSet: BaseRegisterRequestValidator.REQUIRE_PASSWORD);
+                if(!setPasswordValidationResult.IsValid)
+                {
+                    foreach(ValidationFailure setPasswordError in setPasswordValidationResult.Errors)
+                    {
+                        validationResult.Errors.Add(setPasswordError);
+                    }
+                }
+            }
+
             if (!validationResult.IsValid)
             {
                 _logger.LogError($"Invalid {typeof(BaseRegisterRequest).Name} model");
