@@ -11,7 +11,7 @@
 body {
     color: rgb(80, 80, 80);
     font-weight: 400;
-    font-family: "Segoe UI";
+    font-family: 'Open Sans', sans-serif;
 }
 
 
@@ -59,9 +59,9 @@ body {
     width: calc(275px - 130px);
 }
 
-    .brand-logo img {
-        width: auto !important;
-    }
+.brand-logo img {
+    width: auto !important;
+}
 
 .navbar-toggler {
     color: white;
@@ -125,7 +125,7 @@ body {
 }
 
 .footer {
-    font-family: "Segoe UI";
+    font-family: 'Open Sans', sans-serif;
     font-weight: bold;
     padding: 20px 2.45rem;
 }
