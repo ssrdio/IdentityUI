@@ -462,6 +462,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IImpersonateService, ImpersonateService>();
 
             builder.Services.AddScoped<IIdentityUIUserInfoService, HttpContextUserInfoService>();
+
+            builder.Services.AddScoped<IDefaultProfileImageService, IdentityUIDefaultProfileImageService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
