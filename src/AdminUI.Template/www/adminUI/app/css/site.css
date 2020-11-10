@@ -121,7 +121,8 @@ table.dataTableClass > tbody > tr > td {
 .profile-image-sm {
     width: 40px;
     height: 40px;
-/*    opacity: 0.35;*/
+    object-fit: cover
+    /*    opacity: 0.35;*/
 }
 
 .dot-loader,
@@ -310,5 +311,9 @@ table.dataTableClass > tbody > tr > td {
 
 .sidebar-icon-container {
     min-width: 20px;
+}
+
+.vertical-textarea {
+    resize: vertical;
 }
 

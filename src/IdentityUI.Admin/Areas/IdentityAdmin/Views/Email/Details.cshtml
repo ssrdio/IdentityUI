@@ -9,61 +9,97 @@
     ViewData["Title"] = "Email";
 }
 
+@section style {
+<style>
+    .preview-iframe {
+        border: none;
+        min-height: 400px;
+        max-height: 600px;
+        padding: 0px;
+    }
+</style>
+}
+
 @section script{
     <script src="~/identityAdmin/app/setting/send-test-email.js"></script>
     <script>
-        $(document).ready(function () {
-
-            const statusAlert = new StatusAlertComponent('#status-alert-container');
-            new SendTestEmailModal(@Model.Id, '@Model.Email', () => {
-                statusAlert.hide();
-                statusAlert.showSuccess('Test mail was sent');
-            });
+        $(document).ready(() => {
+            new EmailDetails();
         });
+
+        class EmailDetails {
+            constructor() {
+                this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                this.$previewModal = $('#email-preview-modal');
+
+                this.$bodyTextArea = $('#body-textarea');
+                this.$previewIframe = $('#preview-iframe');
+
+                $('#preview-button').on('click', () => {
+                    this.showPreview();
+                });
+
+                this.$previewModal.on('hidden.bs.modal', () => {
+                    this.hidePreview();
+                });
+
+                @if (Model.StatusAlert != null)
+                {
+                    <text>
+                        if ('@Model.StatusAlert.Success' === 'True')
+                        {
+                            this.statusAlert.showSuccess(@Json.Serialize(Model.StatusAlert.Messages));
+                        }
+                        else
+                        {
+                            this.statusAlert.showError(@Json.Serialize(Model.StatusAlert.Messages));
+                        }
+                    </text>
+                }
+            }
+
+            showPreview() {
+                const body = this.$bodyTextArea.val();
+
+                var iDoc = this.$previewIframe[0].contentDocument;
+
+                iDoc.open();
+                iDoc.write(body);
+                iDoc.close();
+
+                this.$previewModal.modal('show');
+            }
+
+            hidePreview() {
+                this.$previewModal.modal('hide');
+            }
+        }
     </script>
 
-    @if (Model.StatusAlert != null)
-    {
-        <script>
-            $(document).ready(function () {
-                var x = document.getElementById("snackbar");
-                x.className = "show";
-                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-            });
-        </script>
-    }
 }
+
+<div id="email-preview-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="email-preview-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Email Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body audit-modal-body">
+                <iframe id="preview-iframe" title="Email Preview" class="col-12 preview-iframe"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div>
     @(await Component.InvokeAsync("SettingMenu", new SettingMenuViewComponent.ViewModel("Email", SettingMenuViewComponent.TabSelected.Email)))
 
     <div id="status-alert-container">
-        <div id="snackbar" class="snackbar">
-            <div class="alert-success mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && Model.StatusAlert.Success) ? "" : "none")">
-                <div class="alertMessage" style="width: 80%;display: inline-block;">
-                    @if ((Model.StatusAlert != null && Model.StatusAlert.Success))
-                    {
-                        @foreach (string message in Model.StatusAlert.Messages)
-                        {
-                            @message <br />
-                        }
-                    }
-                </div>
-                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
-            </div>
-            <div class="alert-danger mb-3 pl-3 pb-3 pt-3 no-margin" style="display: @((Model.StatusAlert != null && !Model.StatusAlert.Success) ? "" : "none")">
-                <div class="alertMessage" style="width: 80%;display: inline-block;">
-                    @if ((Model.StatusAlert != null && !Model.StatusAlert.Success))
-                    {
-                        @foreach (string message in Model.StatusAlert.Messages)
-                        {
-                            @message <br />
-                        }
-                    }
-                </div>
-                <button type="button" class="close mr-3" data-dismiss="alert" aria-hidden="true">&times;</button>
-            </div>
-        </div>
+        @await Component.InvokeAsync("IdentityStatusAlertJs")
     </div>
 
     @if (Model.UseEmailSender)
@@ -95,8 +131,11 @@
                         <span asp-validation-for="Subject" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="Body" class="control-label"></label>
-                        <textarea asp-for="Body" class="form-control"></textarea>
+                        <div class="d-flex">
+                            <label asp-for="Body" class="control-label"></label>
+                            <button id="preview-button" type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Preview</button>
+                        </div>
+                        <textarea id="body-textarea" asp-for="Body" class="form-control vertical-textarea" rows="10"></textarea>
                         <span asp-validation-for="Body" class="text-danger"></span>
                     </div>
                     <div class="button-holder">
