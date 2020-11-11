@@ -21,15 +21,20 @@
 }
 
 @section script{
-    <script src="~/identityAdmin/app/setting/send-test-email.js"></script>
     <script>
         $(document).ready(() => {
-            new EmailDetails();
+            new EmailDetails(@Model.Id);
         });
 
         class EmailDetails {
-            constructor() {
+            constructor(id) {
+                this.id = id;
+
                 this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                this.sendTestEmailModal = new SendTestEmailModal(id, () => {
+                    this.statusAlert.showSuccess('Test email was sent');
+                });
 
                 this.$previewModal = $('#email-preview-modal');
 
@@ -42,6 +47,10 @@
 
                 this.$previewModal.on('hidden.bs.modal', () => {
                     this.hidePreview();
+                });
+
+                $('#send-test-email').on('click', () => {
+                    this.sendTestEmailModal.showModal();
                 });
 
                 @if (Model.StatusAlert != null)
@@ -73,6 +82,67 @@
 
             hidePreview() {
                 this.$previewModal.modal('hide');
+            }
+        }
+
+        class SendTestEmailModal {
+            constructor(emailId, successCallback) {
+                this.emailId = emailId;
+                this.successCallback = successCallback;
+
+                this.$sendTesEmailModal = $('#send-test-email-modal');
+                this.$sendTesEmailModal.on('hidden.bs.modal', () => {
+                    this.hideErrors();
+                });
+
+                const $sendTestEmailForm = this.$sendTesEmailModal.find('#send-test-email-form');
+                this.emailInputComponent = new InputComponent($sendTestEmailForm, '#email-input');
+
+                this.errorAlert = new ErrorAlert($sendTestEmailForm);
+
+                this.$sendTesEmailModal.on('click', 'button.confirm', () => {
+                    this.sendTestEmail();
+                });
+            }
+
+            showModal() {
+                this.$sendTesEmailModal.modal('show');
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.errorAlert.showErrors(errors['']);
+                }
+
+                this.emailInputComponent.showError(errors.Email);
+            }
+
+            hideErrors() {
+                this.errorAlert.hide();
+                this.emailInputComponent.hideError();
+            }
+
+            getData() {
+                return {
+                    email: this.emailInputComponent.value()
+                };
+            }
+
+            sendTestEmail() {
+                this.hideErrors();
+                const data = this.getData();
+
+                Api.post(`/IdentityAdmin/Setting/Email/SendTest/${this.emailId}`, data)
+                    .done(() => {
+                        this.$sendTesEmailModal.modal('hide');
+                        if (this.successCallback) {
+                            this.successCallback();
+                        }
+                    })
+                    .fail((resp) => {
+                        //this.emailInputComponent.value(null);
+                        this.showErrors(resp.responseJSON);
+                    });
             }
         }
     </script>
