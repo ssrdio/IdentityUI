@@ -6,6 +6,8 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User
 {
     public class GroupAdminUserDetailsModel
     {
+        public string UserId { get; set; }
+
         public long GroupUserId { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
@@ -19,6 +21,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User
         public string LockedOutTo { get; set; }
 
         public GroupAdminUserDetailsModel(
+            string userId,
             long groupUserId,
             string username,
             string email,
@@ -31,6 +34,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User
             bool enabled,
             string lockedOutTo)
         {
+            UserId = userId;
             GroupUserId = groupUserId;
             Username = username;
             Email = email;

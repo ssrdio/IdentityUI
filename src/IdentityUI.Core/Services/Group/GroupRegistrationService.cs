@@ -106,6 +106,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
         {
             IBaseSpecification<RoleEntity, RoleEntity> getGroupAdminRoleSpecification = SpecificationBuilder
                 .Create<RoleEntity>()
+                .Where(x => x.Type == Data.Enums.Entity.RoleTypes.Group)
                 .WithName(IdentityUIRoles.GROUP_ADMIN)
                 .Build();
 
@@ -116,8 +117,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Result.Fail(ROLE_NOT_FOUND);
             }
 
-
-            Result result = await _groupUserService.AddUserToGroup(userId, groupId, role);
+            Result result = await _groupUserService.AddUserToGroupWithValidation(userId, groupId, role.Id);
             if(result.Failure)
             {
                 return Result.Fail(result);

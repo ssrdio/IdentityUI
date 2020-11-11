@@ -4,6 +4,8 @@
     SidebarSelection.SelectedOption = SidebarOptions.Group;
 }
 
+@inject SSRD.IdentityUI.Core.Interfaces.Services.IIdentityUIUserInfoService _identityUIUserInfoService;
+
 @{
     ViewData["Title"] = "Groups";
 }
@@ -125,7 +127,7 @@
 
 @section modal{
     <div id="modal-container">
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
+        @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
         {
             @await Component.InvokeAsync("InviteToGroupModal")
         }
@@ -148,7 +150,7 @@
                     <h5 class="card-title">
                         Invites
                     </h5>
-                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
+                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS))
                     {
                         <button id="invite-user-button" class="header-button">Invite User</button>
                     }

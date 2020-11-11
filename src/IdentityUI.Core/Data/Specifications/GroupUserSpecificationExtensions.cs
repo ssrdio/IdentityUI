@@ -21,5 +21,22 @@ namespace SSRD.IdentityUI.Core.Data.Specifications
 
             return builder;
         }
+
+        public static IBaseSpecificationBuilder<GroupUserEntity> SearchByUsernameEmailId(this IBaseSpecificationBuilder<GroupUserEntity> builder, string search)
+        {
+            if (string.IsNullOrEmpty(search))
+            {
+                return builder;
+            }
+
+            search = search.ToUpper();
+
+            builder = builder.Where(x => 
+                x.User.NormalizedUserName.Contains(search)
+                || x.User.NormalizedEmail.Contains(search)
+                || x.User.Id.ToUpper().Contains(search));
+
+            return builder;
+        }
     }
 }

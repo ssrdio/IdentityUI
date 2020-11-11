@@ -457,13 +457,13 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddScoped<IGroupRegistrationService, GroupRegistrationService>();
 
-            builder.Services.AddScoped<IAddUserCallbackService, NullAddUserCallback>();
-
             builder.Services.AddScoped<IImpersonateService, ImpersonateService>();
 
             builder.Services.AddScoped<IIdentityUIUserInfoService, HttpContextUserInfoService>();
 
             builder.Services.AddScoped<IDefaultProfileImageService, IdentityUIDefaultProfileImageService>();
+
+            builder.Services.AddScoped<ICanLoginService, CanLoginService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System;
 using System.Linq;
@@ -25,13 +26,15 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            bool isIdentityAdmin = context.HttpContext.User.HasPermission(_requirePermission);
+            IIdentityUIUserInfoService identityUIUserInfoService = context.HttpContext.RequestServices.GetRequiredService<IIdentityUIUserInfoService>();
+
+            bool isIdentityAdmin = identityUIUserInfoService.HasPermission(_requirePermission);
             if (isIdentityAdmin)
             {
                 return;
             }
 
-            bool isInRequiredRole = context.HttpContext.User.HasGroupPermission(_requirePermission);
+            bool isInRequiredRole = identityUIUserInfoService.HasGroupPermission(_requirePermission);
             if (!isInRequiredRole)
             {
                 context.Result = new ForbidResult();

@@ -138,5 +138,29 @@ namespace SSRD.IdentityUI.Core.Services
 
             return _httpContextAccessor.HttpContext.User.HasPermission(permission, _identityUIClaimOptions);
         }
+
+        public bool HasRole(string role)
+        {
+            ClaimsPrincipal user = _httpContextAccessor.HttpContext.User;
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/IdentityAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.ImpersonatorHasRole(role, _identityUIClaimOptions);
+                }
+            }
+
+            if (_httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/GroupAdmin")
+                || _httpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/api/GroupAdmin"))
+            {
+                if (_httpContextAccessor.HttpContext.User.IsImpersonized(_identityUIClaimOptions))
+                {
+                    return user.ImpersonatorHasRole(role, _identityUIClaimOptions);
+                }
+            }
+
+            return _httpContextAccessor.HttpContext.User.HasRole(role, _identityUIClaimOptions);
+        }
     }
 }

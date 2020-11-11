@@ -83,6 +83,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
             Attributes = attributes;
         }
 
+        [Obsolete("Use ICanLoginService")]
         public bool CanLogin()
         {
             if(!Enabled)

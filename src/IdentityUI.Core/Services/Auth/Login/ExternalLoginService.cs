@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,7 +12,6 @@ using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Login.Models;
-using SSRD.IdentityUI.Core.Services.Identity;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Login
@@ -26,6 +24,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
         private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
         private readonly IUrlGenerator _urlGenerator;
         private readonly ISessionService _sessionService;
+        private readonly ICanLoginService _canLoginService;
 
         private readonly IdentityUIEndpoints _identityOptions;
 
@@ -39,6 +38,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
             IIdentityUIUserInfoService identityUIUserInfoService,
             IUrlGenerator urlGenerator,
             ISessionService sessionService,
+            ICanLoginService canLoginService,
             IOptions<IdentityUIEndpoints> identityOptions,
             IValidator<ExternalLoginRequest> externalLoginRequestValidator,
             ILogger<ExternalLoginService> logger)
@@ -49,6 +49,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
             _identityUIUserInfoService = identityUIUserInfoService;
             _urlGenerator = urlGenerator;
             _sessionService = sessionService;
+            _canLoginService = canLoginService;
 
             _identityOptions = identityOptions.Value;
 
@@ -103,7 +104,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.Expired);
             }
 
-            if (!appUser.CanLogin())
+            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
+            if (canLoginResult.Failure)
             {
                 _logger.LogInformation($"User is not allowed to login. User {appUser.Id}");
                 return Result.Fail<SignInResult>("no_user", "No user");

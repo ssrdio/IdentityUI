@@ -14,6 +14,26 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.Group
         Models.Result.Result Remove(long groupUserId);
         Models.Result.Result Leave(string userId, string groupId);
 
-        Task<Result> AddUserToGroup(string userId, string groupId, RoleEntity roleEntity);
+        Task<Result> ValidateGroup(string groupId);
+        Task<Result> ValidateUser(string id);
+        Task<Result> RoleIsValid(string roleId);
+        Task<Result> CanAssigneRole(string roleId);
+
+        /// <summary>
+        /// This method validates all parameters
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="groupId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        Task<Result<GroupUserEntity>> AddUserToGroupWithValidation(string userId, string groupId, string roleId);
+        /// <summary>
+        /// This method requires that you already validated all parameters
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="groupId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        Task<Result<GroupUserEntity>> AddUserToGroupWithoutValidation(string userId, string groupId, string roleId);
     }
 }

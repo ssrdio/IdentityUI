@@ -89,8 +89,18 @@
                     },
                     columns: [
                         {
+                            data: "userId",
+                            title: "Id",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
                             data: "username",
                             title: "Username",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: "email",
+                            title: "Email",
                             render: $.fn.dataTable.render.text()
                         },
                         {
@@ -170,7 +180,7 @@
                         {
                             data: null,
                             className: "dt-head-center",
-                            width: "220px",
+                            width: "250px",
                             mRender: (data) => {
                                 if (data.userId === this.userId) {
                                     if (this.canAccessUserDetails) {
@@ -500,7 +510,7 @@
 
 <div>
     <div class="tab-content">
-        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="main-card mb-3 card fullWidthCard">
             <div class="card-body">
                 <div class="card-title-space">
                     <h5 class="card-title">
@@ -512,7 +522,7 @@
                     }
 
                     @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)
-                      && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
+                     && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
                     {
                         <button id="invite-user-button" class="header-button">Invite User</button>
                     }

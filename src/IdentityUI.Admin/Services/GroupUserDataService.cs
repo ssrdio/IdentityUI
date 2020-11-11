@@ -52,12 +52,13 @@ namespace SSRD.IdentityUI.Admin.Services
             ISelectSpecificationBuilder<GroupUserEntity, GroupUserTableModel> specificationBuilder = SpecificationBuilder
                 .Create<GroupUserEntity>()
                 .Where(x => x.GroupId == groupId)
-                .SearchByUsername(request.Search)
+                .SearchByUsernameEmailId(request.Search)
                 .OrderByDessending(x => x._CreatedDate)
                 .Select(x => new GroupUserTableModel(
                     x.Id,
                     x.UserId,
                     x.User.UserName,
+                    x.User.Email,
                     x.RoleId,
                     x.Role.Name));
 

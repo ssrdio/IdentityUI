@@ -26,6 +26,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
                 .Create<GroupUserEntity>()
                 .Where(x => x.Id == groupUserId)
                 .Select(x => new GroupAdminUserDetailsModel(
+                    x.User.Id,
                     x.Id,
                     x.User.UserName,
                     x.User.Email,

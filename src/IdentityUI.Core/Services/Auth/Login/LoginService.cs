@@ -1,19 +1,13 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Enums.Entity;
-using SSRD.IdentityUI.Core.Data.Models;
-using SSRD.IdentityUI.Core.Data.Specifications;
-using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Login.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using Microsoft.AspNetCore.Http;
@@ -28,6 +22,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
         private readonly ISessionService _sessionService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICanLoginService _canLoginService;
 
         private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IValidator<LoginWith2faRequest> _lginwith2faValidator;
@@ -40,6 +35,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
             UserManager<AppUserEntity> userManager,
             ISessionService sessionService,
             IHttpContextAccessor httpContextAccessor,
+            ICanLoginService canLoginService,
             IValidator<LoginRequest> loginValidator,
             IValidator<LoginWith2faRequest> loginWith2faValidator,
             IValidator<LoginWithRecoveryCodeRequest> loginWithRecoveryCodeValidator,
@@ -50,6 +46,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
             _httpContextAccessor = httpContextAccessor;
             _sessionService = sessionService;
+            _canLoginService = canLoginService;
 
             _loginValidator = loginValidator;
             _lginwith2faValidator = loginWith2faValidator;
@@ -89,7 +86,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.Expired);
             }
 
-            if (!appUser.CanLogin())
+            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
+            if (canLoginResult.Failure)
             {
                 _logger.LogInformation($"User is not allowed to login. User {appUser.Id}");
                 return SignInResult.Failed;
@@ -162,8 +160,9 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.SecurityCodeChange);
             }
 
-            if (!appUser.CanLogin())
-            {
+            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
+            if (canLoginResult.Failure)
+            { 
                 _logger.LogInformation($"User is not allowd to login. User {appUser.Id}");
                 return Result.Fail("error", "Error");
             }
@@ -201,7 +200,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 return SignInResult.Failed;
             }
 
-            if (!appUser.CanLogin())
+            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
+            if (canLoginResult.Failure)
             {
                 _logger.LogInformation($"User is not allowd to login. User {appUser.Id}");
                 return SignInResult.Failed;
@@ -243,6 +243,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 _logger.LogWarning($"Invalid {nameof(LoginWithRecoveryCodeRequest)} model");
                 return Result.Fail(validationResult.Errors);
             }
+
+            //TODO: check if user can login
 
             SignInResult loginResult = await _signInManager.TwoFactorRecoveryCodeSignInAsync(loginWithRecoveryCode.RecoveryCode);
             if(!loginResult.Succeeded)
