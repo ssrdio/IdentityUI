@@ -221,7 +221,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             if(inviteEntity.GroupId != null)
             {
-                Result addToGroupResult = await _groupUserService.AddUserToGroupWithValidation(appUser.Id, inviteEntity.GroupId, inviteEntity.GroupRoleId);
+                Result addToGroupResult = await _groupUserService.AddUserToGroupWithoutValidation(appUser.Id, inviteEntity.GroupId, inviteEntity.GroupRoleId);
             }
 
             if(inviteEntity.RoleId != null)
@@ -254,7 +254,12 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Core.Models.Result.Result.Fail("failed_to_get_external_login_info", "Failed to get external login info");
             }
 
-            CommonUtils.Result.Result<AppUserEntity> addUserResult = await AddUser(externalLoginRegisterRequest, setPassword: false);
+            //TODO: do not confirm. don't require confirmed emails for external login users
+            CommonUtils.Result.Result<AppUserEntity> addUserResult = await AddUser(
+                externalLoginRegisterRequest,
+                setPassword: false,
+                sendConfirmationMail: false,
+                emailConfirmed: true);
             if(addUserResult.Failure)
             {
                 return addUserResult.ToOldResult();
@@ -387,6 +392,8 @@ namespace SSRD.IdentityUI.Core.Services.User
             {
                 baseRegisterRequest.Username = baseRegisterRequest.Email;
             }
+
+            baseRegisterRequest.Username.Trim();
 
             Result result = await BeforeUserAdd(baseRegisterRequest);
             if(result.Failure)

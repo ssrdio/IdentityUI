@@ -145,7 +145,8 @@ namespace SSRD.IdentityUI.Core
                 options.AcceptInvite = identityManagementEndpoints.AcceptInvite;
 
                 options.ProfileImage = identityManagementEndpoints.ProfileImage;
-                options.Logo = identityManagementEndpoints.Logo;
+                options.AdminLogo = identityManagementEndpoints.AdminLogo;
+                options.AccountSettingsLogo = identityManagementEndpoints.AccountSettingsLogo;
 
                 options.RegisterEnabled = identityManagementEndpoints.RegisterEnabled;
                 options.GroupRegistrationEnabled = identityManagementEndpoints.GroupRegistrationEnabled;

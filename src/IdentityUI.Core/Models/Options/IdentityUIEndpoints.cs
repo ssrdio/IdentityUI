@@ -19,7 +19,8 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public string AcceptInvite { get; set; } = "/Account/AcceptInvite";
 
         public string ProfileImage { get; set; } = "/Account/Manage/GetProfileImage";
-        public string Logo { get; set; } = "/adminUI/template/images/logo.png";
+        public string AdminLogo { get; set; } = "/adminUI/template/images/logo.png";
+        public string AccountSettingsLogo { get; set; } = "/adminUI/template/images/logo.png";
 
         public bool RegisterEnabled { get; set; } = true;
         public bool GroupRegistrationEnabled { get; set; } = true;
