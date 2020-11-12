@@ -2,14 +2,11 @@
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.AspNetCore.Hosting;
+using System.Text;
 
 #if NET_CORE3
 using Microsoft.Extensions.Hosting;
@@ -17,12 +14,13 @@ using Microsoft.Extensions.Hosting;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Services
 {
-    internal class EmailSender : IEmailSender
+    public class EmailSender : IEmailSender
     {
-        private readonly SmtpClient _smtpClient;
-        private readonly string _senderName;
+        protected readonly SmtpClient _smtpClient;
+        protected readonly string _senderEmail;
+        protected readonly string _senderDisplayName;
 
-        private readonly ILogger<EmailSender> _logger;
+        protected readonly ILogger<EmailSender> _logger;
 
         public EmailSender(IOptionsSnapshot<EmailSenderOptions> options, ILogger<EmailSender> logger)
         {
@@ -43,18 +41,27 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
                 EnableSsl = emailSender.UseSSL,
             };
 
-            _senderName = emailSender.SenderName;
+            _senderEmail = emailSender.SenderEmail;
+            if(string.IsNullOrEmpty(_senderEmail))
+            {
+                _senderEmail = emailSender.SenderName;
+            }
+
+            _senderDisplayName = emailSender.SenderDisplayName;
         }
 
-        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        public virtual Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             MailMessage mailMessage = new MailMessage(
-                from: _senderName,
-                to: email,
-                subject: subject,
-                body: htmlMessage)
+                from: new MailAddress(_senderEmail, _senderDisplayName),
+                to: new MailAddress(email))
             {
+                Subject = subject,
+                Body = htmlMessage,
                 IsBodyHtml = true,
+                BodyEncoding = Encoding.UTF8,
+                HeadersEncoding = Encoding.UTF8,
+                SubjectEncoding = Encoding.UTF8,
             };
 
             try

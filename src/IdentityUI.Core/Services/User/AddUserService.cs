@@ -195,7 +195,7 @@ namespace SSRD.IdentityUI.Core.Services.User
                     return Result.Fail(groupValidResult).ToOldResult();
                 }
 
-                Result groupRoleValidResult = await _groupUserService.ValidateGroup(inviteEntity.GroupRoleId);
+                Result groupRoleValidResult = await _groupUserService.RoleIsValid(inviteEntity.GroupRoleId);
                 if (groupRoleValidResult.Failure)
                 {
                     return Result.Fail(groupRoleValidResult).ToOldResult();

@@ -110,6 +110,8 @@ namespace SSRD.IdentityUI.Core
                 options.UserName = identityUIOptions.EmailSender?.UserName;
                 options.Password = identityUIOptions.EmailSender?.Password;
                 options.SenderName = identityUIOptions.EmailSender?.SenderName;
+                options.SenderEmail = identityUIOptions.EmailSender?.SenderEmail;
+                options.SenderDisplayName = identityUIOptions.EmailSender?.SenderDisplayName;
                 options.UseSSL = identityUIOptions.EmailSender?.UseSSL ?? false;
             });
 
