@@ -383,8 +383,8 @@ namespace SSRD.IdentityUI.Core.Services.User
             {
                 userAttributes = baseRegisterRequest.Attributes
                     .Select(x => new UserAttributeEntity(
-                        key: x.Key,
-                        value: x.Value))
+                        key: x.Key?.Trim(),
+                        value: x.Value?.Trim()))
                     .ToList();
             }
 
