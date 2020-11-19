@@ -109,7 +109,7 @@ namespace SSRD.IdentityUI.Core
                 options.Port = identityUIOptions.EmailSender?.Port ?? -1;
                 options.UserName = identityUIOptions.EmailSender?.UserName;
                 options.Password = identityUIOptions.EmailSender?.Password;
-                options.SenderName = identityUIOptions.EmailSender?.SenderName;
+                options.SenderEmail = identityUIOptions.EmailSender?.SenderName;
                 options.SenderEmail = identityUIOptions.EmailSender?.SenderEmail;
                 options.SenderDisplayName = identityUIOptions.EmailSender?.SenderDisplayName;
                 options.UseSSL = identityUIOptions.EmailSender?.UseSSL ?? false;

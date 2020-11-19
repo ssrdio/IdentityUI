@@ -27,7 +27,12 @@ Install SSRD.IdentityUI [NuGet](https://www.nuget.org/packages/SSRD.IdentityUI/)
     "Port": "{Port}",
     "Username": "{Username}",
     "Password": "{Password}",
-    "SenderName": "{Sender}"
+    "SenderEmail": "{Sender}",
+    "SenderDisplayName": "{Friendly name}"
+  },
+  "ReCaptcha": {
+    "SiteKey": "{SiteKey}",
+    "SiteSecret": "{SiteSecret}"
   }
 }
 ```

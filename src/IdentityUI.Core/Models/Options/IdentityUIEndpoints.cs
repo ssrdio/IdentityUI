@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Models.Options
 {
@@ -23,7 +21,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public string AccountSettingsLogo { get; set; } = "/adminUI/template/images/logo.png";
 
         public bool RegisterEnabled { get; set; } = true;
-        public bool GroupRegistrationEnabled { get; set; } = true;
+        public bool GroupRegistrationEnabled { get; set; } = false;
 
         public string AuthenticatorIssuer { get; set; } = "IdentityUI";
 
