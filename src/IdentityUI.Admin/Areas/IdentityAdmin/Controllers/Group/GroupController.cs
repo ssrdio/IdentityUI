@@ -6,6 +6,7 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Helper;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Group.Models;
@@ -18,11 +19,13 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
     {
         private readonly IGroupDataService _groupDataService;
         private readonly IGroupService _groupService;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
-        public GroupController(IGroupDataService groupDataService, IGroupService groupService)
+        public GroupController(IGroupDataService groupDataService, IGroupService groupService, IIdentityUIUserInfoService identityUIUserInfoService)
         {
             _groupDataService = groupDataService;
             _groupService = groupService;
+            _identityUIUserInfoService = identityUIUserInfoService;
         }
 
 
@@ -30,19 +33,19 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.Group
         [HttpGet]
         public IActionResult Index()
         {
-            if (User.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
             {
                 return View();
             }
 
-            return RedirectToAction(nameof(User), new { id = User.GetGroupId() });
+            return RedirectToAction(nameof(User), new { id = _identityUIUserInfoService.GetGroupId() });
         }
 
         [HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS)]
         [HttpGet]
         public IActionResult Details()
         {
-            return RedirectToAction(nameof(User), new { id = User.GetGroupId() });
+            return RedirectToAction(nameof(User), new { id = _identityUIUserInfoService.GetGroupId() });
         }
 
         [GroupPermissionAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]

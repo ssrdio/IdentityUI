@@ -58,10 +58,10 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
             }
 
             ValidationResult auditTableRequestValidationResult = _auditTableRequestValidator.Validate(auditTableRequest);
-            if (!dataTableValidationResult.IsValid)
+            if (!auditTableRequestValidationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {nameof(AuditTableRequest)} model");
-                return Result.Fail<DataTableResult<AuditAdminTableModel>>(dataTableValidationResult.ToResultError());
+                return Result.Fail<DataTableResult<AuditAdminTableModel>>(auditTableRequestValidationResult.ToResultError());
             }
 
             IBaseSpecificationBuilder<AuditEntity> baseSpecification = SpecificationBuilder

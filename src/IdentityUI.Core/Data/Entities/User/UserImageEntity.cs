@@ -17,7 +17,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities
 
         public string URL { get { return $"data:image/jpg;base64,{Convert.ToBase64String(BlobImage)}"; } }
 
-        protected UserImageEntity()
+        public UserImageEntity()
         {
         }
 
@@ -26,6 +26,11 @@ namespace SSRD.IdentityUI.Core.Data.Entities
             UserId = userId;
             BlobImage = blobImage;
             FileName = fileName;
+        }
+
+        public UserImageEntity(long id)
+        {
+            Id = id;
         }
     }
 }

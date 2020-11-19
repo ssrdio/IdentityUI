@@ -1,8 +1,6 @@
 ﻿using SSRD.CommonUtils.Result;
-using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
-using SSRD.IdentityUI.Core.Services.User.Models.Add;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Interfaces.Services

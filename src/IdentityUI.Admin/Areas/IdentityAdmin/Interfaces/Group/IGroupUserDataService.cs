@@ -8,6 +8,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group
 {
+    [Obsolete("Use SSRD.IdentityUI.Admin.Interfaces.IGroupUserDataService")]
     public interface IGroupUserDataService
     {
         Result<DataTableResult<GroupUserTableModel>> Get(string groupId, DataTableRequest dataTableRequest);

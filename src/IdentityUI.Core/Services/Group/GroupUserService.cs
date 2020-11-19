@@ -31,16 +31,17 @@ namespace SSRD.IdentityUI.Core.Services.Group
         private const string FAILED_TO_CAHNGE_GROUP_USER_ROLE = "failed_to_cahnge_group_user_role";
         private const string FAILED_TO_REMOVE_GROUP_USER = "failed_to_remove_group_user";
 
-        private readonly IBaseDAO<GroupUserEntity> _groupUserDAO;
-        private readonly IBaseDAO<RoleEntity> _roleDAO;
-        private readonly IBaseDAO<AppUserEntity> _userDAO;
-        private readonly IBaseDAO<GroupEntity> _groupDAO;
+        protected readonly IBaseDAO<GroupUserEntity> _groupUserDAO;
+        protected readonly IBaseDAO<RoleEntity> _roleDAO;
+        protected readonly IBaseDAO<AppUserEntity> _userDAO;
+        protected readonly IBaseDAO<GroupEntity> _groupDAO;
 
-        private readonly IGroupUserStore _groupUserStore;
+        protected readonly IGroupUserStore _groupUserStore;
+        protected readonly IAddGroupUserFilter _addGroupUserFilter;
 
-        private readonly IValidator<AddExistingUserRequest> _addExistingUserValidator;
+        protected readonly IValidator<AddExistingUserRequest> _addExistingUserValidator;
 
-        private readonly ILogger<GroupUserService> _logger;
+        protected readonly ILogger<GroupUserService> _logger;
 
         public GroupUserService(
             IBaseDAO<GroupUserEntity> groupUserDAO,
@@ -48,10 +49,12 @@ namespace SSRD.IdentityUI.Core.Services.Group
             IBaseDAO<AppUserEntity> userDAO,
             IBaseDAO<GroupEntity> groupDAO,
             IGroupUserStore groupUserStore,
+            IAddGroupUserFilter addGroupUserFilter,
             IValidator<AddExistingUserRequest> addExistingUserValidator,
             ILogger<GroupUserService> logger)
         {
             _groupUserStore = groupUserStore;
+            _addGroupUserFilter = addGroupUserFilter;
 
             _groupUserDAO = groupUserDAO;
             _roleDAO = roleDAO;
@@ -63,42 +66,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
             _logger = logger;
         }
 
-        private async Task<Result> AddUserToGroup(string userId, string groupId, string roleId)
-        {
-            Result groupExist = await ValidateGroup(groupId);
-            if (groupExist.Failure)
-            {
-                return Result.Fail(groupExist);
-            }
-
-            Result roleIsValid = await RoleIsValid(roleId);
-            if(roleIsValid.Failure)
-            {
-                return Result.Fail(roleIsValid);
-            }
-
-            Result userExist = await ValidateUser(userId);
-            if (userExist.Failure)
-            {
-                return Result.Fail(userExist);
-            }
-
-            GroupUserEntity groupUser = new GroupUserEntity(
-                userId: userId,
-                groupId: groupId,
-                roleId: roleId);
-
-            bool addResult = await _groupUserDAO.Add(groupUser);
-            if (!addResult)
-            {
-                _logger.LogError($"Failed to add GroupUser. GroupId {groupId}, UserId {userId}, RoleId {roleId}");
-                return Result.Fail(FAILED_TO_ADD_GROUP_USER);
-            }
-
-            return Result.Ok();
-        }
-
-        private async Task<Result> ValidateGroup(string groupId)
+        public virtual async Task<Result> ValidateGroup(string groupId)
         {
             IBaseSpecification<GroupEntity, GroupEntity> specification = SpecificationBuilder
                 .Create<GroupEntity>()
@@ -115,12 +83,18 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return Result.Ok();
         }
 
-        private async Task<Result> ValidateUser(string id)
+        public virtual async Task<Result> ValidateUser(string id)
         {
-            Result userExistResult = await UserExist(id);
-            if(userExistResult.Failure)
+            IBaseSpecification<AppUserEntity, AppUserEntity> userExistsSpecification = SpecificationBuilder
+                .Create<AppUserEntity>()
+                .WithId(id)
+                .Build();
+
+            bool userExist = await _userDAO.Exist(userExistsSpecification);
+            if (!userExist)
             {
-                return Result.Fail(userExistResult);
+                _logger.LogError($"No user. UserId {id}");
+                return Result.Fail(USER_NOT_FOUND);
             }
 
             IBaseSpecification<GroupUserEntity, GroupUserEntity> userAlreadyInGroupSpecification = SpecificationBuilder
@@ -138,7 +112,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return Result.Ok();
         }
 
-        private async Task<Result> RoleIsValid(string roleId)
+        public virtual async Task<Result> RoleIsValid(string roleId)
         {
             if (roleId == null)
             {
@@ -159,28 +133,16 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Result.Fail(GROUP_ROLE_NOT_FOUND);
             }
 
+            return Result.Ok();
+        }
+
+        public virtual async Task<Result> CanAssigneRole(string roleId)
+        {
             List<RoleListData> canAssigneRoles = await _groupUserStore.CanAssigneRoles();
             if (!canAssigneRoles.Any(x => x.Id == roleId))
             {
                 _logger.LogError($"User can not assign that GroupRole. GroupRoleId {roleId}");
                 return Result.Fail(NO_PERMISSION);
-            }
-
-            return Result.Ok();
-        }
-
-        private async Task<Result> UserExist(string id)
-        {
-            IBaseSpecification<AppUserEntity, AppUserEntity> specification = SpecificationBuilder
-                .Create<AppUserEntity>()
-                .WithId(id)
-                .Build();
-
-            bool userExist = await _userDAO.Exist(specification);
-            if(!userExist)
-            {
-                _logger.LogError($"No user. UserId {id}");
-                return Result.Fail(USER_NOT_FOUND);
             }
 
             return Result.Ok();
@@ -195,9 +157,9 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Core.Models.Result.Result.Fail(validationResult.Errors);
             }
 
-            Task<Result> addUserToGroup = AddUserToGroup(addExistingUserRequest.UserId, groupId, addExistingUserRequest.GroupRoleId);
+            Task<Result<GroupUserEntity>> addUserToGroup = AddUserToGroupWithValidation(addExistingUserRequest.UserId, groupId, addExistingUserRequest.GroupRoleId);
 
-            Task<Result[]> taskResult = Task.WhenAll(addUserToGroup);
+            Task<Result<GroupUserEntity>[]> taskResult = Task.WhenAll(addUserToGroup);
 
             Result result = taskResult.Result.Single();
 
@@ -340,27 +302,76 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return result.ToOldResult();
         }
 
-        public async Task<Result> AddUserToGroup(string userId, string groupId, RoleEntity role)
+        /// <summary>
+        /// This method validates all parameters
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="groupId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public async Task<Result<GroupUserEntity>> AddUserToGroupWithValidation(string userId, string groupId, string roleId)
         {
-            if(role.Type != Data.Enums.Entity.RoleTypes.Group)
+            Result groupExist = await ValidateGroup(groupId);
+            if (groupExist.Failure)
             {
-                _logger.LogError($"Role is not group role. RoleId {role}");
-                return Result.Fail(GROUP_ROLE_NOT_FOUND);
+                return Result.Fail<GroupUserEntity>(groupExist);
+            }
+
+            Result roleIsValid = await RoleIsValid(roleId);
+            if (roleIsValid.Failure)
+            {
+                return Result.Fail<GroupUserEntity>(roleIsValid);
+            }
+
+            Result canAssigneRole = await CanAssigneRole(roleId);
+            if(canAssigneRole.Failure)
+            {
+                return Result.Fail<GroupUserEntity>(canAssigneRole);
+            }
+
+            Result userExist = await ValidateUser(userId);
+            if (userExist.Failure)
+            {
+                return Result.Fail<GroupUserEntity>(userExist);
+            }
+
+            return await AddUserToGroupWithoutValidation(userId, groupId, roleId);
+        }
+
+        /// <summary>
+        /// This method requires that you already validated all parameters
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="groupId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public async Task<Result<GroupUserEntity>> AddUserToGroupWithoutValidation(string userId, string groupId, string roleId)
+        {
+            Result beforeResult = await _addGroupUserFilter.BeforeAdd(userId, groupId, roleId);
+            if(beforeResult.Failure)
+            {
+                return Result.Fail<GroupUserEntity>(beforeResult);
             }
 
             GroupUserEntity groupUser = new GroupUserEntity(
                 userId: userId,
                 groupId: groupId,
-                roleId: role.Id);
+                roleId: roleId);
 
             bool addResult = await _groupUserDAO.Add(groupUser);
             if (!addResult)
             {
-                _logger.LogError($"Failed to add GroupUser. GroupId {groupId}, UserId {userId}, RoleId {role.Id}");
-                return Result.Fail(FAILED_TO_ADD_GROUP_USER);
+                _logger.LogError($"Failed to add GroupUser. GroupId {groupId}, UserId {userId}, RoleId {roleId}");
+                return Result.Fail<GroupUserEntity>(FAILED_TO_ADD_GROUP_USER);
             }
 
-            return Result.Ok();
+            Result afterResult = await _addGroupUserFilter.AfterAdded(groupUser);
+            if (afterResult.Failure)
+            {
+                return Result.Fail<GroupUserEntity>(afterResult);
+            }
+
+            return Result.Ok(groupUser);
         }
     }
 }

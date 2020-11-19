@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
@@ -11,6 +12,8 @@ using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Interfaces.Services;
+using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +34,9 @@ namespace SSRD.IdentityUI.Core.Services.Group
         private readonly IBaseDAO<RoleAssignmentEntity> _roleAssignmentDAO;
         private readonly IBaseDAO<RoleEntity> _roleDAO;
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IdentityUIClaimOptions _identityUIClaimOptions;
+
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
         private readonly ILogger<GroupUserStore> _logger;
 
         public GroupUserStore(
@@ -41,7 +46,8 @@ namespace SSRD.IdentityUI.Core.Services.Group
             IBaseDAO<GroupUserEntity> groupUserDAO,
             IBaseDAO<RoleAssignmentEntity> roleAssignmentDAO,
             IBaseDAO<RoleEntity> roleDAO,
-            IHttpContextAccessor httpContextAccessor,
+            IOptions<IdentityUIClaimOptions> identityUIClaimOptions,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             ILogger<GroupUserStore> logger)
         {
             _groupUserRepository = groupUserRepository;
@@ -52,7 +58,9 @@ namespace SSRD.IdentityUI.Core.Services.Group
             _roleAssignmentDAO = roleAssignmentDAO;
             _roleDAO = roleDAO;
 
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIClaimOptions = identityUIClaimOptions.Value;
+
+            _identityUIUserInfoService = identityUIUserInfoService;
 
             _logger = logger;
         }
@@ -60,12 +68,13 @@ namespace SSRD.IdentityUI.Core.Services.Group
         private TSpecification ApplayGroupUserFilter<TSpecification>(TSpecification specification)
             where TSpecification : BaseSpecification<GroupUserEntity>
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
             {
             }
-            else if (_httpContextAccessor.HttpContext.User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+            else if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS)
+                    && _identityUIUserInfoService.GetGroupId() != null)
             {
-                specification.AddFilter(x => x.GroupId == _httpContextAccessor.HttpContext.User.GetGroupId());
+                specification.AddFilter(x => x.GroupId == _identityUIUserInfoService.GetGroupId());
             }
             else
             {
@@ -123,12 +132,12 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return roleListData;
         }
 
-        private List<RoleListData> CanAssigneRoles()
+        private List<RoleListData> CanAssigneRolesOld()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
-            string groupId = _httpContextAccessor.HttpContext.User.GetGroupId();
+            string userId = _identityUIUserInfoService.GetUserId();
+            string groupId = _identityUIUserInfoService.GetGroupId();
 
-            bool hasGlobalAccess = _httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
+            bool hasGlobalAccess = _identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
 
             List<RoleListData> roles;
 
@@ -146,7 +155,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         public List<RoleListData> CanManageGroupRoles()
         {
-            List<RoleListData> roles = CanAssigneRoles();
+            List<RoleListData> roles = CanAssigneRolesOld();
             roles.Add(new RoleListData(
                 id: null,
                 name: null));
@@ -156,7 +165,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         public List<RoleListData> CanAssigneGroupRoles()
         {
-            return CanAssigneRoles();
+            return CanAssigneRolesOld();
         }
 
         public Core.Models.Result.Result<GroupUserEntity> Get(BaseSpecification<GroupUserEntity> baseSpecification)
@@ -228,7 +237,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         public bool CanChangeOwnRole()
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES))
+            if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES))
             {
                 return true;
             }
@@ -238,12 +247,13 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private IBaseSpecification<GroupUserEntity, TData> ApplayGroupUserFilter<TData>(IBaseSpecification<GroupUserEntity, TData> specification)
         {
-            if (_httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+            if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
             {
             }
-            else if (_httpContextAccessor.HttpContext.User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS))
+            else if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS)
+                    && _identityUIUserInfoService.GetGroupId() != null)
             {
-                specification.Filters.Add(x => x.GroupId == _httpContextAccessor.HttpContext.User.GetGroupId());
+                specification.Filters.Add(x => x.GroupId == _identityUIUserInfoService.GetGroupId());
             }
             else
             {
@@ -275,8 +285,8 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 .Create<RoleAssignmentEntity>()
                 .Where(x => x.RoleId == role.Id)
                 .Select(x => new RoleListData(
-                    x.Role.Id,
-                    x.Role.Name))
+                    x.CanAssigneRole.Id,
+                    x.CanAssigneRole.Name))
                 .Build();
 
             List<RoleListData> canAssigneRoles = await _roleAssignmentDAO.Get(getRoleAssigmentsSpecification);
@@ -304,10 +314,10 @@ namespace SSRD.IdentityUI.Core.Services.Group
 
         private async Task<List<RoleListData>> GetRoleAssignments()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
-            string groupId = _httpContextAccessor.HttpContext.User.GetGroupId();
+            string userId = _identityUIUserInfoService.GetUserId();
+            string groupId = _identityUIUserInfoService.GetGroupId();
 
-            bool hasGlobalAccess = _httpContextAccessor.HttpContext.User.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
+            bool hasGlobalAccess = _identityUIUserInfoService.HasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES);
 
             List<RoleListData> roles;
 
@@ -403,7 +413,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return GetRoleAssignments();
         }
 
-        Task<List<RoleListData>> IGroupUserStore.CanAssigneRoles()
+        public Task<List<RoleListData>> CanAssigneRoles()
         {
             return GetRoleAssignments();
         }

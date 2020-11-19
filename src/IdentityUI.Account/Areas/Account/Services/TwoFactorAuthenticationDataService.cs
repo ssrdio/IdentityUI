@@ -7,6 +7,7 @@ using SSRD.IdentityUI.Account.Areas.Account.Models.Manage;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
@@ -25,21 +26,25 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
         private readonly IBaseRepository<AppUserEntity> _userRepository;
 
         private readonly ITwoFactorAuthService _twoFactorAuthService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly IdentityUIEndpoints _options;
 
         private readonly ILogger<TwoFactorAuthenticationDataService> _logger;
 
-        public TwoFactorAuthenticationDataService(UserManager<AppUserEntity> userManager, IBaseRepository<AppUserEntity> userRepository,
-            ITwoFactorAuthService twoFactorAuthService, IHttpContextAccessor httpContextAccessor, IOptions<IdentityUIEndpoints> options,
+        public TwoFactorAuthenticationDataService(
+            UserManager<AppUserEntity> userManager,
+            IBaseRepository<AppUserEntity> userRepository,
+            ITwoFactorAuthService twoFactorAuthService,
+            IIdentityUIUserInfoService identityUIUserInfoService,
+            IOptions<IdentityUIEndpoints> options,
             ILogger<TwoFactorAuthenticationDataService> logger)
         {
             _userManager = userManager;
             _userRepository = userRepository;
 
             _twoFactorAuthService = twoFactorAuthService;
-            _httpContextAccessor = httpContextAccessor;
+            _identityUIUserInfoService = identityUIUserInfoService;
 
             _options = options.Value;
 
@@ -48,7 +53,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
 
         private async Task<Result<AppUserEntity>> GetAppUser()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            string userId = _identityUIUserInfoService.GetUserId();
 
             AppUserEntity appUser = await _userManager.FindByIdAsync(userId);
             if (appUser == null)
@@ -136,7 +141,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
 
         public Result<TwoFactorAuthenticatorViewModel> GetTwoFactorAuthenticatorViewModel()
         {
-            string userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            string userId = _identityUIUserInfoService.GetUserId();
 
             SelectSpecification<AppUserEntity, TwoFactorAuthenticatorViewModel> selectSpecification = new SelectSpecification<AppUserEntity, TwoFactorAuthenticatorViewModel>();
             selectSpecification.AddFilter(x => x.Id == userId);

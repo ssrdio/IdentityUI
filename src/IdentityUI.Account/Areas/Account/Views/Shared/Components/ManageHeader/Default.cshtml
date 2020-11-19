@@ -1,10 +1,12 @@
 ﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
 @using SSRD.IdentityUI.Core.Services.Identity
 
 <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center menu-color">
-        <a class="navbar-brand brand-logo mr-5" href="@PagePath.HOME">
-            <img src="~/adminUI/template/images/logo.png" class="mr-2" alt="logo">
+        <a class="navbar-brand brand-logo mr-5" href="@_identityUIEndpoints.Value.Home">
+            <img src="@_identityUIEndpoints.Value.AccountSettingsLogo" class="mr-2" alt="logo">
         </a>
 
         <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -15,13 +17,13 @@
         <ul class="navbar-nav navbar-nav-right">
             <li class="nav-item nav-profile dropdown">
                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                    <img src="@PagePath.PROFILE_IMAGE" alt="" class="profile-image-sm" />
+                    <img src="@_identityUIEndpoints.Value.ProfileImage" alt="" class="profile-image-sm" />
                     <span class="user-name">
                         @User.GetUsername(_identityUIClaimOptions.Value)
                     </span> <i class="fas fa-angle-down"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-                    <a class="dropdown-item" href="@PagePath.LOGOUT">
+                    <a class="dropdown-item" href="@_identityUIEndpoints.Value.Logout">
                         <i class="fas fa-sign-out-alt text-primary"></i>
                         <span class="i-mar">Logout</span>
                     </a>

@@ -46,8 +46,13 @@
                 },
                 columns: [
                     {
+                        data: "id",
+                        title: "Id",
+                        render: $.fn.dataTable.render.text()
+                    },
+                    {
                         data: "userName",
-                        title: "User name",
+                        title: "Username",
                         render: $.fn.dataTable.render.text()
                     },
                     {

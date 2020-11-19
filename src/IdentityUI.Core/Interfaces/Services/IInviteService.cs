@@ -11,6 +11,10 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
     {
         Task<Result> InviteToGroup(string groupId, InviteToGroupRequest inviteToGroupRequest);
         Task<Result> Invite(InviteRequest inviteRequest);
+
+        [Obsolete("Use Remove(string groupId, string inviteId)")]
         Result Remove(string id);
+
+        Task<CommonUtils.Result.Result> Remove(string groupId, string inviteId);
     }
 }

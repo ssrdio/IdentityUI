@@ -1,0 +1,45 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.RegisterSuccessViewModel
+
+@{
+    ViewData["Title"] = "Accept Invite";
+}
+
+@section script {
+    <script type="text/javascript">
+        document.getElementById("toDashboard").onclick = function () {
+            window.location.href = "@PagePath.HOME";
+        };
+        document.getElementById("toLogin").onclick = function () {
+            window.location.href = "@PagePath.LOGIN";
+        };
+    </script>
+}
+
+<div class="app-container">
+    <div class="h-100 bg-plum-plate bg-animation">
+        <div class="d-flex min-vh-100  justify-content-center align-items-center">
+            <div class="mx-auto app-login-box col-md-8">
+                <div class="modal-dialog w-100 mx-auto">
+                    <div class="modal-content">
+                        <div class="adminErrorDiv">
+                            <div class="icon-holder">
+                                <div class="icon-denied-square-1 aleternate-square">
+                                    <div class="icon-denied-square-2 aleternate-square-2">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <span>Successfully registered using external login provider</span>
+                        </div>
+
+                        <div class="modal-footer clearfix">
+                            <button id="toDashboard" class="btn btn-light btn-lg lBtnMarg">Go to Home</button>
+                            <button id="toLogin" class="btn btn-primary btn-lg">Go to Login</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-white opacity-8 mt-3">Copyright © @CopyRightModel.NAME @CopyRightModel.YEAR </div>
+            </div>
+        </div>
+    </div>
+</div>

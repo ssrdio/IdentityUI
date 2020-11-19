@@ -1,0 +1,163 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimPermissions;
+
+@{
+    GroupAdminSidebarSelection.SelectedOption = GroupAdminSidebarOptions.Settings;
+}
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+@section modal{
+    <div id="modal-container">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div>
+    <div id="status-alert">
+        @await Component.InvokeAsync("IdentityStatusAlertJs")
+    </div>
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Settings
+                    </h5>
+                </div>
+
+                <div id="details-loader">
+                    @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
+                </div>
+
+                <div id="settings-form" class="custom-form" style="display:none;">
+                    <div id="group-name-input" class="form-group">
+                        <label class="control-label">Group Name</label>
+                        <input class="form-control" />
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div class="button-holder">
+                        <button type="button" id="update-button" class="btn btn-primary custom-submit">Save</button>
+                        <button type="button" id="delete-button" class="btn btn-danger custom-submit remove-button">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script{
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            new GroupSettingsClass('@Model.GroupId');
+        });
+
+        class GroupSettingsClass {
+            constructor(groupId) {
+                this.groupId = groupId;
+                const $form = $('#settings-form');
+
+                this.groupNameInput = new InputComponent($form, '#group-name-input');
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                this.loader = new DotLoader($('#details-loader'), $form);
+
+                this.confirmationModal = new conformationModal(
+                    $('#modal-container'),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeGroup') {
+                            this.remove();
+                        }
+                    });
+
+                $('#update-button').on('click', () => {
+                    this.update();
+                });
+
+                $('#delete-button').on('click', () => {
+                    this.confirmationModal.show({ key: 'removeGroup' }, 'Are you sure you want to remove this group?');
+                });
+
+                this.get();
+            }
+
+            showData(data) {
+                this.groupNameInput.value(data.groupName);
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== undefined && errors[''] !== null) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.groupNameInput.showError(errors.GroupName);
+            }
+
+            get() {
+                this.loader.show();
+                this.statusAlert.hide();
+
+                Api.get(`/api/GroupAdmin/${this.groupId}/Settings/Get`)
+                    .done((data) => {
+                        this.showData(data);
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    })
+            }
+
+            getData() {
+                return {
+                    groupName: this.groupNameInput.value()
+                };
+            }
+
+            update() {
+                this.loader.show();
+                this.statusAlert.hide();
+
+                const data = this.getData();
+
+                Api.post(`/api/GroupAdmin/${this.groupId}/Settings/Update`, data)
+                    .done(() => {
+                        this.statusAlert.showSuccess('Setings were updated');
+                        this.get();
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+
+            remove() {
+                this.loader.show();
+                this.statusAlert.hide();
+
+                Api.delete(`/api/GroupAdmin/${this.groupId}/Settings/Delete`)
+                    .done(() => {
+                        window.location.href = '/';
+                    })
+                    .fail((response) => {
+                        this.showErrors()
+                    })
+                    .always(() => {
+                        this.loader.hide;
+                    })
+            }
+        }
+    </script>
+
+}

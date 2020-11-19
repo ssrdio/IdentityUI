@@ -1,0 +1,788 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit.AuditIndexViewModel
+
+@{ GroupAdminSidebarSelection.SelectedOption = GroupAdminSidebarOptions.Audit; }
+
+@{ ViewData["Title"] = "Audit"; }
+
+<div class="row">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="custom_container pb-0">
+            <div class="row">
+                <div class="col-3">
+                    <div id="object-type" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-type-select" class="control-label">Object Type</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="object-type-select" class="form-control select2-container"></select>
+                    </div>
+                    <div id="object-identifier" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-identifier-select" class="control-label">Object Identifier</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="object-identifier-select" class="form-control select2-container" disabled></select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div id="subject-type" class="form-group">
+                        <div class="d-flex">
+                            <label for="subject-type-select" class="control-label">Subject Type</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="subject-type-select" class="form-control select2-container"></select>
+                    </div>
+                    <div id="subject-identifier" class="form-group">
+                        <div class="d-flex">
+                            <label for="subject-identifier-select" class="control-label">Subject Identifier</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="subject-identifier-select" class="form-control select2-container"></select>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div id="action-type" class="form-group col-6">
+                            <div class="d-flex">
+                                <label for="action-type-select" class="control-label">Action Type</label>
+                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            </div>
+                            <select id="action-type-select" class="form-control select2-container"></select>
+                        </div>
+                        <div id="resource-name" class="form-group col-6">
+                            <div class="d-flex">
+                                <label for="resource-name-select" class="control-label">Resource Name</label>
+                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            </div>
+                            <select id="resource-name-select" class="form-control select2-container"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="date-time-range-container" class="col-6">
+                            <div class="d-flex">
+                                <label for="resource-name-select" class="control-label">Range</label>
+                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            </div>
+                            <div class="input-group height-1">
+                                <div class="input-group-prepend">
+                                    <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
+                                </div>
+                                <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
+                                <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex h-100 justify-content-end">
+                                <button id="reset-all-button" type="button" class="btn btn-primary btn-sm align-self-end">Reset all</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="custom_container custom_table">
+            <table id="audit-table" class="dataTableClass display "></table>
+        </div>
+    </div>
+</div>
+
+<div id="audit-details-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="audit-details-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body audit-modal-body">
+                <div id="invite-user-form">
+                    @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                    <div id="audit-details-loader">
+                        @await Component.InvokeAsync("AdminUIDotLoader")
+                    </div>
+
+                    <div id="audit-data-container">
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Action Type: </label>
+                            <span id="action-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Object Type: </label>
+                            <span id="object-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Object Identifier: </label>
+                            <span id="object-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Subject Type: </label>
+                            <span id="subject-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Subject Identifier: </label>
+                            <span id="subject-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Group Identifier: </label>
+                            <span id="group-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Resource Name: </label>
+                            <span id="resource-name-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Host: </label>
+                            <span id="host-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Remote Ip: </label>
+                            <span id="remote-ip-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">User Agent: </label>
+                            <span id="user-agent-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Trace Identifier: </label>
+                            <span id="trace-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">App Version: </label>
+                            <span id="app-version-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Created: </label>
+                            <span id="created-container"></span>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <label class="col-3 font-weight-bold">Object Metadata: </label>
+                            </div>
+                            <span id="object-metadata-container"></span>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <label class="col-3 font-weight-bold">Subject Metadata: </label>
+                            </div>
+                            <span id="subject-metadata-container"></span>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <label class="col-3 font-weight-bold">Metadata: </label>
+                            </div>
+                            <span id="metadata-container"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+@section style {
+    <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/jjsonviewer-master/css/jjsonviewer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
+
+    <style>
+        .height-1 {
+            height: 1em;
+        }
+
+        .line-height-02 {
+            line-height: 0.2
+        }
+
+        .select2-selection.select2-selection--single {
+            border-radius: 2px;
+            border: 1px solid #c9c8c8;
+        }
+
+        .audit-modal-body {
+            max-height: 70vh;
+            overflow: auto;
+            margin-bottom: 30px;
+        }
+
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc,
+        table.dataTable thead .sorting_asc_disabled,
+        table.dataTable thead .sorting_desc_disabled {
+            cursor: pointer;
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+
+        table.dataTable thead th {
+            position: relative;
+            background-image: none !important;
+        }
+
+            table.dataTable thead th.sorting:after,
+            table.dataTable thead th.sorting_asc:after,
+            table.dataTable thead th.sorting_desc:after {
+                position: absolute;
+                top: 12px;
+                right: 8px;
+                display: block;
+                font-family: "Font Awesome 5 Free";
+            }
+
+            table.dataTable thead th.sorting:after {
+                content: "\f0dc";
+                color: #ddd;
+                font-size: 0.8em;
+                padding-top: 0.12em;
+            }
+
+            table.dataTable thead th.sorting_asc:after {
+                content: "\f0de";
+            }
+
+            table.dataTable thead th.sorting_desc:after {
+                content: "\f0dd";
+            }
+    </style>
+}
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/select2-4.0.13/dist/js/select2.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/datatables/datatables.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/jjsonviewer-master/js/jjsonviewer.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/js/components/range-picker.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            new AuditTable('@Model.GroupId', @Json.Serialize(Model.ActionTypes), @Json.Serialize(Model.SubjectTypes));
+        });
+
+        class AuditDetailsModal {
+            constructor(groupId) {
+                this.groupId = groupId;
+
+                this.$modal = $('#audit-details-modal');
+                this.$modal.on('hidden.bs.modal', () => {
+                    this.reset();
+                });
+
+                this.$auditDataContiner = this.$modal.find('#audit-data-container');
+                this.loader = new DotLoader(this.$modal.find('#audit-details-loader'), this.$auditDataContiner);
+
+                this.$actionType = this.$auditDataContiner.find('#action-type-container');
+
+                this.$objectType = this.$auditDataContiner.find('#object-type-container');
+                this.$objectIdentifier = this.$auditDataContiner.find('#object-identifier-container');
+                this.$objectMetadata = this.$auditDataContiner.find('#object-metadata-container');
+
+                this.$subjectType = this.$auditDataContiner.find('#subject-type-container');
+                this.$subjectIdentifier = this.$auditDataContiner.find('#subject-identifier-container');
+                this.$subjectMetadata = this.$auditDataContiner.find('#subject-metadata-container');
+
+                this.$groupIdentifier = this.$auditDataContiner.find('#group-identifier-container');
+
+                this.$resourceName = this.$auditDataContiner.find('#resource-name-container');
+                this.$host = this.$auditDataContiner.find('#host-container');
+                this.$remoteIp = this.$auditDataContiner.find('#remote-ip-container');
+                this.$userAgent = this.$auditDataContiner.find('#user-agent-container');
+                this.$traceIdentifier = this.$auditDataContiner.find('#trace-identifier-container');
+                this.$appVersion = this.$auditDataContiner.find('#app-version-container');
+                this.$metadata = this.$auditDataContiner.find('#metadata-container');
+
+                this.$created = this.$auditDataContiner.find('#created-container');
+            }
+
+            showModal(id) {
+                this.$modal.modal('show');
+                this.get(id);
+            }
+
+            hideModal() {
+                this.$modal.modal('hide');
+                this.reset();
+            }
+
+            reset() {
+                this.$actionType.text(null);
+
+                this.$objectType.text(null);
+                this.$objectIdentifier.text(null);
+                this.$objectMetadata.text(null);
+
+                this.$subjectType.text(null);
+                this.$subjectIdentifier.text(null);
+                this.$subjectMetadata.text(null);
+
+                this.$groupIdentifier.text(null);
+
+                this.$resourceName.text(null);
+                this.$host.text(null);
+                this.$remoteIp.text(null);
+                this.$userAgent.text(null);
+                this.$traceIdentifier.text(null);
+                this.$appVersion.text(null);
+                this.$metadata.text(null);
+
+                this.$created.text(null);
+            }
+
+            set(data) {
+                this.$actionType.text(data.actionType);
+
+                this.$objectType.text(data.objectType);
+                this.$objectIdentifier.text(data.objectIdentifier);
+                this.$objectMetadata.jJsonViewer(data.objectMetadata);
+
+                this.$subjectType.text(data.subjectType);
+                this.$subjectIdentifier.text(data.subjectIdentifier);
+                this.$subjectMetadata.jJsonViewer(data.subjectMetadata);
+
+                this.$groupIdentifier.text(data.groupIdentifier);
+
+                this.$resourceName.text(data.resourceName);
+                this.$host.text(data.host);
+                this.$remoteIp.text(data.remoteIp);
+                this.$userAgent.text(data.userAgent);
+                this.$traceIdentifier.text(data.traceIdentifier);
+                this.$appVersion.text(data.appVersion);
+                this.$metadata.jJsonViewer(data.metadata);
+
+                this.$created.text(moment.utc(data.created).format("D.M.YYYY HH:mm:ssZ"));
+            }
+
+            get(id) {
+                this.loader.show();
+
+                Api.get(`/api/GroupAdmin/${this.groupId}/Audit/Get/${id}`)
+                    .done((data) => {
+                        this.set(data)
+                    })
+                    .fail((resp) => {
+                        console.error('failed to get audit details');
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    })
+            }
+        }
+
+        class AuditTable {
+            constructor(groupId, actionTypes, subjectTypes) {
+                this.groupId = groupId;
+
+                this.$auditTable = $('#audit-table');
+                this.actionTypes = actionTypes;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                this.auditDetailsModal = new AuditDetailsModal(groupId);
+                this.auditTableFilters = new AuditTableFilters(groupId, subjectTypes, actionTypes, this.statusAlert, () => {
+                    this.reloadTable();
+                });
+
+                this.init();
+
+                $('#audit-table tbody').on('click', 'tr', (event) => {
+                    const data = this.$auditTable.DataTable().row(event.target).data();
+                    this.auditDetailsModal.showModal(data.id);
+                });
+            }
+
+            init() {
+                this.$auditTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    order: [[6, 'desc']],
+                    lengthChange: false,
+                    pageLength: 20,
+                    searching: false,
+                    ajax: {
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/Get`,
+                        type: 'GET',
+                        data: (params) => {
+                            const orderByTypes = Object.freeze({
+                                'Dessending': 1,
+                                'Assending': 2,
+                            });
+
+                            let customParams = {
+                                draw: params.draw,
+                                start: params.start,
+                                length: params.length,
+                            }
+
+                            switch (params.order.find(x => x.column === 6).dir) {
+                                case "desc": {
+                                    customParams.orderBy = orderByTypes.Dessending;
+                                    break;
+                                }
+                                case "asc": {
+                                    customParams.orderBy = orderByTypes.Assending;
+                                    break;
+                                }
+                                default: {
+                                    customParams.orderBy = orderByTypes.Dessending;
+                                    break;
+                                }
+                            }
+
+                            const filters = this.auditTableFilters.getFilters();
+
+                            const finalParams = { ...customParams, ...filters };
+
+                            return finalParams;
+                        }
+                    },
+                    columns: [
+                        {
+                            data: 'id',
+                            orderable: false,
+                            visible: false,
+                        },
+                        {
+                            title: "Type",
+                            orderable: false,
+
+                            data: "actionType",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            title: "Resource Name",
+                            orderable: false,
+
+                            data: "resourceName",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            title: "Object Type",
+                            orderable: false,
+
+                            data: "objectType",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            title: "Subject Type",
+                            orderable: false,
+
+                            data: "subjectType",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            title: "Subject Identifier",
+                            orderable: false,
+
+                            data: "subjectIdentifier",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            title: "Created",
+                            render: (data) => {
+                                return `<span>${moment.utc(data.created).format("D.M.YYYY HH:mm:ssZ")}</span>`;
+                            }
+                        }
+                    ]
+                });
+            }
+
+            reloadTable() {
+                this.$auditTable.DataTable()
+                    .clear()
+                    .draw();
+            }
+        }
+
+        class AuditTableFilters {
+            constructor(groupId, subjectTypes, actionTypes, statusAlert, onChange) {
+                this.groupId = groupId;
+
+                this.onChange = onChange;
+                this.statusAlert = statusAlert;
+
+                const $objectTypeContainer = $('#object-type');
+                this.$objectTypeSelect = $objectTypeContainer.find('select');
+
+                $objectTypeContainer.on('click', 'button.reset-button', () => {
+                    this.resetObjectType();
+                });
+
+                const $objectIdentifierContainer = $('#object-identifier');
+                this.$objectIdentifierSelect = $objectIdentifierContainer.find('select');
+
+                $objectIdentifierContainer.on('click', 'button.reset-button', () => {
+                    this.resetObjectIdentifierSelect();
+                });
+
+                const $subjectTypeContainer = $('#subject-type');
+                this.$subjectTypeSelect = $subjectTypeContainer.find('select');
+
+                $subjectTypeContainer.on('click', 'button.reset-button', () => {
+                    this.resetSubjectType();
+                });
+
+                const $subjectIdentifierContainer = $('#subject-identifier');
+                this.$subjectIdentifierSelect = $subjectIdentifierContainer.find('select');
+
+                $subjectIdentifierContainer.on('click', 'button.reset-button', () => {
+                    this.resetSubjectIdentifier();
+                });
+
+                const $actionTypeContainer = $('#action-type');
+                this.$actionTypeSelect = $actionTypeContainer.find('select');
+
+                $actionTypeContainer.on('click', "button.reset-button", () => {
+                    this.resetActionType();
+                });
+
+                const $resourceNameContainer = $('#resource-name');
+                this.$resourceNameSelect = $resourceNameContainer.find('select');
+
+                $resourceNameContainer.on('click', 'button.reset-button', () => {
+                    this.resetResourceName();
+                });
+
+                const $dateTimeRangePicker = $('#date-time-range-container');
+
+                this.daterangePicker = new RangePicker($dateTimeRangePicker, this.statusAlert, () => {
+                    this.change();
+                });
+
+                $dateTimeRangePicker.on('click', 'button.reset-button', () => {
+                    this.daterangePicker.reset();
+                });
+
+                $('#reset-all-button').on('click', () => {
+                    this.reset();
+                })
+
+                this.initObjectTypeSelect();
+                this.initObjectIdentifierSelect();
+
+                this.initSubjectTypeSelect(subjectTypes);
+                this.initSubjectIdentifierSelect();
+
+                this.initActionTypeSelect(actionTypes);
+
+                this.initResourceNameSelect();
+            }
+
+            showError(error) {
+                this.statusAlert.showError(error);
+            }
+
+            hideError() {
+                this.statusAlert.hide();
+            }
+
+            change() {
+                if (this.onChange === null || this.onChange === undefined) {
+                    return;
+                }
+
+                this.onChange();
+            }
+
+            getFilters() {
+                return {
+                    objectType: this.$objectTypeSelect.val(),
+                    objectIdentifier: this.$objectIdentifierSelect.val(),
+                    subjectType: this.$subjectTypeSelect.val(),
+                    subjectIdentifier: this.$subjectIdentifierSelect.val(),
+                    actionType: this.$actionTypeSelect.val(),
+                    resourceName: this.$resourceNameSelect.val(),
+                    from: this.daterangePicker.getFrom(),
+                    to: this.daterangePicker.getTo(),
+                }
+            }
+
+            initObjectTypeSelect() {
+                this.$objectTypeSelect.select2({
+                    ajax: {
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetObjectTypes`,
+                        delay: 100,
+                        data: (params) => {
+                            params.page = params.page ?? 1;
+
+                            return params;
+                        }
+                    }
+                });
+
+                this.$objectTypeSelect.on('change', () => {
+                    this.hideError();
+
+                    this.selectedObjectType = this.$objectTypeSelect.val();
+                    this.resetObjectIdentifierSelect();
+                    this.$objectIdentifierSelect.prop('disabled', false);
+
+                    this.change();
+                });
+            }
+
+            initObjectIdentifierSelect() {
+                this.$objectIdentifierSelect.select2({
+                    ajax: {
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetObjectIdentifiers`,
+                        delay: 100,
+                        data: (params) => {
+                            params.page = params.page ?? 1;
+
+                            params.objectType = this.$objectTypeSelect.val();
+
+                            return params;
+                        }
+                    }
+                });
+
+                this.$objectIdentifierSelect.on('change', () => {
+                    this.hideError();
+
+                    this.change();
+                });
+            }
+
+            initSubjectTypeSelect(subjectTypes) {
+                this.$subjectTypeSelect.select2({
+                    data: subjectTypes
+                });
+
+                this.$subjectTypeSelect.val(null).trigger('change');
+
+                this.$subjectTypeSelect.on('change', () => {
+                    this.hideError();
+
+                    this.change();
+                });
+            }
+
+            initSubjectIdentifierSelect() {
+                this.$subjectIdentifierSelect.select2({
+                    ajax: {
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetSubjectIdentifiers`,
+                        delay: 100,
+                        data: (params) => {
+                            params.page = params.page ?? 1;
+
+                            return params;
+                        }
+                    }
+                });
+
+                this.$subjectIdentifierSelect.on('change', () => {
+                    this.hideError();
+
+                    this.change();
+                });
+            }
+
+            initActionTypeSelect(actionTypes) {
+                this.$actionTypeSelect.select2({
+                    data: actionTypes,
+                });
+
+                this.$actionTypeSelect.val(null).trigger('change');
+
+                this.$actionTypeSelect.on('change', () => {
+                    this.hideError();
+
+                    this.change();
+                })
+            }
+
+            initResourceNameSelect() {
+                this.$resourceNameSelect.select2({
+                    ajax: {
+                        url: `/api/GroupAdmin/${this.groupId}/Audit/GetResourceNames`,
+                        delay: 100,
+                        data: (params) => {
+                            params.page = params.page ?? 1;
+
+                            return params;
+                        }
+                    }
+                });
+
+                this.$resourceNameSelect.on('change', () => {
+                    this.hideError();
+
+                    this.change();
+                })
+            }
+
+            reset() {
+                const onChange = this.onChange;
+                this.onChange = null;
+
+                this.resetObjectType();
+
+                this.resetSubjectType();
+                this.resetSubjectIdentifier();
+
+                this.resetActionType();
+                this.resetResourceName();
+
+                this.daterangePicker.reset();
+
+                this.onChange = onChange;
+                this.change();
+            }
+
+            resetObjectType() {
+                const onChange = this.onChange;
+                this.onChange = null;
+
+                this.$objectTypeSelect.val(null).trigger('change');
+                //TODO: remove options
+
+                this.resetObjectIdentifierSelect();
+                this.$objectIdentifierSelect.prop('disabled', true);
+
+                this.onChange = onChange;
+                this.change();
+            }
+
+            resetObjectIdentifierSelect() {
+                this.$objectIdentifierSelect.val(null).trigger('change');
+                //TODO: remove options
+            }
+
+            resetSubjectType() {
+                this.$subjectTypeSelect.val(null).trigger('change');
+                //TODO: remove options
+            }
+
+            resetSubjectIdentifier() {
+                this.$subjectIdentifierSelect.val(null).trigger('change');
+                //TODO: remove options
+            }
+
+            resetActionType() {
+                this.$actionTypeSelect.val(null).trigger('change');
+                //TODO: remove options
+            }
+
+            resetResourceName() {
+                this.$resourceNameSelect.val(null).trigger('change');
+                //TODO: remove options
+            }
+        }
+
+    </script>
+}

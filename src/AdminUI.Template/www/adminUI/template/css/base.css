@@ -11,7 +11,7 @@
 body {
     color: rgb(80, 80, 80);
     font-weight: 400;
-    font-family: "Segoe UI";
+    font-family: 'Open Sans', sans-serif;
 }
 
 
@@ -59,9 +59,9 @@ body {
     width: calc(275px - 130px);
 }
 
-    .brand-logo img {
-        width: auto !important;
-    }
+.brand-logo img {
+    width: auto !important;
+}
 
 .navbar-toggler {
     color: white;
@@ -125,7 +125,7 @@ body {
 }
 
 .footer {
-    font-family: "Segoe UI";
+    font-family: 'Open Sans', sans-serif;
     font-weight: bold;
     padding: 20px 2.45rem;
 }
@@ -493,7 +493,7 @@ body {
 .lockout-holder {
     box-shadow: 0px 0px 7px -4px rgba(0, 0, 0, 0.4);
     background-color: var(--gray-lightest);
-    padding: 0px 30px;
+    padding: 5px 30px;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -504,12 +504,12 @@ body {
     vertical-align: text-top;
     font-size: 1rem;
     color: var(--red);
+    margin: 0px;
 }
 
 .lockout-button {
-    background-color: white;
-    margin-right: -30px;
-    color: var(--success);
+    color: white;
+    background-color: var(--success);
     font-weight: bold;
     border: 0;
     outline: 0;
@@ -518,7 +518,6 @@ body {
     .lockout-button:hover,
     .lockout-button:active {
         background-color: var(--success);
-        margin-right: -30px;
         color: white;
         border: 0;
         outline: 0;

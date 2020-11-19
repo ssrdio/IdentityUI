@@ -1,0 +1,6 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.AdminUI.Template.Models.ReCaptchaOptions> _reCaptchaOptions;
+
+@if (_reCaptchaOptions.Value.UseReCaptcha)
+{
+    <input id="recaptcha-token-input" name="ReCaptchaToken" hidden />
+}

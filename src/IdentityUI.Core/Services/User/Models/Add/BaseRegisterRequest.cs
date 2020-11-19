@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace SSRD.IdentityUI.Core.Services.User.Models.Add
+namespace SSRD.IdentityUI.Core.Services.User.Models
 {
     public class BaseRegisterRequest : IUserAttributeRequest
     {
@@ -44,7 +44,8 @@ namespace SSRD.IdentityUI.Core.Services.User.Models.Add
 
                 RuleFor(x => x.Username)
                     .Equal(x => x.Email)
-                    .When(x => !string.IsNullOrEmpty(x.Username));
+                    .When(x => !string.IsNullOrEmpty(x.Username))
+                    .WithErrorCode("username_must_be_the_same_as_email");
             });
 
             RuleSet(REQUIRE_EMAIL_USERNAME, () =>
@@ -64,7 +65,7 @@ namespace SSRD.IdentityUI.Core.Services.User.Models.Add
 
                 RuleFor(x => x.ConfirmPassword)
                     .NotEmpty()
-                    .Equal(x => x.Password).WithMessage("'ConfirmPassword' does not match 'Password'");
+                    .WithErrorCode("confirm_password_must_be_the_same_as_password");
             });
         }
     }

@@ -3,22 +3,20 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SSRD.CommonUtils.Result;
+using SSRD.CommonUtils.Specifications;
+using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities;
-using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Models;
-using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces;
-using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Models.Options;
-using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
@@ -26,37 +24,55 @@ namespace SSRD.IdentityUI.Core.Services.User
 {
     internal class InviteService : IInviteService
     {
-        private readonly IBaseRepository<AppUserEntity> _userRepository;
-        private readonly IBaseRepository<InviteEntity> _inviteRepository;
-        private readonly IBaseRepository<RoleEntity> _roleRepository;
+        private const string FAILED_TO_REMOVE_INVITE = "failed_to_remove_invite";
+        private const string INVITE_NOT_FOUND = "invite_not_found";
+        private const string FAILED_TO_ADD_INVITE = "failed_to_add_invite";
+        private const string NO_PERMISSION = "no_permission";
 
-        private readonly IGroupStore _groupStore;
-        private readonly IGroupUserStore _groupUserStore;
+        private const string INVITE_ALREADY_EXISTS = "invite_already_exists";
+        private const string USER_WITH_SAME_EMAIL_ALREADY_EXIST = "user_with_same_email_already_exist";
+        private const string GROUP_ROLE_NOT_FOUND = "group_role_not_found";
+        private const string GLOBAL_ROLE_NOT_FOUND = "global_role_not_found";
 
-        private readonly IEmailService _mailService;
+        protected readonly IBaseDAO<AppUserEntity> _userDAO;
+        protected readonly IBaseDAO<RoleEntity> _roleDAO;
+        protected readonly IBaseDAO<InviteEntity> _inviteDAO;
 
-        private readonly IValidator<InviteToGroupRequest> _inviteToGroupRequestValidator;
-        private readonly IValidator<InviteRequest> _inviteRequestValidator;
+        protected readonly IGroupStore _groupStore;
+        protected readonly IGroupUserStore _groupUserStore;
+        protected readonly IEmailService _mailService;
+        protected readonly IAddInviteFilter _addInviteFilter;
 
-        private readonly ILogger<InviteService> _logger;
+        protected readonly IValidator<InviteToGroupRequest> _inviteToGroupRequestValidator;
+        protected readonly IValidator<InviteRequest> _inviteRequestValidator;
 
-        private readonly IdentityUIOptions _identityManagementOptions;
-        private readonly IdentityUIEndpoints _identityManagementEndpoints;
+        protected readonly ILogger<InviteService> _logger;
 
-        public InviteService(IBaseRepository<AppUserEntity> userRepository, IBaseRepository<InviteEntity> inviteRepository,
-            IBaseRepository<RoleEntity> roleRepository, IGroupStore groupStore, IGroupUserStore groupUserStore, IEmailService mailService,
-            IValidator<InviteToGroupRequest> inviteToGroupRequestValidator, IValidator<InviteRequest> inviteRequestValidator,
-            ILogger<InviteService> logger, IOptionsSnapshot<IdentityUIOptions> identityManagementOptions,
-            IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
+        protected readonly IdentityUIOptions _identityManagementOptions;
+        protected readonly IdentityUIEndpoints _identityManagementEndpoints;
+
+        public InviteService(
+            IBaseDAO<AppUserEntity> userDAO,
+            IBaseDAO<RoleEntity> roleDAO,
+            IBaseDAO<InviteEntity> inviteDAO,
+            IGroupStore groupStore,
+            IGroupUserStore groupUserStore,
+            IEmailService mailService,
+            IAddInviteFilter addInviteFilter,
+            IValidator<InviteToGroupRequest> inviteToGroupRequestValidator,
+            IValidator<InviteRequest> inviteRequestValidator,
+            ILogger<InviteService> logger,
+            IOptions<IdentityUIOptions> identityManagementOptions,
+            IOptions<IdentityUIEndpoints> identityManagementEndpoints)
         {
-            _userRepository = userRepository;
-            _inviteRepository = inviteRepository;
-            _roleRepository = roleRepository;
+            _userDAO = userDAO;
+            _roleDAO = roleDAO;
+            _inviteDAO = inviteDAO;
 
             _groupStore = groupStore;
             _groupUserStore = groupUserStore;
-
             _mailService = mailService;
+            _addInviteFilter = addInviteFilter;
 
             _inviteToGroupRequestValidator = inviteToGroupRequestValidator;
             _inviteRequestValidator = inviteRequestValidator;
@@ -67,7 +83,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             _identityManagementEndpoints = identityManagementEndpoints.Value;
         }
 
-        public Task<Result> InviteToGroup(string groupId, InviteToGroupRequest inviteToGroupRequest)
+        public async Task<Core.Models.Result.Result> InviteToGroup(string groupId, InviteToGroupRequest inviteToGroupRequest)
         {
             _logger.LogInformation($"Adding new group invite");
 
@@ -75,34 +91,13 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!validationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {nameof(InviteToGroupRequest)} model");
-                return Task.FromResult(Result.Fail(validationResult.Errors));
+                return Result.Fail(validationResult.ToResultError()).ToOldResult();
             }
 
-            Result canInviteResult = CanInvite(inviteToGroupRequest.Email);
-            if (canInviteResult.Failure)
-            {
-                return Task.FromResult(Result.Fail(canInviteResult.Errors));
-            }
-
-            Result isGroupInviteValid = IsGroupInviteValid(groupId, inviteToGroupRequest.GroupRoleId);
-            if (isGroupInviteValid.Failure)
-            {
-                return Task.FromResult(Result.Fail(isGroupInviteValid.Errors));
-            }
-
-            InviteEntity inviteEntity = new InviteEntity(
-                email: inviteToGroupRequest.Email,
-                token: StringUtils.GenerateToken(),
-                status: Data.Enums.Entity.InviteStatuses.Pending,
-                roleId: null,
-                groupId: groupId,
-                groupRoleId: inviteToGroupRequest.GroupRoleId,
-                expiresAt: DateTimeOffset.UtcNow.Add(_identityManagementEndpoints.InviteValidForTimeSpan));
-
-            return AddInvite(inviteEntity);
+            return (await AddInvite(inviteToGroupRequest.Email, null, groupId, inviteToGroupRequest.GroupRoleId)).ToOldResult();
         }
 
-        public Task<Result> Invite(InviteRequest inviteRequest)
+        public async Task<Core.Models.Result.Result> Invite(InviteRequest inviteRequest)
         {
             _logger.LogInformation($"Adding new invite");
 
@@ -110,195 +105,245 @@ namespace SSRD.IdentityUI.Core.Services.User
             if (!validationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {nameof(InviteToGroupRequest)} model");
-                return Task.FromResult(Result.Fail(validationResult.Errors));
+                return Result.Fail(validationResult.ToResultError()).ToOldResult();
             }
 
-            Result canInviteResult = CanInvite(inviteRequest.Email);
-            if (canInviteResult.Failure)
-            {
-                return Task.FromResult(Result.Fail(canInviteResult.Errors));
-            }
-
-            if (inviteRequest.RoleId != null)
-            {
-                Result globalRoleExists = GlobalRoleExists(inviteRequest.RoleId);
-                if (globalRoleExists.Failure)
-                {
-                    return Task.FromResult(Result.Fail(globalRoleExists.Errors));
-                }
-            }
-
-            if (inviteRequest.GroupId != null)
-            {
-                Result isGroupInviteValid = IsGroupInviteValid(inviteRequest.GroupId, inviteRequest.GroupRoleId);
-                if (isGroupInviteValid.Failure)
-                {
-                    return Task.FromResult(Result.Fail(isGroupInviteValid.Errors));
-                }
-            }
-
-            InviteEntity inviteEntity = new InviteEntity(
-                email: inviteRequest.Email,
-                token: StringUtils.GenerateToken(),
-                status: Data.Enums.Entity.InviteStatuses.Pending,
-                roleId: inviteRequest.RoleId,
-                groupId: inviteRequest.GroupId,
-                groupRoleId: inviteRequest.GroupRoleId,
-                expiresAt: DateTimeOffset.UtcNow.Add(_identityManagementEndpoints.InviteValidForTimeSpan));
-
-            return AddInvite(inviteEntity);
+            return (await AddInvite(inviteRequest.Email, inviteRequest.RoleId, inviteRequest.GroupId, inviteRequest.GroupRoleId)).ToOldResult();
         }
 
-        private async Task<Result> AddInvite(InviteEntity inviteEntity)
+        public async Task<Result> AddInvite(string email, string roleId = null, string groupId = null, string groupRoleId = null)
         {
-            bool addInvite = _inviteRepository.Add(inviteEntity);
+            Result inviteAlreadyExistsResult = await InviteAlreadyExits(email);
+            if(inviteAlreadyExistsResult.Failure)
+            {
+                return inviteAlreadyExistsResult;
+            }
+
+            //TODO: change method or response to make more sense
+            Result userAlreadyExistsResult = await UserAlreadyExist(email);
+            if(userAlreadyExistsResult.Failure)
+            {
+                return userAlreadyExistsResult;
+            }
+
+            if(!string.IsNullOrEmpty(roleId))
+            {
+                Result roleValidResult = await GlobalRoleExists(roleId);
+                if(roleValidResult.Failure)
+                {
+                    return roleValidResult;
+                }
+            }
+
+            if(!string.IsNullOrEmpty(groupId))
+            {
+                Result isGroupValid = await IsGroupInviteValid(groupId, groupRoleId);
+                if(isGroupValid.Failure)
+                {
+                    return isGroupValid;
+                }
+            }
+
+            Result beforeAddResult = await _addInviteFilter.BeforeAdd(email, roleId, groupId, groupRoleId);
+            if(beforeAddResult.Failure)
+            {
+                return beforeAddResult;
+            }
+
+            InviteEntity invite = new InviteEntity(
+                email: email,
+                token: StringUtils.GenerateToken(),
+                status: Data.Enums.Entity.InviteStatuses.Pending,
+                roleId: roleId,
+                groupId: groupId,
+                groupRoleId: groupRoleId,
+                expiresAt: DateTimeOffset.UtcNow.Add(_identityManagementEndpoints.InviteValidForTimeSpan));
+
+            bool addInvite = await _inviteDAO.Add(invite);
             if (!addInvite)
             {
                 _logger.LogError($"Failed to add invite");
-                return Result.Fail("failed_to_add_invite", "Failed to add invite");
+                return Result.Fail(FAILED_TO_ADD_INVITE);
+            }
+
+            Result afterAddedResult = await _addInviteFilter.AfterAdded(invite);
+            if(afterAddedResult.Failure)
+            {
+                return afterAddedResult;
             }
 
             _logger.LogInformation($"Invite was added, sending email");
 
-            string callbackUrl = QueryHelpers.AddQueryString($"{_identityManagementOptions.BasePath}{_identityManagementEndpoints.AcceptInvite}", "code", inviteEntity.Token);
+            string callbackUrl = QueryHelpers.AddQueryString($"{_identityManagementOptions.BasePath}{_identityManagementEndpoints.AcceptInvite}", "code", invite.Token);
             callbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
-            Result sendMailResult = await _mailService.SendInvite(inviteEntity.Email, callbackUrl);
+            Core.Models.Result.Result sendMailResult = await _mailService.SendInvite(invite.Email, callbackUrl);
             if (sendMailResult.Failure)
             {
-                return Result.Fail(sendMailResult.Errors);
+                return sendMailResult.ToNewResult();
             }
 
             return Result.Ok();
         }
 
-        private Result InviteExits(string email)
+        private async Task<Result> InviteAlreadyExits(string email)
         {
-            SelectSpecification<InviteEntity, InviteEntity> validInvteExistsSpecification = new SelectSpecification<InviteEntity, InviteEntity>();
-            validInvteExistsSpecification.AddFilter(x => x.Email == email);
-            validInvteExistsSpecification.AddFilter(x => x.Status == Data.Enums.Entity.InviteStatuses.Pending);
-            validInvteExistsSpecification.AddSelect(x => x);
+            DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            List<InviteEntity> invites = _inviteRepository.GetList(validInvteExistsSpecification);
-            if (invites.Any(x => x.ExpiresAt > DateTimeOffset.UtcNow))
+            IBaseSpecification<InviteEntity, InviteEntity> specification = SpecificationBuilder
+                .Create<InviteEntity>()
+                .Where(x => x.Email.ToUpper() == email.ToUpper())
+                .Where(x => x.Status == Data.Enums.Entity.InviteStatuses.Pending)
+                .Where(x => x.ExpiresAt > now)
+                .Build();
+
+            bool inviteExists = await _inviteDAO.Exist(specification);
+            if(inviteExists)
             {
                 _logger.LogError($"Valid invite already exists");
-                return Result.Fail("invite_exists", "Invite exits");
+                return Result.Fail(INVITE_ALREADY_EXISTS);
             }
 
             return Result.Ok();
         }
 
-        private Result UserExist(string email)
+        private async Task<Result> UserAlreadyExist(string email)
         {
-            BaseSpecification<AppUserEntity> userExistSpecification = new BaseSpecification<AppUserEntity>();
-            userExistSpecification.AddFilter(x => x.NormalizedEmail == email.ToUpper());
+            IBaseSpecification<AppUserEntity, AppUserEntity> specification = SpecificationBuilder
+                .Create<AppUserEntity>()
+                .Where(x => x.NormalizedEmail == email.ToUpper())
+                .Build();
 
-            bool userExist = _userRepository.Exist(userExistSpecification);
+            bool userExist = await _userDAO.Exist(specification);
             if (userExist)
             {
                 _logger.LogError($"User with the same email already exists");
-                return Result.Fail("user_with_that_email_already_exist", "User with that email already exists");
+                //return Result.Fail(USER_WITH_SAME_EMAIL_ALREADY_EXIST); //TODO: dont expose all users to everybody
+                return Result.Fail(FAILED_TO_ADD_INVITE);
             }
 
             return Result.Ok();
         }
 
-        private Result CanInvite(string email)
+        private async Task<Result> GroupRoleExists(string groupRoleId)
         {
-            Result inviteExits = InviteExits(email);
-            if (inviteExits.Failure)
-            {
-                return Result.Fail(inviteExits.Errors);
-            }
+            IBaseSpecification<RoleEntity, RoleEntity> specification = SpecificationBuilder
+                .Create<RoleEntity>()
+                .Where(x => x.Id == groupRoleId)
+                .Where(x => x.Type == Data.Enums.Entity.RoleTypes.Group)
+                .Build();
 
-            Result userExistsResult = UserExist(email);
-            if (userExistsResult.Failure)
-            {
-                return Result.Fail(userExistsResult.Errors);
-            }
-
-            return Result.Ok();
-        }
-
-        private Result GroupRoleExists(string groupRoleId)
-        {
-            BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
-            baseSpecification.AddFilter(x => x.Id == groupRoleId);
-            baseSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Group);
-
-            bool groupRoleExists = _roleRepository.Exist(baseSpecification);
+            bool groupRoleExists = await _roleDAO.Exist(specification);
             if (!groupRoleExists)
             {
                 _logger.LogError($"No GroupRole. RoleId {groupRoleId}");
-                return Result.Fail("no_group_role", "No GroupRole");
+                return Result.Fail(GROUP_ROLE_NOT_FOUND);
             }
 
             return Result.Ok();
         }
 
-        private Result GlobalRoleExists(string globalRoleId)
+        public virtual async Task<Result> CanAssigneGroupRole(string roleId)
         {
-            BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
-            baseSpecification.AddFilter(x => x.Id == globalRoleId);
-            baseSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Global);
+            List<RoleListData> canAssigneRoles = await _groupUserStore.CanAssigneRoles();
+            if (!canAssigneRoles.Any(x => x.Id == roleId))
+            {
+                _logger.LogError($"User can not assign that GroupRole. GroupRoleId {roleId}");
+                return Result.Fail(NO_PERMISSION);
+            }
 
-            bool globalRoleExists = _roleRepository.Exist(baseSpecification);
+            return Result.Ok();
+        }
+
+        private async Task<Result> GlobalRoleExists(string globalRoleId)
+        {
+            IBaseSpecification<RoleEntity, RoleEntity> specification = SpecificationBuilder
+                .Create<RoleEntity>()
+                .Where(x => x.Id == globalRoleId)
+                .Where(x => x.Type == Data.Enums.Entity.RoleTypes.Global)
+                .Build();
+
+            bool globalRoleExists = await _roleDAO.Exist(specification);
             if (!globalRoleExists)
             {
                 _logger.LogError($"No GlobalRole. RoleId {globalRoleId}");
-                return Result.Fail("no_global_role", "No GlobalRole");
+                return Result.Fail(GLOBAL_ROLE_NOT_FOUND);
             }
 
             return Result.Ok();
         }
 
-        private Result IsGroupInviteValid(string groupId, string groupRoleId)
+        private async Task<Result> IsGroupInviteValid(string groupId, string groupRoleId)
         {
-            Result groupExistsResult = _groupStore.Exists(groupId);
+            Result groupExistsResult = await _groupStore.Any(groupId);
             if (groupExistsResult.Failure)
             {
-                return Result.Fail(groupExistsResult.Errors);
+                return Result.Fail(groupExistsResult);
             }
 
-            Result groupRoleExists = GroupRoleExists(groupRoleId);
+            Result groupRoleExists = await GroupRoleExists(groupRoleId);
             if (groupRoleExists.Failure)
             {
-                return Result.Fail(groupRoleExists.Errors);
+                return Result.Fail(groupRoleExists);
             }
 
-            List<RoleListData> canAssigneRoles = _groupUserStore.CanAssigneGroupRoles();
-            if (!canAssigneRoles.Any(x => x.Id == groupRoleId))
+            Result canAssigneGroupRoleResult = await CanAssigneGroupRole(groupRoleId);
+            if (canAssigneGroupRoleResult.Failure)
             {
-                _logger.LogError($"User has no permission so assign role. GroupRoleId {groupRoleId}");
-                return Result.Fail("no_permission", "No Permission");
+                return Result.Fail(canAssigneGroupRoleResult);
             }
 
             return Result.Ok();
         }
 
-        public Result Remove(string id)
+        private async Task<Result> Remove(InviteEntity invite)
+        {
+            bool removeResult = await _inviteDAO.Remove(invite);
+            if (!removeResult)
+            {
+                _logger.LogError($"Failed to remove invite");
+                return Result.Fail(FAILED_TO_REMOVE_INVITE);
+            }
+
+            return Result.Ok();
+        }
+
+        [Obsolete("Use Remove(string groupId, string inviteId)")]
+        public Core.Models.Result.Result Remove(string id)
         {
             _logger.LogInformation($"Removing Invite. InviteId {id}");
 
-            BaseSpecification<InviteEntity> baseSpecification = new BaseSpecification<InviteEntity>();
-            baseSpecification.AddFilter(x => x.Id == id);
+            IBaseSpecification<InviteEntity, InviteEntity> specification = SpecificationBuilder
+                .Create<InviteEntity>()
+                .Where(x => x.Id == id)
+                .Build();
 
-            InviteEntity invite = _inviteRepository.SingleOrDefault(baseSpecification);
+            InviteEntity invite = _inviteDAO.SingleOrDefault(specification).Result;
             if (invite == null)
             {
                 _logger.LogError($"No Invite. InviteId {id}");
-                return Result.Fail("no_invite", "No Invite");
+                return Result.Fail(INVITE_NOT_FOUND).ToOldResult();
             }
 
-            bool removeResult = _inviteRepository.Remove(invite);
-            if (!removeResult)
+            return Remove(invite).Result.ToOldResult();
+        }
+
+        public async Task<Result> Remove(string groupId, string inviteId)
+        {
+            IBaseSpecification<InviteEntity, InviteEntity> specification = SpecificationBuilder
+                .Create<InviteEntity>()
+                .Where(x => x.Id == inviteId)
+                .Where(x => x.GroupId == groupId)
+                .Build();
+
+            InviteEntity invite = await _inviteDAO.SingleOrDefault(specification);
+            if(invite == null)
             {
-                _logger.LogError($"Failed to remove invite. InviteId {id}");
-                return Result.Fail("failed_to_remove_invite", "Failed to remove invite");
+                _logger.LogError($"Invite not found. InviteId {inviteId}, GroupId {groupId}");
+                return Result.Fail(INVITE_NOT_FOUND);
             }
 
-            return Result.Ok();
+            return await Remove(invite);
         }
     }
 }

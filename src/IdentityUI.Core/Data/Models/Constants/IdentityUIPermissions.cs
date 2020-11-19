@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Core.Data.Models.Constants
 {
@@ -16,6 +14,16 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
         public const string GROUP_CAN_REMOVE_USERS = "group_can_remove_users";
         public const string GROUP_CAN_MANAGE_ATTRIBUTES = "group_can_manage_attributes";
 
+        public const string GROUP_ADMIN_ACCESS = "group_admin_access";
+        public const string GROUP_CAN_ACCESS_DASHBOARD = "group_can_access_dashboard";
+        public const string GROUP_CAN_VIEW_AUDIT = "group_can_view_audit";
+
+        public const string GROUP_CAN_ACCESS_USER_DETAILS = "group_can_access_user_details";
+        public const string GROUP_CAN_MANAGE_USER_DETAILS = "group_can_manage_user_details";
+        public const string GROUP_CAN_IMPERSONATE_USER = "group_can_impersonate_user";
+
+        public const string GROUP_CAN_MANAGE_SETTINGS = "group_can_manage_settings";
+
         public static readonly string[] ALL_GROUP = new string[]
         {
             GROUP_CAN_SEE_USERS,
@@ -25,6 +33,16 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             GROUP_CAN_MANAGE_ROLES,
             GROUP_CAN_REMOVE_USERS,
             GROUP_CAN_MANAGE_ATTRIBUTES,
+
+            GROUP_ADMIN_ACCESS,
+            GROUP_CAN_ACCESS_DASHBOARD,
+            GROUP_CAN_VIEW_AUDIT,
+
+            GROUP_CAN_ACCESS_USER_DETAILS,
+            GROUP_CAN_MANAGE_USER_DETAILS,
+            GROUP_CAN_IMPERSONATE_USER,
+
+            GROUP_CAN_MANAGE_SETTINGS,
         };
 
         public static readonly string[] ALL = new string[]
@@ -38,6 +56,16 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
             GROUP_CAN_MANAGE_ROLES,
             GROUP_CAN_REMOVE_USERS,
             GROUP_CAN_MANAGE_ATTRIBUTES,
+
+            GROUP_ADMIN_ACCESS,
+            GROUP_CAN_ACCESS_DASHBOARD,
+            GROUP_CAN_VIEW_AUDIT,
+
+            GROUP_CAN_ACCESS_USER_DETAILS,
+            GROUP_CAN_MANAGE_USER_DETAILS,
+            GROUP_CAN_IMPERSONATE_USER,
+
+            GROUP_CAN_MANAGE_SETTINGS,
         };
 
         internal static readonly List<PermissionSeedModel> ALL_DATA = new List<PermissionSeedModel>
@@ -65,7 +93,28 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
                 description: "User can remove users from group. When this permission is used in a role with type 'group' user can only remove users that have a role that is assigned to that role"),
             new PermissionSeedModel(
                 name: GROUP_CAN_MANAGE_ATTRIBUTES,
-                description: "User can view, add, edit group attributes")
+                description: "User can view, add, edit group attributes"),
+            new PermissionSeedModel(
+                name: GROUP_ADMIN_ACCESS,
+                description: "User has access to GroupAdmin"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_ACCESS_DASHBOARD,
+                description: "User has access to group dashboard"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_VIEW_AUDIT,
+                description: "User can view audit logs for the group"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_ACCESS_USER_DETAILS,
+                description: "User can access another user details"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_MANAGE_USER_DETAILS,
+                description: "User can manage another user details"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_IMPERSONATE_USER,
+                description: "User can impersonate another user"),
+            new PermissionSeedModel(
+                name: GROUP_CAN_MANAGE_SETTINGS,
+                description: "User can view/change group settings"),
         };
     }
 }

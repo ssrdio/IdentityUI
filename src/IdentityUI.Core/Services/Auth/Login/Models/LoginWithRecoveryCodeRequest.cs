@@ -1,13 +1,13 @@
 ﻿using FluentValidation;
+using SSRD.AdminUI.Template.Services;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Login.Models
 {
-    public class LoginWithRecoveryCodeRequest
+    public class LoginWithRecoveryCodeRequest : IReCaptchaRequest
     {
         public string RecoveryCode { get; set; }
+        public string ReCaptchaToken { get; set; }
     }
 
     internal class LoginWithRecoveryCodeRequestValidator : AbstractValidator<LoginWithRecoveryCodeRequest>

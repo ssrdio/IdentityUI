@@ -1,0 +1,52 @@
+﻿@model SSRD.AdminUI.Template.Views.Shared.Components.AdminUIReCaptchaJavaScript.AdminUIReCaptchaJavaScriptViewComponent.ViewModel
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.AdminUI.Template.Models.ReCaptchaOptions> _reCaptchaOptions;
+
+@if (_reCaptchaOptions.Value.UseReCaptcha)
+{
+    <script src="https://www.google.com/recaptcha/api.js?render=@_reCaptchaOptions.Value.SiteKey"></script>
+
+    <script>
+        $(document).ready(() => {
+
+            var reCaptchaRetries = 0;
+
+            var $formContainer;
+            @if(string.IsNullOrEmpty(Model.FormContainer))
+            {
+                <text> $formContainer = $('form') </text>
+            }
+            else
+            {
+                <text> $formContainer = $('@Model.FormContainer form') </text>
+            }
+
+            $formContainer.submit(function (event) {
+                    if (reCaptchaRetries > 5) {
+                        reCaptchaRetries = 0;
+                        return;
+                    }
+
+                    let $form = $(event.target);
+                let $reCaptchaInput = $form.find('#recaptcha-token-input');
+                let reCaptchaToken = $reCaptchaInput.val();
+
+                if (reCaptchaToken !== undefined && reCaptchaToken !== null && reCaptchaToken !== '') {
+                    reCaptchaRetries = 0;
+                    return;
+                }
+
+            event.preventDefault();
+            grecaptcha.ready(() => {
+                grecaptcha.execute('@_reCaptchaOptions.Value.SiteKey', { action: '@Model.Action' })
+                        .then((token) => {
+                            $reCaptchaInput.val(token);
+                            $form.trigger('submit');
+                         });
+            });
+
+            reCaptchaRetries++;
+            });
+        })
+    </script>
+}

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SSRD.IdentityUI.Core.Data.Models.Constants
+﻿namespace SSRD.IdentityUI.Core.Data.Models.Constants
 {
     public static class IdentityUIClaims
     {
@@ -21,5 +17,11 @@ namespace SSRD.IdentityUI.Core.Data.Models.Constants
 
         public const string IMPERSONATOR_ROLE = "IdentityUI.ImpersonatorRole";
         public const string IMPERSONATOR_PERMISSION = "IdentityUI.ImpersonatorPermission";
+        
+        public const string IMPERSONATOR_GROUP_ID = "IdentityUI.ImpersonatorGroupId";
+        public const string IMPERSONATOR_GROUP_NAME = "IdentityUI.ImpersonatorGroupName";
+        public const string IMPERSONATOR_GROUP_ROLE = "IdentityUI.ImpersonatorGroupRole";
+        public const string IMPERSONATOR_GROUP_PERMISSION = "IdentityUI.ImpersonatorGroupPermission";
+
     }
 }

@@ -1,22 +1,21 @@
-﻿using SSRD.IdentityUI.Core.Data.Entities.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Group
 {
-    public class GroupEntity : IBaseEntity
+    public class GroupEntity : IBaseEntity, ISoftDelete
     {
-        public string Id { get; private set; }
-        public string Name { get; private set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
 
-        public ICollection<GroupUserEntity> Users { get; private set; }
-        public ICollection<GroupAttributeEntity> GroupAttributes { get; private set; }
+        public ICollection<GroupUserEntity> Users { get; set; }
+        public ICollection<GroupAttributeEntity> GroupAttributes { get; set; }
 
-        public ICollection<InviteEntity> Invites { get; private set; }
+        public ICollection<InviteEntity> Invites { get; set; }
 
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }
+        public DateTimeOffset? _DeletedDate { get; set; }
 
         protected GroupEntity()
         {

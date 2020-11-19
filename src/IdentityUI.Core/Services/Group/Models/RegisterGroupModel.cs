@@ -1,18 +1,17 @@
 ﻿using FluentValidation;
+using SSRD.AdminUI.Template.Services;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Services.User.Models;
-using SSRD.IdentityUI.Core.Services.User.Models.Add;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Services.Group.Models
 {
-    public class RegisterGroupModel
+    public class RegisterGroupModel : IReCaptchaRequest
     {
         public string GroupName { get; set; }
 
         public GroupBaseUserRegisterRequest BaseUser { get; set; }
+
+        public string ReCaptchaToken { get; set; }
     }
 
     public class RegisterGroupModelValidator : AbstractValidatorWithNullCheck<RegisterGroupModel>

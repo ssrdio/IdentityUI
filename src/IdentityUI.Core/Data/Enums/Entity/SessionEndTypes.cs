@@ -18,5 +18,7 @@ namespace SSRD.IdentityUI.Core.Data.Enums.Entity
         InvalidLogin = 20,
 
         ImpersonationLogout = 30,
+
+        AffterLoginFilterFailure = 40,
     }
 }

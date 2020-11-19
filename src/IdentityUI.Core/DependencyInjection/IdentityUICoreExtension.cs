@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SSRD.AdminUI.Template.Models;
 using SSRD.Audit.Data;
 using SSRD.Audit.Extensions;
 using SSRD.CommonUtils.Specifications.Interfaces;
@@ -84,6 +85,12 @@ namespace SSRD.IdentityUI.Core
                 options.EmailSender = identityUIOptions.EmailSender;
             });
 
+            services.Configure<ReCaptchaOptions>(options =>
+            {
+                options.SiteKey = identityUIOptions.ReCaptcha?.SiteKey;
+                options.SiteSecret = identityUIOptions.ReCaptcha?.SiteSecret;
+            });
+
             DatabaseOptions databaseOptions = new DatabaseOptions
             {
                 Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory,
@@ -102,7 +109,10 @@ namespace SSRD.IdentityUI.Core
                 options.Port = identityUIOptions.EmailSender?.Port ?? -1;
                 options.UserName = identityUIOptions.EmailSender?.UserName;
                 options.Password = identityUIOptions.EmailSender?.Password;
-                options.SenderName = identityUIOptions.EmailSender?.SenderName;
+                options.SenderEmail = identityUIOptions.EmailSender?.SenderName;
+                options.SenderEmail = identityUIOptions.EmailSender?.SenderEmail;
+                options.SenderDisplayName = identityUIOptions.EmailSender?.SenderDisplayName;
+                options.UseSSL = identityUIOptions.EmailSender?.UseSSL ?? false;
             });
 
             IdentityUIEndpoints identityManagementEndpoints = new IdentityUIEndpoints();
@@ -134,10 +144,26 @@ namespace SSRD.IdentityUI.Core
                 options.ResetPassword = identityManagementEndpoints.ResetPassword;
                 options.AcceptInvite = identityManagementEndpoints.AcceptInvite;
 
+                options.ProfileImage = identityManagementEndpoints.ProfileImage;
+                options.AdminLogo = identityManagementEndpoints.AdminLogo;
+                options.AccountSettingsLogo = identityManagementEndpoints.AccountSettingsLogo;
+
                 options.RegisterEnabled = identityManagementEndpoints.RegisterEnabled;
+                options.GroupRegistrationEnabled = identityManagementEndpoints.GroupRegistrationEnabled;
+
+                options.AuthenticatorIssuer = identityManagementEndpoints.AuthenticatorIssuer;
+
                 options.UseEmailSender = identityManagementEndpoints.UseEmailSender;
                 options.UseSmsGateway = identityManagementEndpoints.UseSmsGateway;
                 options.InviteValidForTimeSpan = identityManagementEndpoints.InviteValidForTimeSpan;
+
+                options.BypassTwoFactorOnExternalLogin = identityManagementEndpoints.BypassTwoFactorOnExternalLogin;
+                options.UseEmailAsUsername = identityManagementEndpoints.UseEmailAsUsername;
+                options.ShowAuditToUser = identityManagementEndpoints.ShowAuditToUser;
+                options.CanChangeGroupName = identityManagementEndpoints.CanChangeGroupName;
+                options.CanRemoveGroup = identityManagementEndpoints.CanRemoveGroup;
+                options.CanRemoveUser = identityManagementEndpoints.CanRemoveUser;
+                options.AllowImpersonation = identityManagementEndpoints.AllowImpersonation;
             });
 
             IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, databaseOptions, configuration);
@@ -155,9 +181,12 @@ namespace SSRD.IdentityUI.Core
                 Microsoft.Extensions.Options.IOptions<IdentityUIClaimOptions> identityUIClaimOptions = x.GetRequiredService<Microsoft.Extensions.Options.IOptions<IdentityUIClaimOptions>>();
 
                 Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor = x.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+
+                IIdentityUIUserInfoService identityUIUserInfoService = x.GetRequiredService<IIdentityUIUserInfoService>();
+
                 if (httpContextAccessor.HttpContext != null)
                 {
-                    return new IdentityUIAuditSubjectService(httpContextAccessor, auditOptions, identityUIClaimOptions);
+                    return new IdentityUIAuditSubjectService(httpContextAccessor, identityUIUserInfoService, auditOptions, identityUIClaimOptions);
                 }
 
                 Audit.Services.IBackgroundServiceContextAccessor backgroundServiceContextAccessor = x.GetRequiredService<Audit.Services.IBackgroundServiceContextAccessor>();
@@ -432,9 +461,16 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddScoped<IGroupRegistrationService, GroupRegistrationService>();
 
-            builder.Services.AddScoped<IAddUserCallbackService, NullAddUserCallback>();
-
             builder.Services.AddScoped<IImpersonateService, ImpersonateService>();
+
+            builder.Services.AddScoped<IIdentityUIUserInfoService, HttpContextUserInfoService>();
+
+            builder.Services.AddScoped<IDefaultProfileImageService, IdentityUIDefaultProfileImageService>();
+
+            builder.Services.AddScoped<ILoginFilter, LoginFilter>();
+            builder.Services.AddScoped<IAddUserFilter, NullAddUserFilter>();
+            builder.Services.AddScoped<IAddGroupUserFilter, NullAddGroupUserFilter>();
+            builder.Services.AddScoped<IAddInviteFilter, NullAddInviteFilter>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
@@ -475,6 +511,7 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<AddRoleAssignmentRequest>, AddRoleAssignmentRequestValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Group.Models.AddGroupRequest>, Services.Group.Models.AddGroupRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.Group.Models.UpdateGroupModel>, Services.Group.Models.UpdateGroupModelValidator>();
 
             builder.Services.AddSingleton<IValidator<AddRolePermissionRequest>, Services.Role.Models.AddRolePermissionRequestValidator>();
 
@@ -500,8 +537,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Services.User.Models.Attribute.UpdateUserAttributeModel>, Services.User.Models.Attribute.UpdateUserAttributeModelValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Group.Models.RegisterGroupModel>, Services.Group.Models.RegisterGroupModelValidator>();
-            builder.Services.AddSingleton<IValidator<Services.User.Models.Add.BaseRegisterRequest>, Services.User.Models.Add.BaseRegisterRequestValidator>();
-            builder.Services.AddSingleton<IValidator<Services.User.Models.Add.GroupBaseUserRegisterRequest>, Services.User.Models.Add.GroupBaseUserRegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.BaseRegisterRequest>, Services.User.Models.BaseRegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.GroupBaseUserRegisterRequest>, Services.User.Models.GroupBaseUserRegisterRequestValidator>();
         }
 
         /// <summary>

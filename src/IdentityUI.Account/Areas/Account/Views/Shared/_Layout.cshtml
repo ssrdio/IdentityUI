@@ -12,6 +12,8 @@
     <!-- Disable tap highlight on IE -->
     <meta name="msapplication-tap-highlight" content="no">
 
+    @await Component.InvokeAsync("AdminUIFavicon")
+
     <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/adminUI/template/css/style.css" />
     <link rel="stylesheet" href="~/adminUI/template/css/base.css" asp-append-version="true" />

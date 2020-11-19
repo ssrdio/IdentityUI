@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Services.Identity;
 using System;
 
@@ -18,7 +20,8 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            bool hasPermission = context.HttpContext.User.HasPermission(_permission);
+            IIdentityUIUserInfoService identityUIUserInfoService = context.HttpContext.RequestServices.GetRequiredService<IIdentityUIUserInfoService>();
+            bool hasPermission = identityUIUserInfoService.HasPermission(_permission);
             if (!hasPermission)
             {
                 context.Result = new ForbidResult();

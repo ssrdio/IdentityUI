@@ -18,6 +18,7 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.Postgre
             new Update_20200831195154_AddUserAttributes(),
             new Update_20201012130535_AddAudit(),
             new Update_20201029131921_AuditMetadataGroupIdentifier(),
+            new Update_20201103064212_AppUserGroupSoftDelete(),
         };
 
         public IEnumerable<IUpdate> Get()

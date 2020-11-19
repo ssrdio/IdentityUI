@@ -1,0 +1,10 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.AdminUI.Template.Models.AdminUIFaviconOptions> _faviconOptions;
+
+@if (string.IsNullOrEmpty(_faviconOptions.Value.FaviconType))
+{
+    <link rel="icon" href="@_faviconOptions.Value.FaviconUrl" />
+}
+else
+{
+    <link rel="icon" type="@_faviconOptions.Value.FaviconType" href="@_faviconOptions.Value.FaviconUrl" />
+}

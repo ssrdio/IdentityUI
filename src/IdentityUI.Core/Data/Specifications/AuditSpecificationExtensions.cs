@@ -147,5 +147,11 @@ namespace SSRD.IdentityUI.Core.Data.Specifications
             return baseBuilder
                 .Where(x => x.ResourceName.ToUpper().Contains(upperSearch));
         }
+
+        public static IBaseSpecificationBuilder<AuditEntity> WithGroupIdentifier(this IBaseSpecificationBuilder<AuditEntity> baseBuilder, string groupId)
+        {
+            return baseBuilder
+                .Where(x => x.GroupIdentifier == groupId);
+        }
     }
 }

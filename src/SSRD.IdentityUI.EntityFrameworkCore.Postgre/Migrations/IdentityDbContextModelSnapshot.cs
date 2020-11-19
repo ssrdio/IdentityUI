@@ -154,6 +154,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset?>("_CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("_DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset?>("_ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -268,6 +271,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                         .HasMaxLength(256);
 
                     b.Property<DateTimeOffset?>("_CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("_DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("_ModifiedDate")
