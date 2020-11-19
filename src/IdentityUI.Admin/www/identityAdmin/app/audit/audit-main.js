@@ -7,8 +7,9 @@
 
         this.actionTypes = actionTypes;
 
-        this.$auditDataContiner = this.$modal.find('#audit-data-container');
-        this.$loader = this.$modal.find('#audit-data-loader');
+        this.$auditDataContiner = this.$modal.find('#audit-data-container')
+
+        this.loader = new DotLoader(this.$modal.find('#audit-details-loader'), this.$auditDataContiner);
 
         this.$actionType = this.$auditDataContiner.find('#action-type-container');
 
@@ -18,6 +19,9 @@
 
         this.$subjectType = this.$auditDataContiner.find('#subject-type-container');
         this.$subjectIdentifier = this.$auditDataContiner.find('#subject-identifier-container');
+        this.$subjectMetadata = this.$auditDataContiner.find('#subject-metadata-container');
+
+        this.$groupIdentifier = this.$auditDataContiner.find('#group-identifier-container');
 
         this.$resourceName = this.$auditDataContiner.find('#resource-name-container');
         this.$host = this.$auditDataContiner.find('#host-container');
@@ -25,18 +29,9 @@
         this.$userAgent = this.$auditDataContiner.find('#user-agent-container');
         this.$traceIdentifier = this.$auditDataContiner.find('#trace-identifier-container');
         this.$appVersion = this.$auditDataContiner.find('#app-version-container');
+        this.$metadata = this.$auditDataContiner.find('#metadata-container');
 
         this.$created = this.$auditDataContiner.find('#created-container');
-    }
-
-    showLoader() {
-        this.$auditDataContiner.hide();
-        this.$loader.removeClass('loader-hidden');
-    }
-
-    hideLoader() {
-        this.$auditDataContiner.show();
-        this.$loader.addClass('loader-hidden');
     }
 
     showModal(id) {
@@ -58,6 +53,9 @@
 
         this.$subjectType.text(null);
         this.$subjectIdentifier.text(null);
+        this.$subjectMetadata.text(null);
+
+        this.$groupIdentifier.text(null);
 
         this.$resourceName.text(null);
         this.$host.text(null);
@@ -65,6 +63,7 @@
         this.$userAgent.text(null);
         this.$traceIdentifier.text(null);
         this.$appVersion.text(null);
+        this.$metadata.text(null);
 
         this.$created.text(null);
     }
@@ -78,6 +77,9 @@
 
         this.$subjectType.text(data.subjectType);
         this.$subjectIdentifier.text(data.subjectIdentifier);
+        this.$subjectMetadata.jJsonViewer(data.subjectMetadata);
+
+        this.$groupIdentifier.text(data.groupIdentifier);
 
         this.$resourceName.text(data.resourceName);
         this.$host.text(data.host);
@@ -85,12 +87,13 @@
         this.$userAgent.text(data.userAgent);
         this.$traceIdentifier.text(data.traceIdentifier);
         this.$appVersion.text(data.appVersion);
+        this.$metadata.jJsonViewer(data.metadata);
 
         this.$created.text(moment.utc(data.created).format("D.M.YYYY HH:mm:ssZ"));
     }
 
     get(id) {
-        this.showLoader();
+        this.loader.show();
 
         Api.get(`/IdentityAdmin/Audit/Get/${id}`)
             .done((data) => {
@@ -100,7 +103,7 @@
                 console.error('failed to get audit details');
             })
             .always(() => {
-                this.hideLoader();
+                this.loader.hide();
             })
     }
 }
@@ -464,11 +467,17 @@ class AuditTableFilters {
     }
 
     resetObjectType() {
+        const onChange = this.onChange;
+        this.onChange = null;
+
         this.$objectTypeSelect.val(null).trigger('change');
         //TODO: remove options
 
         this.resetObjectIdentifierSelect();
         this.$objectIdentifierSelect.prop('disabled', true);
+
+        this.onChange = onChange;
+        this.change();
     }
 
     resetObjectIdentifierSelect() {

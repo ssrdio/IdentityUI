@@ -8,6 +8,7 @@
         this.$inviteUserModal.on('hidden.bs.modal', () => {
             this.emailInputComponent.value(null);
             this.rolesSelectComponent.selectOption(null);
+            this.rolesSelectComponent.triggerChange();
 
             this.hideErrors();
         });
@@ -36,6 +37,7 @@
 
         this.$rolesSelect.select2({
             data: data,
+            placeholder: 'Select Group Role'
         });
 
         this.rolesSelectComponent.selectOption(null);

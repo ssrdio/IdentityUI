@@ -1,14 +1,17 @@
-﻿using SSRD.IdentityUI.Core.Models.Result;
+﻿using SSRD.CommonUtils.Result;
+using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Services.Group.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Interfaces.Services.Group
 {
     public interface IGroupService
     {
-        Result Add(AddGroupRequest addGroup);
-        Result Remove(string id);
+        Models.Result.Result Add(AddGroupRequest addGroup);
+        Models.Result.Result Remove(string id);
+
+        Task<Result<IdStringModel>> AddAsync(AddGroupRequest addGroup);
+        Task<Result> Update(string groupId, UpdateGroupModel updateGroupModel);
+        Task<Result> RemoveAsync(string id);
     }
 }

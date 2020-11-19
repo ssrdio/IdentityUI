@@ -9,6 +9,9 @@ namespace SSRD.Audit.Models
     {
         public SubjectTypes SubjectType { get; set; }
         public string SubjectIdentifier { get; set; }
+        public string SubjectMetadata { get; set; }
+
+        public string GroupIdentifier { get; set; }
 
         public string Host { get; set; }
         public string RemoteIp { get; set; }
@@ -20,6 +23,8 @@ namespace SSRD.Audit.Models
         public AuditSubjectData(
             SubjectTypes subjectType,
             string subjectIdentifier,
+            string subjectMetadata,
+            string groupIdentifier,
             string host,
             string remoteIp,
             string resourceName,
@@ -29,6 +34,9 @@ namespace SSRD.Audit.Models
         {
             SubjectType = subjectType;
             SubjectIdentifier = subjectIdentifier;
+            SubjectMetadata = subjectMetadata;
+
+            GroupIdentifier = groupIdentifier;
 
             Host = host;
             RemoteIp = remoteIp;

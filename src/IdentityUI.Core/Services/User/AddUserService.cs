@@ -4,83 +4,98 @@ using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
-using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
-using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.User.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Data.Entities;
-using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
-using SSRD.IdentityUI.Core.Infrastructure.Data.Repository;
 using SSRD.IdentityUI.Core.Data.Entities.User;
 using System.Linq;
+using SSRD.CommonUtils.Specifications.Interfaces;
+using SSRD.CommonUtils.Result;
+using SSRD.CommonUtils.Specifications;
+using SSRD.IdentityUI.Core.Models;
+using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
     internal class AddUserService : IAddUserService
     {
-        private readonly UserManager<AppUserEntity> _userManager;
-        private readonly SignInManager<AppUserEntity> _signInManager;
+        public const string USER_NOT_FOUND = "USER_NOT_FOUND";
+        public const string GROUP_NOT_FOUND = "group_not_found";
+        public const string FAILED_TO_ADD_GROUP_USER = "failed_to_add_group_user";
+        public const string ROLE_NO_FOUND = "role_no_found";
+        public const string FAILED_TO_ADD_ROLE = "failed_to_add_role";
+        public const string INVITE_NOT_FOUND = "invite_not_found";
+        public const string REGISTRATION_IS_NOT_ENABLED = "registration_is_not_enabled";
 
-        private readonly IEmailConfirmationService _emailService;
+        protected readonly UserManager<AppUserEntity> _userManager;
+        protected readonly SignInManager<AppUserEntity> _signInManager;
 
-        private readonly IBaseRepository<InviteEntity> _inviteRepository;
-        private readonly IBaseRepository<GroupEntity> _groupRepository; 
-        private readonly IBaseRepository<GroupUserEntity> _groupUserRepository;
-        private readonly IBaseRepository<RoleEntity> _roleRepository;
+        protected readonly IEmailConfirmationService _emailService;
+        protected readonly IGroupUserService _groupUserService;
+        protected readonly IAddUserFilter _addUserFilter;
 
-        private readonly IValidator<NewUserRequest> _newUserValidator;
-        private readonly IValidator<RegisterRequest> _registerValidator;
-        private readonly IValidator<AcceptInviteRequest> _acceptInviteValidator;
-        private readonly IValidator<ExternalLoginRegisterRequest> _externalLoginRequsterRequestValidator;
-        private readonly IValidator<IUserAttributeRequest> _userAttributeRequestValidator;
+        protected readonly IBaseDAO<AppUserEntity> _userDAO;
+        protected readonly IBaseDAO<InviteEntity> _inviteDAO;
+        protected readonly IBaseDAO<GroupEntity> _groupDAO;
+        protected readonly IBaseDAO<GroupUserEntity> _groupUserDAO;
+        protected readonly IBaseDAO<RoleEntity> _roleDAO;
 
-        private readonly IdentityUIEndpoints _identityUIEndpoints;
+        protected readonly IValidator<NewUserRequest> _newUserValidator;
+        protected readonly IValidator<RegisterRequest> _registerValidator;
+        protected readonly IValidator<AcceptInviteRequest> _acceptInviteValidator;
+        protected readonly IValidator<ExternalLoginRegisterRequest> _externalLoginRequsterRequestValidator;
+        protected readonly IValidator<GroupBaseUserRegisterRequest> _groupBaseUserRegisterRequestValidator;
+        protected readonly IValidator<BaseRegisterRequest> _baseRegisterValidator;
+        protected readonly IValidator<IUserAttributeRequest> _userAttributeRequestValidator;
 
-        private readonly ILogger<AddUserService> _logger;
+        protected readonly IdentityUIEndpoints _identityUIEndpoints;
+
+        protected readonly ILogger<AddUserService> _logger;
 
         public AddUserService(
             UserManager<AppUserEntity> userManager,
             SignInManager<AppUserEntity> signInManager,
+            IEmailConfirmationService emailService,
+            IGroupUserService groupUserService,
+            IAddUserFilter addUserFilter,
+            IBaseDAO<AppUserEntity> userDAO,
+            IBaseDAO<InviteEntity> inviteDAO,
+            IBaseDAO<RoleEntity> roleDAO,
+            IOptions<IdentityUIEndpoints> identityUIEndpoints,
             IValidator<NewUserRequest> newUserValidator,
             IValidator<RegisterRequest> registerValidator,
             IValidator<AcceptInviteRequest> acceptInviteValidator,
-            ILogger<AddUserService> logger,
-            IEmailConfirmationService emailService,
-            IBaseRepository<InviteEntity> inviteRepository,
-            IBaseRepository<GroupEntity> groupRepository,
-            IBaseRepository<GroupUserEntity> groupUserRepository,
             IValidator<ExternalLoginRegisterRequest> externalLoginRequsterRequestValidator,
-            IOptions<IdentityUIEndpoints> identityUIEndpoints,
-            IBaseRepository<RoleEntity> roleRepository,
-            IValidator<IUserAttributeRequest> userAttributeRequestValidator)
+            IValidator<GroupBaseUserRegisterRequest> groupBaseUserRegisterRequestValidator,
+            IValidator<BaseRegisterRequest> baseRegisterValidator,
+            IValidator<IUserAttributeRequest> userAttributeRequestValidator,
+            ILogger<AddUserService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
 
-            _inviteRepository = inviteRepository;
-            _groupRepository = groupRepository;
-            _groupUserRepository = groupUserRepository;
-            _roleRepository = roleRepository;
+            _userDAO = userDAO;
+            _inviteDAO = inviteDAO;
+            _roleDAO = roleDAO;
+
+            _emailService = emailService;
+            _groupUserService = groupUserService;
+            _addUserFilter = addUserFilter;
 
             _newUserValidator = newUserValidator;
             _registerValidator = registerValidator;
             _acceptInviteValidator = acceptInviteValidator;
             _externalLoginRequsterRequestValidator = externalLoginRequsterRequestValidator;
+            _groupBaseUserRegisterRequestValidator = groupBaseUserRegisterRequestValidator;
             _userAttributeRequestValidator = userAttributeRequestValidator;
-
-            _emailService = emailService;
+            _baseRegisterValidator = baseRegisterValidator;
 
             _identityUIEndpoints = identityUIEndpoints.Value;
 
@@ -93,186 +108,110 @@ namespace SSRD.IdentityUI.Core.Services.User
         /// <param name="newUserRequest"></param>
         /// <param name="adminId"></param>
         /// <returns></returns>
-        public async Task<Result<string>> AddUser(NewUserRequest newUserRequest, string adminId)
+        public async Task<Core.Models.Result.Result<string>> AddUser(NewUserRequest newUserRequest, string adminId)
         {
             ValidationResult validationResult = _newUserValidator.Validate(newUserRequest);
             if(!validationResult.IsValid)
             {
                 _logger.LogError($"Invalid NewUserRequest. Admin {adminId}");
-                return Result.Fail<string>(ResultUtils.ToResultError(validationResult.Errors));
+                return Core.Models.Result.Result.Fail<string>(ResultUtils.ToResultError(validationResult.Errors));
             }
 
-            AppUserEntity appUser = new AppUserEntity(
-                userName: newUserRequest.UserName,
-                email: newUserRequest.Email,
-                firstName: newUserRequest.FirstName,
-                lastName: newUserRequest.LastName,
-                emailConfirmed: false,
-                enabled: true);
-
-            IdentityResult result = await _userManager.CreateAsync(appUser);
-            if (!result.Succeeded)
+            BaseRegisterRequest baseRegisterRequest = new BaseRegisterRequest
             {
-                _logger.LogError($"Admin with id {adminId} failed to add new user");
-                return Result.Fail<string>(ResultUtils.ToResultError(result.Errors));
-            }
+                Username = newUserRequest.UserName,
+                Email = newUserRequest.Email,
+                FirstName = newUserRequest.FirstName,
+                LastName = newUserRequest.LastName,
+            };
 
-            appUser = await _userManager.FindByNameAsync(newUserRequest.UserName);
-            if (appUser == null)
+            Result<AppUserEntity> addUserResult = await AddUser(baseRegisterRequest, false, false, false);
+            if(addUserResult.Failure)
             {
-                _logger.LogError($"Failed to find new user with UserName {newUserRequest.UserName}. Admin {adminId}");
-                return Result.Fail<string>("no_user", "No user");
+                return Core.Models.Result.Result.Fail<string>(addUserResult.ResultMessages.Select(x => new Core.Models.Result.Result.ResultError(x.Code, x.Code)).ToList());
             }
 
-            return Result.Ok(appUser.Id);
+            return Core.Models.Result.Result.Ok(addUserResult.Value.Id);
         }
 
-        public async Task<Result> Register(RegisterRequest registerRequest)
+        public async Task<Core.Models.Result.Result> Register(RegisterRequest registerRequest)
         {
             if (!_identityUIEndpoints.RegisterEnabled)
             {
                 _logger.LogError($"User tried to register, but registrations are disabled");
-                return Result.Fail("registration_is_not_enabled", "Registration disabled");
+                return Core.Models.Result.Result.Fail(REGISTRATION_IS_NOT_ENABLED, REGISTRATION_IS_NOT_ENABLED);
             }
 
-            ValidationResult registerValidationResult = _registerValidator.Validate(registerRequest);
-            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(registerRequest);
-            if (!registerValidationResult.IsValid || !userAttributeValidationResult.IsValid)
+            ValidationResult validationResult = _registerValidator.Validate(registerRequest);
+            if(!validationResult.IsValid)
             {
-                _logger.LogError($"Invalid {typeof(RegisterRequest).Name} model");
-
-                List<Result.ResultError> errors = ResultUtils.ToResultError(registerValidationResult.Errors);
-                errors.AddRange(ResultUtils.ToResultError(userAttributeValidationResult.Errors));
-
-                return Result.Fail(errors);
+                _logger.LogWarning($"Invalid {typeof(RegisterRequest).Name}");
+                return Core.Models.Result.Result.Fail(validationResult.Errors);
             }
 
-            List<UserAttributeEntity> userAttributes = null;
-            if(registerRequest.Attributes != null)
+            CommonUtils.Result.Result<AppUserEntity> addResult = await AddUser(registerRequest);
+            if(addResult.Failure)
             {
-                userAttributes = registerRequest.Attributes
-                    .Select(x => new UserAttributeEntity(
-                        key: x.Key,
-                        value: x.Value))
-                    .ToList();
+                return Core.Models.Result.Result.Fail(addResult.ResultMessages.Select(x => new Core.Models.Result.Result.ResultError(x.Code, x.Code, null)).ToList());
             }
 
-            string username;
-            if(_identityUIEndpoints.UseEmailAsUsername)
-            {
-                username = registerRequest.Email;
-            }
-            else
-            {
-                if(string.IsNullOrEmpty(registerRequest.Username))
-                {
-                    _logger.LogError($"Username cannot be empty");
-                    return Result.Fail("username_cannot_be_empty", "username_cannot_be_empty");
-                }
-
-                username = registerRequest.Username;
-            }
-
-            AppUserEntity appUser = new AppUserEntity(
-                userName: username,
-                email: registerRequest.Email,
-                firstName: registerRequest.FirstName,
-                lastName: registerRequest.LastName,
-                emailConfirmed: false,
-                enabled: true,
-                phoneNumber: registerRequest.PhoneNumber,
-                attributes: userAttributes);
-
-            IdentityResult identityResult = await _userManager.CreateAsync(appUser, registerRequest.Password);
-            if (!identityResult.Succeeded)
-            {
-                _logger.LogError($"Failed to register user");
-                return Result.Fail(ResultUtils.ToResultError(identityResult.Errors));
-            }
-
-            string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
-
-            await _emailService.SendVerificationMail(appUser, code);
-
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        public async Task<Result> AcceptInvite(AcceptInviteRequest acceptInvite)
+        public async Task<Core.Models.Result.Result> AcceptInvite(AcceptInviteRequest acceptInvite)
         {
             ValidationResult acceptInviteValidationResult = _acceptInviteValidator.Validate(acceptInvite);
-            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(acceptInvite);
-            if (!acceptInviteValidationResult.IsValid || !userAttributeValidationResult.IsValid)
+            if(!acceptInviteValidationResult.IsValid)
             {
-                _logger.LogWarning($"Invalid {nameof(AcceptInviteRequest)} model");
-
-                List<Result.ResultError> errors = ResultUtils.ToResultError(acceptInviteValidationResult.Errors);
-                errors.AddRange(ResultUtils.ToResultError(userAttributeValidationResult.Errors));
-
-                return Result.Fail(errors);
+                _logger.LogWarning($"Invalid {typeof(AcceptInviteRequest).Name} model");
             }
 
-            BaseSpecification<InviteEntity> getInviteSpecification = new BaseSpecification<InviteEntity>();
-            getInviteSpecification.AddFilter(x => x.Token == acceptInvite.Code);
-            getInviteSpecification.AddFilter(x => x.Status == Data.Enums.Entity.InviteStatuses.Pending);
+            IBaseSpecification<InviteEntity, InviteEntity> getInviteSpecification = SpecificationBuilder
+                .Create<InviteEntity>()
+                .Where(x => x.Token == acceptInvite.Code)
+                .Where(x => x.Status == Data.Enums.Entity.InviteStatuses.Pending)
+                .Build();
 
-            InviteEntity inviteEntity = _inviteRepository.SingleOrDefault(getInviteSpecification);
+            InviteEntity inviteEntity = await _inviteDAO.SingleOrDefault(getInviteSpecification);
             if(inviteEntity == null)
             {
                 _logger.LogError($"No Invite. Token {acceptInvite.Code}");
-                return Result.Fail("no_invite", "No Invite");
+                return Core.Models.Result.Result.Fail("no_invite", "No Invite");
             }
 
             if(inviteEntity.ExpiresAt < DateTimeOffset.UtcNow)
             {
                 _logger.LogError($"Invite has expired");
-                return Result.Fail("no_invite", "No Invite");
+                return Core.Models.Result.Result.Fail("no_invite", "No Invite");
             }
 
-            List<UserAttributeEntity> userAttributes = null;
-            if (acceptInvite.Attributes != null)
+            if (inviteEntity.GroupId != null)
             {
-                userAttributes = acceptInvite.Attributes
-                    .Select(x => new UserAttributeEntity(
-                        key: x.Key,
-                        value: x.Value))
-                    .ToList();
-            }
-
-            string username;
-            if (_identityUIEndpoints.UseEmailAsUsername)
-            {
-                username = inviteEntity.Email;
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(acceptInvite.Username))
+                Result groupValidResult = await _groupUserService.ValidateGroup(inviteEntity.GroupId);
+                if (groupValidResult.Failure)
                 {
-                    _logger.LogError($"Username cannot be empty");
-                    return Result.Fail("username_cannot_be_empty", "username_cannot_be_empty");
+                    return Result.Fail(groupValidResult).ToOldResult();
                 }
 
-                username = acceptInvite.Username;
+                Result groupRoleValidResult = await _groupUserService.RoleIsValid(inviteEntity.GroupRoleId);
+                if (groupRoleValidResult.Failure)
+                {
+                    return Result.Fail(groupRoleValidResult).ToOldResult();
+                }
             }
 
-            AppUserEntity appUser = new AppUserEntity(
-                userName: username,
-                email: inviteEntity.Email,
-                firstName: acceptInvite.FirstName,
-                lastName: acceptInvite.LastName,
-                emailConfirmed: true,
-                enabled: true,
-                phoneNumber: acceptInvite.PhoneNumber,
-                attributes: userAttributes);
+            acceptInvite.Email = inviteEntity.Email;
 
-            IdentityResult identityResult = await _userManager.CreateAsync(appUser, acceptInvite.Password);
-            if (!identityResult.Succeeded)
+            Result<AppUserEntity> addUserResult = await AddUser(acceptInvite, sendConfirmationMail: false, emailConfirmed: true);
+            if(addUserResult.Failure)
             {
-                _logger.LogError($"Failed to create new user for invite. InviteId {inviteEntity.Id}");
-                return Result.Fail(ResultUtils.ToResultError(identityResult.Errors));
+                return addUserResult.ToOldResult();
             }
+
+            AppUserEntity appUser = addUserResult.Value;
 
             inviteEntity.Update(Data.Enums.Entity.InviteStatuses.Accepted);
-            bool updateInvite = _inviteRepository.Update(inviteEntity);
+            bool updateInvite = await _inviteDAO.Update(inviteEntity);
             if(!updateInvite)
             {
                 _logger.LogWarning($"Failed to update invite status. InnivteId {inviteEntity.Id}, UserId {appUser.Id}");
@@ -280,151 +219,51 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             if(inviteEntity.GroupId != null)
             {
-                AddToGroup(appUser.Id, inviteEntity.GroupId, inviteEntity.GroupRoleId);
+                Result addToGroupResult = await _groupUserService.AddUserToGroupWithoutValidation(appUser.Id, inviteEntity.GroupId, inviteEntity.GroupRoleId);
             }
 
             if(inviteEntity.RoleId != null)
             {
-                await AddToGlobalRole(appUser, inviteEntity.RoleId);
+                Result addToGlobalRole = await AddToGlobalRole(appUser, inviteEntity.RoleId);
             }
 
-            return Result.Ok();
+            return Core.Models.Result.Result.Ok();
         }
 
-        private Result AddToGroup(string userId, string groupId, string groupRoleId)
-        {
-            _logger.LogInformation($"Adding user to group. UserId {userId}, GroupId {groupId}");
-
-            BaseSpecification<GroupEntity> groupExistsSpecification = new BaseSpecification<GroupEntity>();
-            groupExistsSpecification.AddFilter(x => x.Id == groupId);
-
-            bool groupExists = _groupRepository.Exist(groupExistsSpecification);
-            if(!groupExists)
-            {
-                _logger.LogError($"No Group. GroupId {groupId}");
-                return Result.Fail("no_group", "No Group");
-            }
-
-            BaseSpecification<RoleEntity> groupRoleExistsSpecification = new BaseSpecification<RoleEntity>();
-            groupRoleExistsSpecification.AddFilter(x => x.Id == groupRoleId);
-            groupRoleExistsSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Group);
-
-            bool groupRoleExists = _roleRepository.Exist(groupRoleExistsSpecification);
-            if(!groupRoleExists)
-            {
-                _logger.LogWarning($"No GroupRole, adding GroupUser without GroupRole");
-                groupRoleId = null;
-            }
-
-            GroupUserEntity groupUser = new GroupUserEntity(
-                userId: userId,
-                groupId: groupId,
-                roleId: groupRoleId);
-
-            bool addGroupUser = _groupUserRepository.Add(groupUser);
-            if(!addGroupUser)
-            {
-                _logger.LogError($"Failed to add GroupUser. GroupId {groupId}, UserId {userId}");
-                return Result.Fail("failed_to_add_group_user", "Failed to add GroupUser");
-            }
-
-            return Result.Ok();
-        }
-
-        private async Task<Result> AddToGlobalRole(AppUserEntity appUser, string roleId)
-        {
-            _logger.LogInformation($"Adding user to global role. UserId {appUser.Id}, RoleId {roleId}");
-
-            BaseSpecification<RoleEntity> baseSpecification = new BaseSpecification<RoleEntity>();
-            baseSpecification.AddFilter(x => x.Id == roleId);
-            baseSpecification.AddFilter(x => x.Type == Data.Enums.Entity.RoleTypes.Global);
-
-            RoleEntity role = _roleRepository.SingleOrDefault(baseSpecification);
-            if(role == null)
-            {
-                _logger.LogError($"No GlobalRole. RoleId {roleId}");
-                return Result.Fail("no_role", "No Role");
-            }
-
-            IdentityResult addResult = await _userManager.AddToRoleAsync(appUser, role.Name);
-            if(!addResult.Succeeded)
-            {
-                _logger.LogError($"Failed to add role. UserId {appUser.Id}, RoleId {roleId}");
-                return Result.Fail("failed_to_add_role", "Failed to add role");
-            }
-
-            return Result.Ok();
-        }
-
-        public async Task<Result> ExternalLoginRequest(ExternalLoginRegisterRequest externalLoginRegisterRequest)
+        public async Task<Core.Models.Result.Result> ExternalLoginRequest(ExternalLoginRegisterRequest externalLoginRegisterRequest)
         {
             if (!_identityUIEndpoints.RegisterEnabled)
             {
                 _logger.LogError($"User tried to register, but registrations are disabled");
-                return Result.Fail("registration_is_not_enabled", "Registration disabled");
+                return Core.Models.Result.Result.Fail("registration_is_not_enabled", "Registration disabled");
             }
 
             ValidationResult externalLoginValidationResult = _externalLoginRequsterRequestValidator.Validate(externalLoginRegisterRequest);
-            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(externalLoginRegisterRequest);
-            if (!externalLoginValidationResult.IsValid || !userAttributeValidationResult.IsValid)
+            if(!externalLoginValidationResult.IsValid)
             {
-                _logger.LogWarning($"Invalid {nameof(ExternalLoginRegisterRequestValidator)} model");
-
-                List<Result.ResultError> errors = ResultUtils.ToResultError(externalLoginValidationResult.Errors);
-                errors.AddRange(ResultUtils.ToResultError(userAttributeValidationResult.Errors));
-
-                return Result.Fail(errors);
+                _logger.LogWarning($"Invalid {typeof(ExternalLoginRegisterRequest)} model");
+                return Core.Models.Result.Result.Fail(externalLoginValidationResult.Errors);
             }
 
             ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
             if(externalLoginInfo == null)
             {
                 _logger.LogError($"Failed to get external login info.");
-                return Result.Fail("failed_to_get_external_login_info", "Failed to get external login info");
+                return Core.Models.Result.Result.Fail("failed_to_get_external_login_info", "Failed to get external login info");
             }
 
-            List<UserAttributeEntity> userAttributes = null;
-            if (externalLoginRegisterRequest.Attributes != null)
+            //TODO: do not confirm. don't require confirmed emails for external login users
+            CommonUtils.Result.Result<AppUserEntity> addUserResult = await AddUser(
+                externalLoginRegisterRequest,
+                setPassword: false,
+                sendConfirmationMail: false,
+                emailConfirmed: true);
+            if(addUserResult.Failure)
             {
-                userAttributes = externalLoginRegisterRequest.Attributes
-                    .Select(x => new UserAttributeEntity(
-                        key: x.Key,
-                        value: x.Value))
-                    .ToList();
+                return addUserResult.ToOldResult();
             }
 
-            string username;
-            if (_identityUIEndpoints.UseEmailAsUsername)
-            {
-                username = externalLoginRegisterRequest.Email;
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(externalLoginRegisterRequest.Username))
-                {
-                    _logger.LogError($"Username cannot be empty");
-                    return Result.Fail("username_cannot_be_empty", "username_cannot_be_empty");
-                }
-
-                username = externalLoginRegisterRequest.Username;
-            }
-
-            AppUserEntity appUser = new AppUserEntity(
-                userName: username,
-                email: externalLoginRegisterRequest.Email,
-                firstName: externalLoginRegisterRequest.FirstName,
-                lastName: externalLoginRegisterRequest.LastName,
-                emailConfirmed: false,
-                enabled: true,
-                phoneNumber: externalLoginRegisterRequest.PhoneNumber,
-                attributes: userAttributes);
-
-            IdentityResult createUserResult = await _userManager.CreateAsync(appUser);
-            if(!createUserResult.Succeeded)
-            {
-                _logger.LogError($"Failed to create user");
-                return Result.Fail(createUserResult.Errors);
-            }
+            AppUserEntity appUser = addUserResult.Value;
 
             IdentityResult addLoginResult = await _userManager.AddLoginAsync(appUser, externalLoginInfo);
             if(!addLoginResult.Succeeded)
@@ -432,11 +271,185 @@ namespace SSRD.IdentityUI.Core.Services.User
                 _logger.LogError($"Failed to add login to user. UserId {appUser.Id}");
             }
 
-            string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+            return Core.Models.Result.Result.Ok();
+        }
 
-            await _emailService.SendVerificationMail(appUser, code);
+        public async Task<CommonUtils.Result.Result> UserExists(BaseRegisterRequest baseRegisterRequest)
+        {
+            string username = baseRegisterRequest.Username;
 
-            return Result.Ok();
+            if(_identityUIEndpoints.UseEmailAsUsername)
+            {
+                username = baseRegisterRequest.Email;
+            }
+
+            IBaseSpecification<AppUserEntity, AppUserEntity> specification = SpecificationBuilder
+                .Create<AppUserEntity>()
+                .WithUsername(username)
+                .Build();
+
+            bool userExists = await _userDAO.Exist(specification);
+            if(!userExists)
+            {
+                return CommonUtils.Result.Result.Fail(USER_NOT_FOUND);
+            }
+
+            return CommonUtils.Result.Result.Ok();
+        }
+
+        private async Task<CommonUtils.Result.Result> AddToGlobalRole(AppUserEntity appUser, string roleId)
+        {
+            _logger.LogInformation($"Adding user to global role. UserId {appUser.Id}, RoleId {roleId}");
+
+            IBaseSpecification<RoleEntity, RoleEntity> roleSpecification = SpecificationBuilder
+                .Create<RoleEntity>()
+                .Where(x => x.Id == roleId)
+                .Where(x => x.Type == Data.Enums.Entity.RoleTypes.Global)
+                .Build();
+
+            RoleEntity role = await _roleDAO.SingleOrDefault(roleSpecification);
+            if (role == null)
+            {
+                _logger.LogError($"No GlobalRole. RoleId {roleId}");
+                return CommonUtils.Result.Result.Fail(ROLE_NO_FOUND);
+            }
+
+            IdentityResult addResult = await _userManager.AddToRoleAsync(appUser, role.Name);
+            if (!addResult.Succeeded)
+            {
+                _logger.LogError($"Failed to add role. UserId {appUser.Id}, RoleId {roleId}");
+                return CommonUtils.Result.Result.Fail(FAILED_TO_ADD_ROLE);
+            }
+
+            return CommonUtils.Result.Result.Ok();
+        }
+
+        public virtual async Task<CommonUtils.Result.Result<AppUserEntity>> AddUser(
+            BaseRegisterRequest baseRegisterRequest,
+            bool setPassword = true,
+            bool sendConfirmationMail = true,
+            bool emailConfirmed = false)
+        {
+            ValidationResult validationResult;
+
+            if (_identityUIEndpoints.UseEmailAsUsername)
+            {
+                validationResult = _baseRegisterValidator.Validate(baseRegisterRequest, ruleSet: BaseRegisterRequestValidator.USE_EMAIL_AS_USERNAME);
+            }
+            else
+            {
+                validationResult = _baseRegisterValidator.Validate(baseRegisterRequest, ruleSet: BaseRegisterRequestValidator.REQUIRE_EMAIL_USERNAME);
+            }
+
+            if(setPassword)
+            {
+                ValidationResult setPasswordValidationResult = _baseRegisterValidator.Validate(baseRegisterRequest, ruleSet: BaseRegisterRequestValidator.REQUIRE_PASSWORD);
+                if(!setPasswordValidationResult.IsValid)
+                {
+                    foreach(ValidationFailure setPasswordError in setPasswordValidationResult.Errors)
+                    {
+                        validationResult.Errors.Add(setPasswordError);
+                    }
+                }
+            }
+
+            if (!validationResult.IsValid)
+            {
+                _logger.LogError($"Invalid {typeof(BaseRegisterRequest).Name} model");
+                return Result.Fail<AppUserEntity>(validationResult.ToResultError());
+            }
+
+            ValidationResult userAttributeValidationResult = _userAttributeRequestValidator.Validate(baseRegisterRequest);
+            if (!userAttributeValidationResult.IsValid)
+            {
+                _logger.LogError($"Invalid {typeof(IUserAttributeRequest).Name} type");
+                return Result.Fail<AppUserEntity>(validationResult.ToResultError());
+            }
+
+            List<UserAttributeEntity> userAttributes = null;
+            if (baseRegisterRequest.Attributes != null)
+            {
+                userAttributes = baseRegisterRequest.Attributes
+                    .Select(x => new UserAttributeEntity(
+                        key: x.Key?.Trim(),
+                        value: x.Value?.Trim()))
+                    .ToList();
+            }
+
+            if (_identityUIEndpoints.UseEmailAsUsername)
+            {
+                baseRegisterRequest.Username = baseRegisterRequest.Email;
+            }
+
+            baseRegisterRequest.Username.Trim();
+
+            Result beforeUserAddResult = await _addUserFilter.BeforeAdd(baseRegisterRequest);
+            if(beforeUserAddResult.Failure)
+            {
+                return Result.Fail<AppUserEntity>(beforeUserAddResult);
+            }
+
+            AppUserEntity appUser = new AppUserEntity(
+                userName: baseRegisterRequest.Username,
+                email: baseRegisterRequest.Email,
+                firstName: baseRegisterRequest.FirstName,
+                lastName: baseRegisterRequest.LastName,
+                emailConfirmed: emailConfirmed,
+                enabled: true,
+                phoneNumber: baseRegisterRequest.PhoneNumber,
+                attributes: userAttributes);
+
+            IdentityResult identityResult;
+            if (setPassword)
+            {
+                identityResult = await _userManager.CreateAsync(appUser, baseRegisterRequest.Password);
+            }
+            else
+            {
+                identityResult = await _userManager.CreateAsync(appUser);
+            }
+
+            if (!identityResult.Succeeded)
+            {
+                _logger.LogError($"Failed to register user");
+                return Result.Fail<AppUserEntity>(identityResult.ToResultError());
+            }
+
+            Result afterUserAddedResult = await _addUserFilter.AfterAdded(appUser);
+            if(afterUserAddedResult.Failure)
+            {
+                return Result.Fail<AppUserEntity>(afterUserAddedResult);
+            }
+
+            if (sendConfirmationMail)
+            {
+                string code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+
+                await _emailService.SendVerificationMail(appUser, code);
+            }
+
+            return Result.Ok(appUser);
+        }
+
+        public async Task<Result<IdStringModel>> RegisterForGroup(GroupBaseUserRegisterRequest registerRequest)
+        {
+            ValidationResult validationResult = _groupBaseUserRegisterRequestValidator.Validate(registerRequest);
+            if(!validationResult.IsValid)
+            {
+                _logger.LogError($"Invalid {typeof(GroupBaseUserRegisterRequest).Name} model");
+                return Result.Fail<IdStringModel>(validationResult.ToResultError());
+            }
+
+            Result<AppUserEntity> addUserResult = await AddUser(registerRequest);
+            if(addUserResult.Failure)
+            {
+                return Result.Fail<IdStringModel>(addUserResult);
+            }
+
+            IdStringModel idStringModel = new IdStringModel(
+                id: addUserResult.Value.Id);
+
+            return Result.Ok(idStringModel);
         }
     }
 }

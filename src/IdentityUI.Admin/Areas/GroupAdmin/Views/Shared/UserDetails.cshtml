@@ -1,0 +1,433 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.User.GroupAdminUserDetailsViewModel
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimPermissions;
+
+@{
+    GroupAdminSidebarSelection.SelectedOption = GroupAdminSidebarOptions.User;
+}
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+@section script{
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            new UserDetails('@Model.GroupId', '@Model.GroupUserId');
+        });
+
+        class UserDetails {
+            constructor(groupId, userId) {
+                this.groupId = groupId;
+                this.userId = userId;
+
+                const $form = $('#details-form');
+
+                this.userIdInput = new InputComponent($form, '#user-id-input');
+                this.userNameInput = new InputComponent($form, '#username-input');
+                this.emailInput = new InputComponent($form, '#email-input');
+                this.firstNameInput = new InputComponent($form, '#first-name-input');
+                this.lastNameInput = new InputComponent($form, '#last-name-input');
+                this.phoneNumberInput = new InputComponent($form, '#phone-number-input');
+
+                this.$emailConfirmedCheckbox = $form.find('#email-confirmed-checkbox');
+                this.$phoneNumberConfirmedCheckbox = $form.find('#phone-number-confirmed-checkbox');
+                this.$twoFactorEnabledCheckbox = $form.find('#two-factor-enabled-checkbox');
+                this.$enabledCheckbox = $form.find('#enabled-checkbox');
+
+                this.$lockedOutToContainer = $form.find('#locked-out-container');
+                this.$lockedOutToLabel = $form.find('#locked-out-to-label');
+                this.$lockedOutToContainer.hide();
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                this.loader = new DotLoader($('#details-loader'), $form);
+
+                $('#impersonate-button').on('click', () => {
+                    this.impersonate();
+                });
+
+                $('#unlock-user-button').on('click', () => {
+                    this.unlock();
+                });
+
+                $('#verify-email').on('click', () => {
+                    this.sendVereficationMain();
+                });
+
+                $('#update-details-button').on('click', () => {
+                    this.update();
+                });
+
+                this.get();
+            }
+
+            hasFormChanged() {
+                const curentData = this.getData();
+
+                if (this.data === undefined || this.data === null) {
+                    return false;
+                }
+
+                if (this.data.userId !== curentData.data.userId) {
+                    return true;
+                }
+
+                if (this.data.username !== curentData.data.username) {
+                    return true;
+                }
+
+                if (this.data.email !== curentData.data.email) {
+                    return true;
+                }
+
+                if (this.data.firstName !== curentData.data.firstName) {
+                    return true;
+                }
+
+                if (this.data.lastName !== curentData.data.lastName) {
+                    return true;
+                }
+
+                if (this.data.emailConfirmed !== curentData.data.emailConfirmed) {
+                    return true;
+                }
+
+                if (this.data.phoneNumberConfirmed !== curentData.data.phoneNumberConfirmed) {
+                    return true;
+                }
+
+                if (this.data.twoFactorAuthenticationEnabled !== curentData.data.twoFactorAuthenticationEnabled) {
+                    return true;
+                }
+
+                if (this.data.enabled !== curentData.data.enabled) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            reset() {
+                this.userIdInput.value(null);
+                this.userNameInput.value(null);
+                this.emailInput.value(null);
+                this.firstNameInput.value(null);
+                this.lastNameInput.value(null);
+
+                this.$emailConfirmedCheckbox.prop('checked', false);
+                this.$phoneNumberConfirmedCheckbox.prop('checked', false);
+                this.$twoFactorEnabledCheckbox.prop('checked', false);
+                this.$enabledCheckbox.prop('checked', false);
+
+                this.$lockedOutToContainer.hide();
+                this.$lockedOutToLabel.text(null);
+            }
+
+            showUser(data) {
+                this.userDetails = data;
+
+                this.userIdInput.value(data.userId);
+                this.userNameInput.value(data.username);
+                this.emailInput.value(data.email);
+                this.firstNameInput.value(data.firstName);
+                this.lastNameInput.value(data.lastName);
+                this.phoneNumberInput.value(data.phoneNumber);
+
+                this.$emailConfirmedCheckbox.prop('checked', data.emailConfirmed);
+                this.$phoneNumberConfirmedCheckbox.prop('checked', data.phoneNumberConfirmed);
+                this.$twoFactorEnabledCheckbox.prop('checked', data.twoFactorAuthenticationEnabled);
+                this.$enabledCheckbox.prop('checked', data.enabled);
+
+                if (!data.twoFactorAuthenticationEnabled) {
+                    this.$twoFactorEnabledCheckbox.prop('disabled', true);
+                }
+
+                if (data.lockedOutTo !== null) {
+                    this.$lockedOutToContainer.show();
+                    this.$lockedOutToLabel.text(data.lockedOutTo);
+                }
+            }
+
+            showErrors(errors) {
+                this.userIdInput.showError(errors.userId);
+                this.userNameInput.showError(errors.username);
+                this.emailInput.showError(errors.Email);
+                this.firstNameInput.showError(errors.FirstName);
+                this.lastNameInput.showError(errors.LastName);
+                this.phoneNumberInput.showError(errors.PhoneNumber);
+
+                if (errors[''] !== undefined && errors[''] !== null) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+            }
+
+            get() {
+                this.loader.show();
+                this.reset();
+
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/Get/${this.userId}`)
+                    .done((data) => {
+                        this.showUser(data);
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    });
+            }
+
+            getData() {
+                return {
+                    //username: this.userNameInput.value(),
+                    Email: this.emailInput.value(),
+                    FirstName: this.firstNameInput.value(),
+                    LastName: this.lastNameInput.value(),
+                    PhoneNumber: this.phoneNumberInput.value(),
+                    EmailConfirmed: this.$emailConfirmedCheckbox.prop('checked'),
+                    PhoneNumberConfirmed: this.$phoneNumberConfirmedCheckbox.prop('checked'),
+                    TwoFactorEnabled: this.$twoFactorEnabledCheckbox.prop('checked'),
+                    Enabled: this.$enabledCheckbox.prop('checked'),
+                }
+            }
+
+            update() {
+                this.statusAlert.hide();
+                this.loader.show();
+
+                const data = this.getData();
+
+                Api.post(`/api/GroupAdmin/${this.groupId}/User/Update/${this.userId}`, data)
+                    .done(() => {
+                        this.statusAlert.showSuccess('User Update');
+                        this.get();
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+
+                        this.loader.hide();
+                    })
+            }
+
+            impersonate() {
+                this.loader.show();
+                this.statusAlert.hide();
+
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/StartImpersonation/${this.userId}`)
+                    .done(() => {
+                        window.open(`/`);
+                        location.reload();
+                    })
+                    .fail((response) => {
+                        this.statusAlert.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    });
+            }
+
+            unlock() {
+                this.loader.show();
+                this.statusAlert.hide();
+
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/Unlock/${this.userId}`)
+                    .done(() => {
+                        this.$lockedOutToContainer.hide();
+                        this.statusAlert.showSuccess('User was unlocked');
+                    })
+                    .fail((response) => {
+                        this.statusAlert.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    });
+            }
+
+            sendVereficationMain() {
+                this.loader.show();
+                this.statusAlert.hide();
+
+                Api.get(`/api/GroupAdmin/${this.groupId}/User/SendVereficationMain/${this.userId}`)
+                    .done(() => {
+                        this.statusAlert.showSuccess('Email verification mail was sent');
+                    })
+                    .fail((response) => {
+                        this.statusAlert.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    });
+            }
+        }
+    </script>
+}
+
+<div>
+    <div id="status-alert">
+        @await Component.InvokeAsync("IdentityStatusAlertJs")
+    </div>
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Details
+                    </h5>
+                </div>
+
+                <div id="details-loader">
+                    @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
+                </div>
+
+                <div id="details-form" class="custom-form" style="display:none;">
+                    <div id="user-id-input" class="form-group">
+                        <label class="control-label">User Id</label>
+                        <input class="form-control disabled" disabled />
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div id="username-input" class="form-group">
+                        <label class="control-label">Username</label>
+                        <input class="form-control disabled" disabled />
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div id="email-input" class="form-group">
+                        <label class="control-label">Email</label>
+                        @if (_identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value &&
+                         User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                        {
+                            <div class="verify-email">
+                                <input class="form-control" />
+                                <button type="button" id="verify-email" class="btn btn-primary">Verify Email</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <input class="form-control" disabled />
+                        }
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div id="first-name-input" class="form-group">
+                        <label class="control-label">First Name</label>
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                        {
+                            <input class="form-control" />
+                        }
+                        else
+                        {
+                            <input class="form-control" disabled />
+                        }
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div id="last-name-input" class="form-group">
+                        <label class="control-label">Last Name</label>
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                        {
+                            <input class="form-control" />
+                        }
+                        else
+                        {
+                            <input class="form-control" disabled />
+                        }
+                        <span class="text-danger"></span>
+                    </div>
+                    <div id="phone-number-input" class="form-group">
+                        <label class="control-label">Phone Number</label>
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                        {
+                            <input class="form-control" />
+                        }
+                        else
+                        {
+                            <input class="form-control" disabled />
+                        }
+                        <span class="text-danger"></span>
+                    </div>
+                    <div class="details-checkboxes">
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                                {
+                                    <input id="email-confirmed-checkbox" type="checkbox" class="custom-control-input">
+                                }
+                                else
+                                {
+                                    <input id="email-confirmed-checkbox" type="checkbox" class="custom-control-input" disabled>
+                                }
+                                <label for="email-confirmed-checkbox" class="custom-control-label">Email Confirmed</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                                {
+                                    <input id="phone-number-confirmed-checkbox" type="checkbox" class="custom-control-input" id="phone-number-confirmed-checkbox">
+                                }
+                                else
+                                {
+                                    <input id="phone-number-confirmed-checkbox" type="checkbox" class="custom-control-input" id="phone-number-confirmed-checkbox" disabled>
+                                }
+                                <label for="phone-number-confirmed-checkbox" class="custom-control-label">Phone Number Confirmed</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                                {
+                                    <input id="two-factor-enabled-checkbox" type="checkbox" class="custom-control-input">
+                                }
+                                else
+                                {
+                                    <input id="two-factor-enabled-checkbox" type="checkbox" class="custom-control-input" disabled>
+                                }
+                                <label for="two-factor-enabled-checkbox" class="custom-control-label">TwoFactor Enabled</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                                {
+                                    <input id="enabled-checkbox" type="checkbox" class="custom-control-input">
+                                }
+                                else
+                                {
+                                    <input id="enabled-checkbox" type="checkbox" class="custom-control-input" disabled>
+                                }
+
+                                <label for="enabled-checkbox" class="custom-control-label">Enabled</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="locked-out-container" class="lockout-holder">
+                        <div>
+                            <label class="control-label text-danger lockout-text">Lockout ends: </label>
+                            <label id="locked-out-to-label" class="control-label lockout-text lockout-text-padding"></label>
+                        </div>
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                        {
+                            <button type="button" id="unlock-user-button" class="btn btn-primary lockout-button">Unlock user</button>
+                        }
+                    </div>
+
+                    <div class="button-holder">
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_IMPERSONATE_USER, _identityUIClaimPermissions.Value)
+                           && _identityUIEndpoints.Value.AllowImpersonation)
+                        {
+                            <button type="button" id="impersonate-button" class="btn btn-primary custom-submit">Impersonate</button>
+                        }
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
+                        {
+                            <button type="button" id="update-details-button" class="btn btn-primary custom-submit">Save</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,10 @@
     ViewData["Title"] = "Register";
 }
 
+@section script {
+    @await Component.InvokeAsync("AdminUIReCaptchaJavaScript", new { action = "register" })
+}
+
 <div class="app-container">
     <div class="h-100 bg-plum-plate">
         <div class="d-flex min-vh-100 justify-content-center align-items-center">
@@ -21,6 +25,9 @@
                                     </h4>
                                 </div>
                                 <div class="divider row"></div>
+
+                                @await Component.InvokeAsync("AdminUIReCaptchaInput")
+
                                 <div class="form-row">
                                     <div class="col-md-12">
                                         <div class="position-relative form-group">

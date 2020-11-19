@@ -1,14 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch.Helpers;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using SSRD.Audit.Models;
-using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 
 namespace SSRD.Audit.Services
 {
@@ -24,11 +19,13 @@ namespace SSRD.Audit.Services
             _auditOptions = auditOptions.Value;
         }
 
-        public Models.AuditSubjectData Get()
+        public AuditSubjectData Get()
         {
-            Models.AuditSubjectData auditData = new Models.AuditSubjectData(
+            AuditSubjectData auditData = new AuditSubjectData(
                 subjectType: Data.SubjectTypes.Human,
                 subjectIdentifier: GetUserId(),
+                subjectMetadata: GetSubjectMetadata(),
+                groupIdentifier: GetGroupIdentifier(),
                 host: GetHost(),
                 remoteIp: GetRemoteIp(),
                 resourceName: GetResourceName(),
@@ -42,6 +39,16 @@ namespace SSRD.Audit.Services
         public virtual string GetUserId()
         {
             return _httpContextAccessor.HttpContext?.User.FindFirst(_auditOptions.UserIdClaimType)?.Value;
+        }
+
+        public virtual string GetSubjectMetadata()
+        {
+            return null;
+        }
+
+        public virtual string GetGroupIdentifier()
+        {
+            return null;
         }
 
         public virtual string GetHost()

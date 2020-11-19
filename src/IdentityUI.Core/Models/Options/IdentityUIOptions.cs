@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSRD.AdminUI.Template.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,5 +13,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
 
         public EmailSenderOptions EmailSender { get; set; }
         public DatabaseOptions Database { get; set; }
+
+        public ReCaptchaOptions ReCaptcha { get; set; }
     }
 }

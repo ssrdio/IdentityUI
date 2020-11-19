@@ -1,0 +1,89 @@
+﻿@model SSRD.IdentityUI.Account.Areas.Account.Models.Account.RegisterGroupViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+@section script {
+    @await Component.InvokeAsync("AdminUIReCaptchaJavaScript", new { action = "registerGroup" })
+}
+
+<div class="app-container">
+    <div class="h-100 bg-plum-plate">
+        <div class="d-flex min-vh-100 justify-content-center align-items-center">
+            <div class="mx-auto app-login-box col-md-8">
+                <!-- <div class="app-logo-inverse mx-auto mb-3"></div> -->
+                <div class="modal-dialog w-100">
+                    <div class="modal-content">
+                        <form asp-area="Account" asp-controller="Account" asp-action="RegisterGroup" method="post">
+                            <div class="modal-body extra-body-padding">
+
+                                <div class="h5 modal-title text-center">
+                                    <h4 class="mt-2 modal-header-custom">
+                                        <div>Welcome,</div>
+                                        <span>It only takes a <span class="text-success inline-span">few seconds</span> to create your account</span>
+                                    </h4>
+                                </div>
+                                <div class="divider row"></div>
+
+                                @await Component.InvokeAsync("AdminUIReCaptchaInput")
+
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="GroupName" placeholder="Group name here..." type="text" class="form-control">
+                                            <span asp-validation-for="GroupName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="BaseUser.FirstName" placeholder="First name here..." type="text" class="form-control">
+                                            <span asp-validation-for="BaseUser.FirstName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="BaseUser.LastName" placeholder="Last name here..." type="text" class="form-control">
+                                            <span asp-validation-for="BaseUser.LastName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="BaseUser.Email" placeholder="Email here..." type="email" class="form-control">
+                                            <span asp-validation-for="BaseUser.Email" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="BaseUser.Password" placeholder="Password here..." type="password" class="form-control">
+                                            <span asp-validation-for="BaseUser.Password" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <input asp-for="BaseUser.ConfirmPassword" placeholder="Repeat Password here..." type="password" class="form-control">
+                                            <span asp-validation-for="BaseUser.ConfirmPassword" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @await Component.InvokeAsync("AdminUIErrorAlertRazor")
+                                <div class="divider row"></div>
+                                <h6 class="mb-0">
+                                    Already have an account? <a href="@PagePath.LOGIN" class="text-primary">Sign in</a> @if (Model.RecoverPasswordEnabled)
+                                    {<span> | <a href="@PagePath.RECOVER_PASSWORD" class="text-primary">Recover Password</a> </span>}
+                                </h6>
+                            </div>
+                            <div class="modal-footer d-block">
+                                <div class="float-right" style="padding-bottom: 15px">
+                                    <button type="submit" class="btn-wide btn-pill btn-shadow btn-hover-shine btn btn-primary btn-lg">Create Group</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center text-white opacity-8 mt-3">Copyright © @CopyRightModel.NAME @CopyRightModel.YEAR </div>
+            </div>
+        </div>
+    </div>
+</div>

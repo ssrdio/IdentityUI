@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.DataTable;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User;
@@ -11,16 +8,12 @@ using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Session.Models;
 using SSRD.IdentityUI.Core.Services.User.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
-using Newtonsoft.Json;
 using SSRD.AdminUI.Template.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.User
 {
-    [Authorize(Roles = IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)]
     public class UserController : BaseController
     {
         private const string TEMP_DATA_STATUS_ALERT_KEY = "UserStatusAlert";
@@ -29,13 +22,20 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.User
         private readonly IManageUserService _manageUserService;
         private readonly IAddUserService _addUserService;
         private readonly ISessionService _sessionService;
+        private readonly IImpersonateService _impersonateService;
 
-        public UserController(IUserDataService userDataService, IManageUserService manageUserService, IAddUserService addUserService, ISessionService sessionService)
+        public UserController(
+            IUserDataService userDataService,
+            IManageUserService manageUserService,
+            IAddUserService addUserService,
+            ISessionService sessionService,
+            IImpersonateService impersonateService)
         {
             _userDataService = userDataService;
             _manageUserService = manageUserService;
             _addUserService = addUserService;
             _sessionService = sessionService;
+            _impersonateService = impersonateService;
         }
 
         [HttpGet]
@@ -350,6 +350,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.User
             }
 
             return Ok(new EmptyResult());
+        }
+
+        [HttpDelete("[area]/[controller]/[action]/{userId}")]
+        public async Task<IActionResult> Delete([FromRoute] string userId)
+        {
+            CommonUtils.Result.Result result = await _manageUserService.RemoveUser(userId);
+
+            return CommonUtils.Result.ActionResultExtensions.ToApiResult(result);
         }
     }
 }

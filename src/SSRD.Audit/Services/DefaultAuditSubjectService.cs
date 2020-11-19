@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using SSRD.Audit.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.Audit.Services
 {
@@ -20,6 +17,8 @@ namespace SSRD.Audit.Services
             AuditSubjectData auditSubjectData = new AuditSubjectData(
                 subjectType: Data.SubjectTypes.Machine,
                 subjectIdentifier: _auditOptions.DefaultSubjectName,
+                subjectMetadata: null,
+                groupIdentifier: null,
                 host: null,
                 remoteIp: null,
                 resourceName: null,

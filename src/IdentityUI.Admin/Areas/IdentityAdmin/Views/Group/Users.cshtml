@@ -1,5 +1,10 @@
 ﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Group.Components.GroupMenu
 @model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Group.GroupUserViewModel
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
+@inject SSRD.IdentityUI.Core.Interfaces.Services.IIdentityUIUserInfoService _identityUIUserInfoService;
+
 @{
     SidebarSelection.SelectedOption = SidebarOptions.Group;
 }
@@ -13,9 +18,9 @@
     <script src="~/identityAdmin/app/group/group-invite-modal.js"></script>
     <script>
         $(document).ready(function () {
-            new GroupUsers('@Model.GroupId', '@User.GetUserId()', '@Json.Serialize(Model.CanMangeGroupRoles)', '@Json.Serialize(Model.CanAssigneGroupRoles)',
-                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True',
-                '@User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True',
+            new GroupUsers('@Model.GroupId', '@_identityUIUserInfoService.GetUserId()', '@Json.Serialize(Model.CanMangeGroupRoles)', '@Json.Serialize(Model.CanAssigneGroupRoles)',
+                '@_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ROLES)' === 'True',
+                '@_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_REMOVE_USERS)' === 'True',
                 '@Model.CanChangeOwnRole' === 'True')
         });
     </script>
@@ -23,12 +28,13 @@
 
 @section modal{
     <div id="modal-container">
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
+        @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
         {
             @await Component.InvokeAsync("AddExistingUserToGroupModal")
         }
 
-        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS) && SidebarSelection.UseEmailSender)
+        @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS) 
+            && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
         {
             @await Component.InvokeAsync("InviteToGroupModal")
         }
@@ -51,11 +57,13 @@
                     <h5 class="card-title">
                         Users
                     </h5>
-                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
+                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
                     {
                         <button id="add-existing-user-button" class="header-button">Add Existing User</button>
                     }
-                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS) && SidebarSelection.UseEmailSender)
+
+                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)
+                       && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
                     {
                         <button id="invite-user-button" class="header-button">Invite User</button>
                     }

@@ -1,0 +1,34 @@
+﻿<div id="invite-user-modal" class="modal fade" role="dialog" aria-labelledby="invite-user-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invite User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="invite-user-form">
+                    @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                    <div id="email-input" class="form-group">
+                        <label class="control-label">Email</label>
+                        <input class="form-control" type="text" />
+                        <span class="error text-danger"></span>
+                    </div>
+                    <div id="group-role-select" class="form-group">
+                        <label class="control-label">Group Role</label>
+                        <select class="form-control select2-container" style="width:100%">
+                            <option></option>
+                        </select>
+                        <span class="error text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer custom-modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary confirm">Add</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -48,10 +48,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
 
         public const string AUDIT = IDENTITY_ADMIN_AREA + "/Audit";
 
+        [Obsolete("Use IdentityUIEndpoints.ProfileImage")]
         public const string PROFILE_IMAGE = "/Account/Manage/GetProfileImage";
 
+        [Obsolete("Use IdentityUIEndpoints.Logout")]
         public static string LOGOUT;
+
+        [Obsolete("Use IdentityUIEndpoints.Manage")]
         public static string MANAGE;
+
+        [Obsolete("Use IdentityUIEndpoints.Home")]
         public static string HOME;
     }
 }

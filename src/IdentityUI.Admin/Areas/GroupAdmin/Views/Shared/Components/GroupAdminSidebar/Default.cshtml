@@ -1,0 +1,63 @@
+﻿@model GroupAdminViewModel
+
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityClaimOptions;
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
+<nav class="sidebar sidebar-offcanvas menu-line-color">
+    <ul class="nav">
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_ACCESS_DASHBOARD, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Dashboard ? "active" : "")">
+                <a class="nav-link" href="@string.Format(GroupAdminPaths.DASHBOARD, Model.GroupId)">
+                    <i class="fas fa-chart-line sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Dashboard</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.User ? "active" : "")">
+                <a class="nav-link" href="@string.Format(GroupAdminPaths.USER, Model.GroupId)">
+                    <i class="fas fa-user sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">User</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_INVITES, _identityClaimOptions.Value) && (_identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Invite ? "active" : "")">
+                <a class="nav-link" href="@string.Format(GroupAdminPaths.INVITE, Model.GroupId)">
+                    <i class="fas fa-envelope sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Invite</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_ATTRIBUTES, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Attributes ? "active" : "")">
+                <a class="nav-link" href="@string.Format(GroupAdminPaths.ATTRIBUTE, Model.GroupId)">
+                    <i class="fas fa-tag sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Attribute</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_VIEW_AUDIT, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Audit ? "active" : "")">
+                <a class="nav-link" href="@string.Format(GroupAdminPaths.AUDIT, Model.GroupId)">
+                    <i class="fas fa-book sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Audit</span>
+                </a>
+            </li>
+        }
+        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_SETTINGS, _identityClaimOptions.Value))
+        {
+            <li class="nav-item @(GroupAdminSidebarSelection.SelectedOption == GroupAdminSidebarOptions.Settings ? "active" : "")">
+                <a class="nav-link" href="@string.Format(GroupAdminPaths.SETTINGS, Model.GroupId)">
+                    <i class="fas fa-cogs sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Settings</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

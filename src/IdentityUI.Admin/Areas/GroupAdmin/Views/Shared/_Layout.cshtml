@@ -1,0 +1,109 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
+@inject SSRD.IdentityUI.Core.Interfaces.Services.IIdentityUIUserInfoService _identityUIUserInfoService;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - IdentityUI</title>
+
+    @await Component.InvokeAsync("AdminUIFavicon")
+
+    <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
+
+    <link rel="stylesheet" href="~/adminUI/template/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
+
+    <link rel="stylesheet" href="~/adminUI/template/css/base.css" asp-append-version="true" />
+    @*<link rel="stylesheet" href="~/adminUI/template/css/admin-pages.css" asp-append-version="true" />*@
+    <link rel="stylesheet" href="~/identityAdmin/app/css/site.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/adminUI/template/vendors/ti-icons/css/themify-icons.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/vendors/fontawesome-free-5.14.0-web/css/all.min.css" asp-append-version="true" />
+
+    @RenderSection("style", required: false)
+</head>
+<body>
+    <div class="container-scroller">
+        @await Component.InvokeAsync("GroupAdminHeader")
+        <div class="container-fluid page-body-wrapper">
+            @await Component.InvokeAsync("GroupAdminSidebar")
+            <div class="main-panel">
+                <div class="content-wrapper">
+
+                    @if (User.IsImpersonized(_identityUIClaimOptions.Value))
+                    {
+                        <div id="impersionation-container" class="alert alert-info impersionation-container">
+                            You are impersonating <strong>@User.GetUsername(_identityUIClaimOptions.Value)</strong>
+                            <button class="btn btn-default">Stop</button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </div>
+                <footer class="footer">
+                    <a href="https://ssrd.io/">
+                        <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                            &copy; @SSRD.AdminUI.Template.Models.CopyRightModel.YEAR - @SSRD.AdminUI.Template.Models.CopyRightModel.NAME
+                        </div>
+                    </a>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    @RenderSection("modal", required: false)
+
+    <script type="text/javascript" src="~/adminUI/app/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/select2-4.0.13/dist/js/select2.min.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/template/js/template.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/identityAdmin/app/js/site.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/lib/datatables/datatables.min.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/lib/mustache-4.0.1/mustache.min.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/template/js/off-canvas.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/input/InputComponent.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/select/select-component.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/statusAlert/StatusAlert.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/confirmationModal/conformationModal.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/errorModal/errorModal.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/errorAlert/error-alert.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/js/alert/alertClose.js" asp-append-version="true"></script>
+
+    @RenderSection("script", required: false)
+    @if (User.IsImpersonized(_identityUIClaimOptions.Value))
+    {
+        <style>
+            .impersionation-container {
+                position: -webkit-sticky; /* Safari */
+                position: sticky;
+                top: 0;
+            }
+        </style>
+
+        <script type="text/javascript">
+            $(document).ready(() => {
+                $('#impersionation-container').on('click', 'button', () => {
+                    Api.get(`/api/GroupAdmin/@_identityUIUserInfoService.GetGroupId()/User/StopImpersonation`)
+                        .done(() => {
+                            location.reload();
+                        })
+                        .fail((response) => {
+                            console.log(response.ResponseJSON);
+                        });
+                })
+            });
+        </script>
+    }
+</body>
+</html>

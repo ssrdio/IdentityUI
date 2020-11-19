@@ -7,8 +7,11 @@
             this.emailInputComponent.value(null);
 
             this.rolesSelectComponent.selectOption(null);
+            this.rolesSelectComponent.triggerChange();
             this.groupSelectComponent.selectOption(null);
+            this.groupSelectComponent.triggerChange();
             this.groupRolesSelectComponent.selectOption(null);
+            this.groupRolesSelectComponent.triggerChange();
 
             this.hideErrors();
         });

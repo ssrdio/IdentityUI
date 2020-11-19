@@ -35,7 +35,13 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("GroupIdentifier")
+                        .HasColumnType("text");
+
                     b.Property<string>("Host")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Metadata")
                         .HasColumnType("text");
 
                     b.Property<string>("ObjectIdentifier")
@@ -54,6 +60,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SubjectIdentifier")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubjectMetadata")
                         .HasColumnType("text");
 
                     b.Property<int>("SubjectType")
@@ -143,6 +152,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("_CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("_DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("_ModifiedDate")
@@ -259,6 +271,9 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Migrations
                         .HasMaxLength(256);
 
                     b.Property<DateTimeOffset?>("_CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("_DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("_ModifiedDate")

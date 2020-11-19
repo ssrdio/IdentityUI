@@ -1,0 +1,250 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Invite.GroupAdminInviteViewModel
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIClaimOptions> _identityUIClaimOptions;
+
+@{
+    GroupAdminSidebarSelection.SelectedOption = GroupAdminSidebarOptions.Invite;
+}
+
+@{
+    ViewData["Title"] = "Invites";
+}
+
+@section script{
+    <script>
+        $(document).ready(function () {
+            new GroupInvites('@Model.GroupId', '@Json.Serialize(Model.CanAssignRoles)');
+        });
+
+        class GroupInvites {
+            constructor(groupId, canAssignRoles) {
+                this.groupId = groupId;
+                this.canAssignRoles = JSON.parse(canAssignRoles);
+
+                this.$inviteTable = $('#invite-table');
+                this.initTable();
+
+                this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+                this.confirmationModal = new conformationModal(
+                    $('#modal-container'),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeInvite') {
+                            this.remove(onYesClick.id);
+                        }
+                    });
+
+                const inviteUserModal = new GroupAdminInviteToGroupModel(this.groupId, this.canAssignRoles, () => {
+                    this.statusAlert.showSuccess("User was invited");
+                    this.reloadTable();
+                });
+
+                $('#invite-user-button').on('click', () => {
+                    inviteUserModal.showModal();
+                });
+            }
+
+            initTable() {
+                this.$inviteTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    "targets": 'no-sort',
+                    "bSort": false,
+                    "order": [],
+                    ajax: {
+                        url: `/api/GroupAdmin/${this.groupId}/Invite/Get`,
+                        type: 'GET'
+                    },
+                    columns: [
+                        {
+                            data: "email",
+                            title: "Email",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: "status",
+                            title: "Status",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: "groupRole",
+                            title: "Group Role",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: "expiresAt",
+                            title: "Expires At",
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            className: "dt-head-center",
+                            width: "160px",
+                            render: function (data) {
+                                return `
+                            <div >
+                                <button class="btn btn-danger table-button remove" data-id="${data.id}">Remove</button>
+                            </div>`
+                            }
+                        }
+                    ],
+                });
+
+                this.$inviteTable.on('click', 'button.remove', (event) => {
+                    let id = $(event.target).data("id");
+                    this.confirmationModal.show({ key: 'removeInvite', id: id }, 'Are you sure that you want to remove Invite?');
+                });
+            }
+
+            reloadTable() {
+                this.$inviteTable
+                    .DataTable()
+                    .clear()
+                    .draw();
+            }
+
+            remove(id) {
+                this.statusAlert.hide();
+
+                Api.post(`/api/GroupAdmin/${this.groupId}/Invite/Remove/${id}`)
+                    .done(() => {
+                        this.reloadTable();
+                        this.statusAlert.showSuccess('Invite was removed');
+                    })
+                    .fail((resp) => {
+                        this.reloadTable();
+                        this.statusAlert.showErrors(resp.responseJSON['']);
+                    })
+            }
+        }
+
+        class GroupAdminInviteToGroupModel {
+            constructor(groupId, canAssignRoles, successCallback) {
+                this.groupId = groupId;
+                this.canAssignRoles = canAssignRoles;
+                this.successCallback = successCallback;
+
+                this.$inviteUserModal = $('#invite-user-modal');
+                this.$inviteUserModal.on('hidden.bs.modal', () => {
+                    this.emailInputComponent.value(null);
+                    this.rolesSelectComponent.selectOption(null);
+                    this.rolesSelectComponent.triggerChange();
+
+                    this.hideErrors();
+                });
+                this.$inviteUserModal.on('click', 'button.confirm', () => {
+                    this.add();
+                });
+
+                const $form = this.$inviteUserModal.find('#invite-user-form');
+                this.emailInputComponent = new InputComponent($form, '#email-input');
+
+                this.$rolesSelect = $form.find('#group-role-select .select2-container')
+                this.rolesSelectComponent = new SelectComponent($form, '#group-role-select');
+
+                this.errorAlert = new ErrorAlert($form);
+
+                this.initRolesSelct();
+            }
+
+            initRolesSelct() {
+                let data = this.canAssignRoles.map((element) => {
+                    return {
+                        id: element.id,
+                        text: element.name,
+                    }
+                });
+
+                this.$rolesSelect.select2({
+                    data: data,
+                    placeholder: 'Select Group Role'
+                });
+
+                this.rolesSelectComponent.selectOption(null);
+            }
+
+            showModal() {
+                this.$inviteUserModal.modal('show');
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.errorAlert.showErrors(errors['']);
+                }
+
+                this.emailInputComponent.showError(errors.Email);
+                this.rolesSelectComponent.showError(errors.GroupRoleId);
+            }
+
+            hideErrors() {
+                this.errorAlert.hide();
+
+                this.emailInputComponent.hideError();
+                this.rolesSelectComponent.hideError();
+            }
+
+            getData() {
+                return {
+                    email: this.emailInputComponent.value(),
+                    groupRoleId: this.rolesSelectComponent.value(),
+                }
+            }
+
+            add() {
+                this.hideErrors();
+                const data = this.getData();
+
+                Api.post(`/api/GroupAdmin/${this.groupId}/Invite/Add`, data)
+                    .done(() => {
+                        this.$inviteUserModal.modal('hide');
+
+                        if (this.successCallback) {
+                            this.successCallback();
+                        }
+                    })
+                    .fail((resp) => {
+                        this.showErrors(resp.responseJSON);
+                    })
+            }
+        }
+    </script>
+}
+
+@section modal{
+    <div id="modal-container">
+        @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value))
+        {
+            @await Component.InvokeAsync("InviteToGroupModal")
+        }
+
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div>
+    <div class="tab-content">
+        <div class="main-card mb-3 card fullWidthCard">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Invites
+                    </h5>
+                    @if (User.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS, _identityUIClaimOptions.Value))
+                    {
+                        <button id="invite-user-button" class="header-button">Invite User</button>
+                    }
+                </div>
+                <div class="custom_container custom_table">
+                    <table id="invite-table" class="dataTableClass display "></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

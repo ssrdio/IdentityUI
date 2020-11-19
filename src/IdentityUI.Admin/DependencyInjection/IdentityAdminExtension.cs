@@ -21,6 +21,7 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit;
+using SSRD.IdentityUI.Admin.Areas.GroupAdmin;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -66,10 +67,11 @@ namespace SSRD.IdentityUI.Admin
 
             builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
 
-            if(builder.IdentityManagementEndpoints.UseEmailSender.HasValue && builder.IdentityManagementEndpoints.UseEmailSender.Value == true)
-            {
-                SidebarSelection.UseEmailSender = true;
-            }
+            builder.Services.AddScoped<Interfaces.IGroupUserDataService, Services.GroupUserDataService>();
+            builder.Services.AddScoped<Interfaces.IGroupInviteDataService, Services.GroupInviteDataService>();
+            builder.Services.AddScoped<Interfaces.IGroupAttributeDataService, Services.GroupAttributeDataService>();
+
+            builder.AddGroupAdmin();
 
             return builder;
         }

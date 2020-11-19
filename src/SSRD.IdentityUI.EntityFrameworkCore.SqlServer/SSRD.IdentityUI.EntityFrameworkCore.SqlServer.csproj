@@ -23,6 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20201020221321_AddAuditMetadata.cs" />
+    <Compile Remove="Migrations\20201020221321_AddAuditMetadata.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Scripts\Migrations\" />
   </ItemGroup>
 </Project>

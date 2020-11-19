@@ -13,6 +13,7 @@ namespace SSRD.IdentityUI.Core.Data.Models
         public string Description { get; set; }
 
         public List<string> Permissions { get; set; }
+        public List<string> RoleAssignments { get; set; }
 
         public RoleSeedModel(string name, RoleTypes type, string description, List<string> permissions)
         {
@@ -20,6 +21,16 @@ namespace SSRD.IdentityUI.Core.Data.Models
             Type = type;
             Description = description;
             Permissions = permissions;
+            RoleAssignments = new List<string>();
+        }
+
+        public RoleSeedModel(string name, RoleTypes type, string description, List<string> permissions, List<string> roleAssignments)
+        {
+            Name = name;
+            Type = type;
+            Description = description;
+            Permissions = permissions;
+            RoleAssignments = roleAssignments;
         }
 
         internal RoleEntity ToEntity()

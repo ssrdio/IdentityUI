@@ -1,6 +1,8 @@
 ﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.User.Components.UserMenu
 @model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User.UserDetailsViewModel
 
+@inject Microsoft.Extensions.Options.IOptions<SSRD.IdentityUI.Core.Models.Options.IdentityUIEndpoints> _identityUIEndpoints;
+
 @{
     SidebarSelection.SelectedOption = SidebarOptions.User;
 }
@@ -10,27 +12,90 @@
 }
 
 @section script{
-    @if (Model.StatusAlert != null)
-    {
-        <script>
-            $(document).ready(function () {
-                var x = document.getElementById("snackbar");
-                x.className = "show";
-                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
-            });
-        </script>
-    }
+    <script>
+        $(document).ready(function () {
+            new UserDetails('@Model.Id');
+        });
+
+        class UserDetails {
+            constructor(userId) {
+                this.userId = userId;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                @if (Model.StatusAlert != null)
+                {
+                    <text>
+                        if ('@Model.StatusAlert.Success' === 'True')
+                        {
+                            this.statusAlert.showSuccess(@Json.Serialize(Model.StatusAlert.Messages));
+                        }
+                        else
+                        {
+                            this.statusAlert.showError(@Json.Serialize(Model.StatusAlert.Messages));
+                        }
+                    </text>
+                }
+
+                this.confirmationModal = new conformationModal(
+                    $(`#modalContainer`),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeUser') {
+                            this.remove();
+                        }
+                    }
+                );
+
+                $('#impersonateButton').on('click', () => {
+                    this.impersonate();
+                });
+
+                $('#remove-button').on('click', () => {
+                    this.confirmationModal.show({ key: 'removeUser' }, 'Are you sure you want to remove user?');
+                });
+            }
+
+            impersonate() {
+                Api.get(`/IdentityAdmin/Impersonation/Start/${this.userId}`)
+                    .done(() => {
+                        window.open(`/`);
+                        location.reload();
+                    })
+                    .fail((response) => {
+                        this.statusAlert.showErrors(response.responseJSON['']);
+                    });
+            }
+
+            remove() {
+                Api.delete(`/IdentityAdmin/User/Delete/${this.userId}`)
+                    .done(() => {
+                        window.location.href = `/IdentityAdmin/User`;
+                    })
+                    .fail((resp) => {
+                        this.statusAlert.showErrors(resp.responseJSON['']);
+                    });
+            }
+
+        }
+    </script>
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
 }
 
 <div>
     @(await Component.InvokeAsync("UserMenu", new { userId = Model.Id, tabSelected = UserMenuViewComponent.TabSelected.Details, userName = Model.UserName }))
 
-    @if (Model.StatusAlert != null)
-    {
-        <div id="snackbar">
-            @await Component.InvokeAsync("IdentityStatusAlertRazor", new { Model.StatusAlert })
-        </div>
-    }
+    <div id="status-alert">
+        @await Component.InvokeAsync("IdentityStatusAlertJs")
+    </div>
 
     <div class="tab-content">
         <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
@@ -53,7 +118,7 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="Email" class="control-label"></label>
-                        @if (Model.UseEmailSender)
+                        @if (_identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
                         {
                             <div class="verify-email">
                                 <input asp-for="Email" class="form-control" />
@@ -62,7 +127,7 @@
                         }
                         else
                         {
-                             <input asp-for="Email" class="form-control" />
+                            <input asp-for="Email" class="form-control" />
                         }
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
@@ -125,8 +190,17 @@
                     }
 
                     <div class="button-holder">
+                        @if (_identityUIEndpoints.Value.AllowImpersonation)
+                        {
+                            <button type="button" id="impersonateButton" class="btn btn-primary custom-submit">Impersonate</button>
+                        }
+
                         <button type="submit" class="btn btn-primary custom-submit" asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id">Save</button>
 
+                        @if (_identityUIEndpoints.Value.CanRemoveUser)
+                        {
+                            <button type="button" id="remove-button" class="btn btn-danger remove-button">Delete</button>
+                        }
                     </div>
                 </form>
             </div>

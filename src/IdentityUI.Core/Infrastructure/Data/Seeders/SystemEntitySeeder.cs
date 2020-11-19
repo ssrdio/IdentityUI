@@ -9,6 +9,7 @@ using SSRD.IdentityUI.Core.Data.Enums.Entity;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
 {
@@ -67,22 +68,20 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
 
         public async Task Seed(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels)
         {
-            if (_context.Permissions.Any() || _context.Roles.Any() || _context.Emails.Any())
-            {
-                _logger.LogError($"Database is not empty. Skipping seeding");
-                return;
-            }
-
             _logger.LogInformation($"Seeding system entities");
 
             permissionSeedModels.AddRange(IdentityUIPermissions.ALL_DATA);
             roleSeedModels.AddRange(IdentityUIRoles.ALL_DATA);
 
-            SeedEmails();
-            await SeedPermissionsRoles(permissionSeedModels, roleSeedModels);
+            SeedMissingEmails();
 
+            await SeedRoles(roleSeedModels);
+            SeedPermissions(permissionSeedModels);
+            SeedRolePermissions(roleSeedModels);
+            SeedRoleAssigments(roleSeedModels);
         }
 
+        [Obsolete("Use Seed")]
         public async Task SeedMissing(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels)
         {
             _logger.LogInformation($"Seeding missing system entities");
@@ -91,136 +90,109 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
             roleSeedModels.AddRange(IdentityUIRoles.ALL_DATA);
 
             SeedMissingEmails();
-            await SeedMissingPermissinsRoles(permissionSeedModels, roleSeedModels);
+
+            await SeedRoles(roleSeedModels);
+            SeedPermissions(permissionSeedModels);
+            SeedRolePermissions(roleSeedModels);
+            SeedRoleAssigments(roleSeedModels);
         }
 
-        private async Task SeedPermissionsRoles(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels)
-        {
-            IEnumerable<PermissionEntity> permissions = permissionSeedModels.Select(x => x.ToEntity());
-
-            _context.Permissions.AddRange(permissions);
-            int addPermissionChanges = _context.SaveChanges();
-            if (addPermissionChanges != permissions.Count())
-            {
-                _logger.LogCritical($"Failed to seed Permission.");
-                throw new Exception("failed_to_seed_permission");
-            }
-
-            permissions = _context.Permissions.ToList();
-
-            List<PermissionRoleEntity> permissionRoleEntities = new List<PermissionRoleEntity>();
-
-            foreach (RoleSeedModel role in roleSeedModels)
-            {
-                RoleEntity roleEntity = role.ToEntity();
-
-                IdentityResult createRoleResult = await _roleManager.CreateAsync(roleEntity);
-                if (!createRoleResult.Succeeded)
-                {
-                    _logger.LogCritical($"Failed to seed Role. RoleName {role.Name}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
-                    throw new Exception($"Failed to seed Role.");
-                }
-
-                IEnumerable<PermissionEntity> validPermissions = permissions
-                    .Where(x => role.Permissions.Contains(x.Name));
-
-                if (validPermissions.Count() != role.Permissions.Count)
-                {
-                    _logger.LogCritical($"Missing role permission. Role: {role.Name}");
-                    throw new Exception("Missing role permission");
-                }
-
-                IEnumerable<PermissionRoleEntity> rolePermissions = validPermissions
-                    .Select(x => new PermissionRoleEntity(
-                        permissionId: x.Id,
-                        roleId: roleEntity.Id));
-
-                permissionRoleEntities.AddRange(rolePermissions);
-            }
-
-            _context.PermissionRole.AddRange(permissionRoleEntities);
-            int addPermissionRoleChanges = _context.SaveChanges();
-            if (addPermissionRoleChanges != permissionRoleEntities.Count())
-            {
-                _logger.LogCritical($"Failed to seed role permissions");
-                throw new Exception("Failed to seed role permissions");
-            }
-        }
-
-        private async Task SeedMissingPermissinsRoles(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels)
+        private void SeedPermissions(List<PermissionSeedModel> permissionSeedModels)
         {
             List<PermissionEntity> existingPermissions = _context.Permissions.ToList();
 
             IEnumerable<PermissionEntity> missingPermissions = permissionSeedModels
-                .Where(x => !existingPermissions.Select(c => c.Name.ToUpper()).Contains(x.Name.ToUpper()))
+                .Where(x => !existingPermissions.Any(c => c.Name.ToUpper() == x.Name.ToUpper()))
                 .Select(x => x.ToEntity());
 
             _context.Permissions.AddRange(missingPermissions);
             int addPermissionChanges = _context.SaveChanges();
-            if (existingPermissions.Count + addPermissionChanges != permissionSeedModels.Count())
+            if(addPermissionChanges != missingPermissions.Count())
             {
-                _logger.LogCritical($"Failed to seed missing Permission");
-                throw new Exception("Failed to seed missing Permission");
+                _logger.LogCritical($"Failed to seed Permission.");
+                throw new Exception("Failed to seed Permission");
             }
 
             existingPermissions = _context.Permissions.ToList();
+            foreach (PermissionSeedModel permission in permissionSeedModels)
+            {
+                bool exists = existingPermissions
+                    .Where(x => x.Name == permission.Name)
+                    .Any();
+                if (!exists)
+                {
+                    _logger.LogCritical($"Failed to seed Permission. Permission name {permission.Name}");
+                    throw new Exception("Failed to seed Permission");
+                }
+            }
+        }
+
+        public async Task SeedRoles(List<RoleSeedModel> roleSeedModels)
+        {
+            List<RoleEntity> existingRoles = _context.Roles.ToList();
+
+            IEnumerable<RoleEntity> missingRoles = roleSeedModels
+                .Where(x => !existingRoles.Any(c => c.NormalizedName == x.Name.ToUpper()))
+                .Select(x => x.ToEntity());
+
+            foreach(RoleEntity roleEntity in missingRoles)
+            {
+                IdentityResult createRoleResult = await _roleManager.CreateAsync(roleEntity);
+                if (!createRoleResult.Succeeded)
+                {
+                    _logger.LogCritical($"Failed to seed Role. Name {roleEntity.Name}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
+                    throw new Exception($"Failed to seed Role.");
+                }
+            }
+        }
+
+        public void SeedRolePermissions(List<RoleSeedModel> roleSeedModels)
+        {
+            List<RoleEntity> roles = _context.Roles
+                .Include(x => x.Permissions)
+                .ThenInclude(x => x.Permission)
+                .ToList();
+
+            List<PermissionEntity> permissions = _context.Permissions.ToList();
 
             List<PermissionRoleEntity> permissionRoleEntities = new List<PermissionRoleEntity>();
 
-            foreach (RoleSeedModel role in roleSeedModels)
+            foreach(RoleSeedModel role in roleSeedModels)
             {
-                RoleEntity roleEntity = await _roleManager.FindByNameAsync(role.Name);
-                if (roleEntity == null)
+                RoleEntity roleEntity = roles
+                    .Where(x => x.NormalizedName == role.Name.ToUpper())
+                    .SingleOrDefault();
+
+                if(roleEntity == null)
                 {
-                    roleEntity = role.ToEntity();
-
-                    IdentityResult createRoleResult = await _roleManager.CreateAsync(roleEntity);
-                    if (!createRoleResult.Succeeded)
-                    {
-                        _logger.LogCritical($"Failed to seed missing Role. RoleName {role.Name}, Error {string.Join(" ", createRoleResult.Errors.Select(x => x.Description))}");
-                        throw new Exception($"Failed to seed missing Role.");
-                    }
-
-                    IEnumerable<PermissionEntity> validPermissions = existingPermissions
-                        .Where(x => role.Permissions.Contains(x.Name));
-
-                    if (validPermissions.Count() != role.Permissions.Count)
-                    {
-                        _logger.LogCritical($"Missing role permission. Role: {role.Name}");
-                        throw new Exception("Missing role permission");
-                    }
-
-                    IEnumerable<PermissionRoleEntity> rolePermissions = validPermissions
-                        .Select(x => new PermissionRoleEntity(
-                            permissionId: x.Id,
-                            roleId: roleEntity.Id));
-
-                    permissionRoleEntities.AddRange(rolePermissions);
+                    _logger.LogCritical($"No role Role. Name {role.Name}");
+                    throw new Exception($"No Role.");
                 }
-                else
+
+                foreach (string permission in role.Permissions)
                 {
-                    List<string> rolePermissions = _context.PermissionRole
-                        .Where(x => x.Role.NormalizedName == role.Name.ToUpper())
-                        .Select(x => x.Permission.Name)
-                        .ToList();
-
-                    IEnumerable<string> missingRolePermissions = role.Permissions.Where(x => !rolePermissions.Contains(x));
-
-                    IEnumerable<PermissionEntity> validPermissions = existingPermissions
-                        .Where(x => missingRolePermissions.Contains(x.Name));
-
-                    if (rolePermissions.Count + validPermissions.Count() < role.Permissions.Count)
+                    bool exists = roleEntity.Permissions
+                        .Where(x => x.Permission.Name.ToUpper() == permission.ToUpper())
+                        .Any();
+                    if (exists)
                     {
-                        _logger.LogCritical($"Missing role permission. Role: {role.Name}");
+                        continue;
+                    }
+
+                    PermissionEntity permissionEntity = permissions
+                        .Where(x => x.Name.ToUpper() == permission.ToUpper())
+                        .SingleOrDefault();
+                    if (permissionEntity == null)
+                    {
+                        _logger.LogCritical($"Missing role permission. Role: {role.Name}, Permission {permission}");
                         throw new Exception("Missing role permission");
                     }
 
-                    IEnumerable<PermissionRoleEntity> permissionRoles = validPermissions
-                        .Select(x => new PermissionRoleEntity(
-                            permissionId: x.Id,
-                            roleId: roleEntity.Id));
+                    PermissionRoleEntity permissionRoleEntity = new PermissionRoleEntity(
+                        permissionEntity.Id,
+                        roleEntity.Id);
 
-                    permissionRoleEntities.AddRange(permissionRoles);
+                    permissionRoleEntities.Add(permissionRoleEntity);
                 }
             }
 
@@ -233,14 +205,78 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
             }
         }
 
-        private void SeedEmails()
+        public void SeedRoleAssigments(List<RoleSeedModel> roleSeedModels)
         {
-            _context.Emails.AddRange(_allEmails);
-            int changes = _context.SaveChanges();
-            if (changes != _allEmails.Count)
+            List<RoleEntity> roles = _context.Roles
+                .Include(x => x.CanAssigne)
+                .ThenInclude(x => x.Role)
+                .ToList();
+
+            List<RoleAssignmentEntity> roleAssignmentEntities = new List<RoleAssignmentEntity>();
+
+            foreach(RoleSeedModel role in roleSeedModels)
             {
-                _logger.LogCritical($"Failed to seed emails");
-                throw new Exception("Failed to seed emails");
+                if(!role.RoleAssignments.Any())
+                {
+                    continue;
+                }
+
+                RoleEntity roleEntity = roles
+                    .Where(x => x.NormalizedName == role.Name.ToUpper())
+                    .SingleOrDefault();
+
+                if (roleEntity == null)
+                {
+                    _logger.LogCritical($"No role Role. Name {roleEntity.Name}");
+                    throw new Exception($"No Role.");
+                }
+
+                foreach(string assigment in role.RoleAssignments)
+                {
+                    bool exists = roles
+                        .Where(x => x.CanAssigne.Any(c => c.CanAssigneRole.NormalizedName == assigment.ToUpper()))
+                        .Any();
+                    if(exists)
+                    {
+                        continue;
+                    }
+
+                    RoleEntity assigneRoleEntity = roles
+                        .Where(x => x.NormalizedName == assigment.ToUpper())
+                        .SingleOrDefault();
+
+                    if (assigneRoleEntity == null)
+                    {
+                        _logger.LogCritical($"No assign role. Name {assigneRoleEntity.Name}");
+                        throw new Exception($"No assign Role.");
+                    }
+
+                    if (assigneRoleEntity.NormalizedName == roleEntity.NormalizedName)
+                    {
+                        _logger.LogCritical($"Role can not assign self. Role name {roleEntity.Name}");
+                        throw new Exception($"Role can not assign self");
+                    }
+
+                    if(assigneRoleEntity.Type != RoleTypes.Group)
+                    {
+                        _logger.LogCritical($"Wrong role type for role assignment. Role name {roleEntity.Name}");
+                        throw new Exception($"Wrong role type for role assignment");
+                    }
+
+                    RoleAssignmentEntity roleAssignmentEntity = new RoleAssignmentEntity(
+                        roleEntity.Id,
+                        assigneRoleEntity.Id);
+
+                    roleAssignmentEntities.Add(roleAssignmentEntity);
+                }
+            }
+
+            _context.RoleAssignments.AddRange(roleAssignmentEntities);
+            int roleAssignmentsChanges = _context.SaveChanges();
+            if (roleAssignmentsChanges != roleAssignmentEntities.Count())
+            {
+                _logger.LogCritical($"Failed to seed role assignments");
+                throw new Exception("Failed to seed role assignments");
             }
         }
 
@@ -255,7 +291,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
 
             _context.Emails.AddRange(missingEmails);
             int changes = _context.SaveChanges();
-            if (emailTypes.Count + changes < _allEmails.Count)
+            if (changes != missingEmails.Count())
             {
                 _logger.LogCritical($"Failed to seed emails");
                 throw new Exception("Failed to seed emails");

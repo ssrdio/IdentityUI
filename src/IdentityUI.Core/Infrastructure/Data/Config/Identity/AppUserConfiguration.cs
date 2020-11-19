@@ -52,6 +52,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity
 
             builder.Ignore(x => x.SessionCode);
 
+            builder.Ignore(x => x.ImpersonatorId);
+
             builder.ToTable("Users");
         }
     }

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 {
-    public class AppUserEntity : IdentityUser, IBaseEntity
+    public class AppUserEntity : IdentityUser, IBaseEntity, ISoftDelete
     {
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }
@@ -43,7 +43,13 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
         /// </summary>
         public string SessionCode { get; set; }
 
-        protected AppUserEntity()
+        /// <summary>
+        /// This column does not exist in database. It is only used for login
+        /// </summary>
+        public string ImpersonatorId { get; set; }
+        public DateTimeOffset? _DeletedDate { get; set; }
+
+        public AppUserEntity()
         {
         }
 
@@ -77,6 +83,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities.Identity
             Attributes = attributes;
         }
 
+        [Obsolete("Use ICanLoginService")]
         public bool CanLogin()
         {
             if(!Enabled)

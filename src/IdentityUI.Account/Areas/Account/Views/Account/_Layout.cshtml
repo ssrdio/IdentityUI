@@ -1,0 +1,36 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>@ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+
+    <!-- Disable tap highlight on IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+
+    @await Component.InvokeAsync("AdminUIFavicon")
+
+    <link rel="stylesheet" href="~/adminUI/app/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/css/base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/template/vendors/fontawesome-free-5.14.0-web/css/all.css" asp-append-version="true" />
+
+    @RenderSection("style", required: false)
+
+</head>
+
+<body>
+    @RenderBody()
+
+    <script src="~/adminUI/app/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/adminUI/app/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/template/js/template.js" asp-append-version="true"></script>
+
+    @RenderSection("script", required: false)
+</body>
+</html>
