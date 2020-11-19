@@ -196,10 +196,10 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Services
             }
 
             ValidationResult auditTableRequestValidationResult = _auditTableRequestValidator.Validate(auditTableRequest);
-            if (!dataTableValidationResult.IsValid)
+            if (!auditTableRequestValidationResult.IsValid)
             {
                 _logger.LogWarning($"Invalid {nameof(GroupAdminAuditTableRequest)} model");
-                return Result.Fail<DataTableResult<GroupAdminAuditTableModel>>(dataTableValidationResult.ToResultError());
+                return Result.Fail<DataTableResult<GroupAdminAuditTableModel>>(auditTableRequestValidationResult.ToResultError());
             }
 
             IBaseSpecificationBuilder<AuditEntity> baseSpecification = SpecificationBuilder

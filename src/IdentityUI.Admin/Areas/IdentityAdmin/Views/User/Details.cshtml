@@ -190,7 +190,10 @@
                     }
 
                     <div class="button-holder">
-                        <button type="button" id="impersonateButton" class="btn btn-primary custom-submit">Impersonate</button>
+                        @if (_identityUIEndpoints.Value.AllowImpersonation)
+                        {
+                            <button type="button" id="impersonateButton" class="btn btn-primary custom-submit">Impersonate</button>
+                        }
 
                         <button type="submit" class="btn btn-primary custom-submit" asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id">Save</button>
 

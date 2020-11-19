@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Services.Group
 {
-    public class GroupUserService : IGroupUserService
+    internal class GroupUserService : IGroupUserService
     {
         private const string FAILED_TO_ADD_GROUP_USER = "failed_to_add_group_user";
         private const string USER_NOT_FOUND = "user_not_found";
@@ -37,6 +37,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
         protected readonly IBaseDAO<GroupEntity> _groupDAO;
 
         protected readonly IGroupUserStore _groupUserStore;
+        protected readonly IAddGroupUserFilter _addGroupUserFilter;
 
         protected readonly IValidator<AddExistingUserRequest> _addExistingUserValidator;
 
@@ -48,10 +49,12 @@ namespace SSRD.IdentityUI.Core.Services.Group
             IBaseDAO<AppUserEntity> userDAO,
             IBaseDAO<GroupEntity> groupDAO,
             IGroupUserStore groupUserStore,
+            IAddGroupUserFilter addGroupUserFilter,
             IValidator<AddExistingUserRequest> addExistingUserValidator,
             ILogger<GroupUserService> logger)
         {
             _groupUserStore = groupUserStore;
+            _addGroupUserFilter = addGroupUserFilter;
 
             _groupUserDAO = groupUserDAO;
             _roleDAO = roleDAO;
@@ -335,16 +338,6 @@ namespace SSRD.IdentityUI.Core.Services.Group
             return await AddUserToGroupWithoutValidation(userId, groupId, roleId);
         }
 
-        protected virtual Task<Result> BeforeAddUserToGroup(string userid, string groupId, string roleId)
-        {
-            return Task.FromResult(Result.Ok());
-        }
-
-        protected virtual Task<Result> AfterAddUserToGroup(GroupUserEntity groupUser)
-        {
-            return Task.FromResult(Result.Ok());
-        }
-
         /// <summary>
         /// This method requires that you already validated all parameters
         /// </summary>
@@ -354,7 +347,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
         /// <returns></returns>
         public async Task<Result<GroupUserEntity>> AddUserToGroupWithoutValidation(string userId, string groupId, string roleId)
         {
-            Result beforeResult = await BeforeAddUserToGroup(userId, groupId, roleId);
+            Result beforeResult = await _addGroupUserFilter.BeforeAdd(userId, groupId, roleId);
             if(beforeResult.Failure)
             {
                 return Result.Fail<GroupUserEntity>(beforeResult);
@@ -372,7 +365,7 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Result.Fail<GroupUserEntity>(FAILED_TO_ADD_GROUP_USER);
             }
 
-            Result afterResult = await AfterAddUserToGroup(groupUser);
+            Result afterResult = await _addGroupUserFilter.AfterAdded(groupUser);
             if (afterResult.Failure)
             {
                 return Result.Fail<GroupUserEntity>(afterResult);

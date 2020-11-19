@@ -163,6 +163,7 @@ namespace SSRD.IdentityUI.Core
                 options.CanChangeGroupName = identityManagementEndpoints.CanChangeGroupName;
                 options.CanRemoveGroup = identityManagementEndpoints.CanRemoveGroup;
                 options.CanRemoveUser = identityManagementEndpoints.CanRemoveUser;
+                options.AllowImpersonation = identityManagementEndpoints.AllowImpersonation;
             });
 
             IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, databaseOptions, configuration);
@@ -466,7 +467,10 @@ namespace SSRD.IdentityUI.Core
 
             builder.Services.AddScoped<IDefaultProfileImageService, IdentityUIDefaultProfileImageService>();
 
-            builder.Services.AddScoped<ICanLoginService, CanLoginService>();
+            builder.Services.AddScoped<ILoginFilter, LoginFilter>();
+            builder.Services.AddScoped<IAddUserFilter, NullAddUserFilter>();
+            builder.Services.AddScoped<IAddGroupUserFilter, NullAddGroupUserFilter>();
+            builder.Services.AddScoped<IAddInviteFilter, NullAddInviteFilter>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
@@ -533,8 +537,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Services.User.Models.Attribute.UpdateUserAttributeModel>, Services.User.Models.Attribute.UpdateUserAttributeModelValidator>();
 
             builder.Services.AddSingleton<IValidator<Services.Group.Models.RegisterGroupModel>, Services.Group.Models.RegisterGroupModelValidator>();
-            builder.Services.AddSingleton<IValidator<Services.User.Models.Add.BaseRegisterRequest>, Services.User.Models.Add.BaseRegisterRequestValidator>();
-            builder.Services.AddSingleton<IValidator<Services.User.Models.Add.GroupBaseUserRegisterRequest>, Services.User.Models.Add.GroupBaseUserRegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.BaseRegisterRequest>, Services.User.Models.BaseRegisterRequestValidator>();
+            builder.Services.AddSingleton<IValidator<Services.User.Models.GroupBaseUserRegisterRequest>, Services.User.Models.GroupBaseUserRegisterRequestValidator>();
         }
 
         /// <summary>

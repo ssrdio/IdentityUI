@@ -2,16 +2,19 @@
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Data.Enums.Entity;
+using SSRD.IdentityUI.Core.Helper;
 using SSRD.IdentityUI.Core.Interfaces;
 using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Login.Models;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Login
@@ -22,11 +25,11 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
         private readonly UserManager<AppUserEntity> _userManager;
 
         private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
-        private readonly IUrlGenerator _urlGenerator;
         private readonly ISessionService _sessionService;
-        private readonly ICanLoginService _canLoginService;
+        private readonly ILoginFilter _canLoginService;
 
-        private readonly IdentityUIEndpoints _identityOptions;
+        private readonly IdentityUIOptions _identityUIOptions;
+        private readonly IdentityUIEndpoints _identityUIEndpoints;
 
         private readonly IValidator<ExternalLoginRequest> _externalLoginRequestValidator;
 
@@ -36,10 +39,10 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
             SignInManager<AppUserEntity> signInManager,
             UserManager<AppUserEntity> userManager,
             IIdentityUIUserInfoService identityUIUserInfoService,
-            IUrlGenerator urlGenerator,
             ISessionService sessionService,
-            ICanLoginService canLoginService,
-            IOptions<IdentityUIEndpoints> identityOptions,
+            ILoginFilter canLoginService,
+            IOptions<IdentityUIOptions> identityUIOptions,
+            IOptions<IdentityUIEndpoints> identityUIEndpoints,
             IValidator<ExternalLoginRequest> externalLoginRequestValidator,
             ILogger<ExternalLoginService> logger)
         {
@@ -47,11 +50,11 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
             _userManager = userManager;
 
             _identityUIUserInfoService = identityUIUserInfoService;
-            _urlGenerator = urlGenerator;
             _sessionService = sessionService;
             _canLoginService = canLoginService;
 
-            _identityOptions = identityOptions.Value;
+            _identityUIOptions = identityUIOptions.Value;
+            _identityUIEndpoints = identityUIEndpoints.Value;
 
             _externalLoginRequestValidator = externalLoginRequestValidator;
 
@@ -69,7 +72,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
 
             await _signInManager.SignOutAsync();
 
-            string redirectUrl = _urlGenerator.GenerateActionUrl("ExternalLoginCallback", "Account", new { returnUrl });
+            string callbackUrl = QueryHelpers.AddQueryString($"{_identityUIOptions.BasePath}/Account/ExternalLoginCallback", "returnUrl", returnUrl);
+            string redirectUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
             AuthenticationProperties properties = _signInManager.ConfigureExternalAuthenticationProperties(externalLoginRequest.Provider, redirectUrl);
 
@@ -104,18 +108,28 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.Expired);
             }
 
-            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
-            if (canLoginResult.Failure)
+            CommonUtils.Result.Result beforeLoginFilterResult = await _canLoginService.BeforeAdd(appUser);
+            if (beforeLoginFilterResult.Failure)
             {
                 _logger.LogInformation($"User is not allowed to login. User {appUser.Id}");
-                return Result.Fail<SignInResult>("no_user", "No user");
+                beforeLoginFilterResult.ToOldResult();
             }
 
             SignInResult signInResult = await _signInManager.ExternalLoginSignInAsync(
                 loginProvider: externalLoginInfo.LoginProvider,
                 providerKey: externalLoginInfo.ProviderKey,
                 isPersistent: false,
-                bypassTwoFactor: _identityOptions.BypassTwoFactorOnExternalLogin);
+                bypassTwoFactor: _identityUIEndpoints.BypassTwoFactorOnExternalLogin);
+
+            CommonUtils.Result.Result afterLoginFilterResult = await _canLoginService.AfterAdded(appUser);
+            if (afterLoginFilterResult.Failure)
+            {
+                await _signInManager.SignOutAsync();
+                _sessionService.Logout(appUser.SessionCode, appUser.Id, SessionEndTypes.AffterLoginFilterFailure);
+
+                _logger.LogInformation($"User is not allowed to login. User {appUser.Id}");
+                afterLoginFilterResult.ToOldResult();
+            }
 
             return Result.Ok(signInResult);
         }

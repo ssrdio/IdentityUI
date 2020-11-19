@@ -238,8 +238,10 @@ class AddExistingUser {
 
         this.$addExisingUserModal = $('#add-existing-user-to-group-modal');
         this.$addExisingUserModal.on('hidden.bs.modal', () => {
-            this.userSelectComponent.selectOption(null);
-            this.rolesSelectComponent.selectOption(null);
+            this.userSelectComponent.selectOption();
+            this.userSelectComponent.triggerChange();
+            this.rolesSelectComponent.selectOption();
+            this.rolesSelectComponent.triggerChange();
 
             this.hideErrors();
         });

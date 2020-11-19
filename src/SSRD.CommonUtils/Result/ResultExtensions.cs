@@ -11,7 +11,7 @@ namespace SSRD.CommonUtils.Result
         {
             return validationResult.Errors
                 .Select(x => new PropertyResultMessage(
-                    code: x.ErrorCode,
+                    code: x.ErrorMessage,
                     propertyName: x.PropertyName,
                     level: ResultMessageLevels.Error))
                 .ToList();

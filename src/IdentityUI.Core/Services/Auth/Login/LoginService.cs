@@ -22,7 +22,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
         private readonly ISessionService _sessionService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ICanLoginService _canLoginService;
+        private readonly ILoginFilter _canLoginService;
 
         private readonly IValidator<LoginRequest> _loginValidator;
         private readonly IValidator<LoginWith2faRequest> _lginwith2faValidator;
@@ -35,7 +35,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
             UserManager<AppUserEntity> userManager,
             ISessionService sessionService,
             IHttpContextAccessor httpContextAccessor,
-            ICanLoginService canLoginService,
+            ILoginFilter canLoginService,
             IValidator<LoginRequest> loginValidator,
             IValidator<LoginWith2faRequest> loginWith2faValidator,
             IValidator<LoginWithRecoveryCodeRequest> loginWithRecoveryCodeValidator,
@@ -86,8 +86,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.Expired);
             }
 
-            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
-            if (canLoginResult.Failure)
+            CommonUtils.Result.Result beforeLoginfilterResult = await _canLoginService.BeforeAdd(appUser);
+            if (beforeLoginfilterResult.Failure)
             {
                 _logger.LogInformation($"User is not allowed to login. User {appUser.Id}");
                 return SignInResult.Failed;
@@ -119,7 +119,16 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 return result;
             }
 
-            _logger.LogInformation($"User id loged in. UserId {appUser.Id}");
+            CommonUtils.Result.Result afterLoginFilterResult = await _canLoginService.AfterAdded(appUser);
+            if (afterLoginFilterResult.Failure)
+            {
+                await _signInManager.SignOutAsync();
+                _sessionService.Logout(appUser.SessionCode, appUser.Id, SessionEndTypes.AffterLoginFilterFailure);
+
+                return SignInResult.Failed;
+            }
+
+            _logger.LogInformation($"User id logged in. UserId {appUser.Id}");
 
             return result;
         }
@@ -160,7 +169,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 _sessionService.Logout(sessionCode, appUser.Id, SessionEndTypes.SecurityCodeChange);
             }
 
-            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
+            CommonUtils.Result.Result canLoginResult = await _canLoginService.BeforeAdd(appUser);
             if (canLoginResult.Failure)
             { 
                 _logger.LogInformation($"User is not allowd to login. User {appUser.Id}");
@@ -176,6 +185,15 @@ namespace SSRD.IdentityUI.Core.Services.Auth
             }
 
             await _signInManager.SignInAsync(appUser, false);
+
+            CommonUtils.Result.Result afterLoginFilterResult = await _canLoginService.AfterAdded(appUser);
+            if (afterLoginFilterResult.Failure)
+            {
+                await _signInManager.SignOutAsync();
+                _sessionService.Logout(appUser.SessionCode, appUser.Id, SessionEndTypes.AffterLoginFilterFailure);
+
+                return Result.Fail("error", "error");
+            }
 
             _logger.LogInformation($"User loged in. UserId {appUser.Id}");
 
@@ -200,7 +218,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 return SignInResult.Failed;
             }
 
-            CommonUtils.Result.Result canLoginResult = await _canLoginService.CanLogin(appUser);
+            CommonUtils.Result.Result canLoginResult = await _canLoginService.BeforeAdd(appUser);
             if (canLoginResult.Failure)
             {
                 _logger.LogInformation($"User is not allowd to login. User {appUser.Id}");
@@ -230,7 +248,16 @@ namespace SSRD.IdentityUI.Core.Services.Auth
                 _sessionService.Logout(appUser.SessionCode, appUser.Id, SessionEndTypes.InvlidTwoFactorLogin);
             }
 
-            _logger.LogInformation($"User loged in with 2fa. UserId {appUser.Id}");
+            CommonUtils.Result.Result afterLoginFilterResult = await _canLoginService.AfterAdded(appUser);
+            if (afterLoginFilterResult.Failure)
+            {
+                await _signInManager.SignOutAsync();
+                _sessionService.Logout(appUser.SessionCode, appUser.Id, SessionEndTypes.AffterLoginFilterFailure);
+
+                return SignInResult.Failed;
+            }
+
+            _logger.LogInformation($"User logged in with 2fa. UserId {appUser.Id}");
 
             return signInResult;
         }

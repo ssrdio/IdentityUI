@@ -131,6 +131,7 @@
                 this.$inviteUserModal.on('hidden.bs.modal', () => {
                     this.emailInputComponent.value(null);
                     this.rolesSelectComponent.selectOption(null);
+                    this.rolesSelectComponent.triggerChange();
 
                     this.hideErrors();
                 });
@@ -153,12 +154,13 @@
                 let data = this.canAssignRoles.map((element) => {
                     return {
                         id: element.id,
-                        text: element.name
+                        text: element.name,
                     }
                 });
 
                 this.$rolesSelect.select2({
                     data: data,
+                    placeholder: 'Select Group Role'
                 });
 
                 this.rolesSelectComponent.selectOption(null);

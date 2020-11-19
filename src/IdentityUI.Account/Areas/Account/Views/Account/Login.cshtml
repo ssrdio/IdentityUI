@@ -14,26 +14,8 @@
 
 @section script {
     <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
-    <script>
-        $(document).ready(function () {
-            $('button.external-login').on('click', (event) => {
-                let provider = $(event.target).data('provider');
-
-                let data = { provider: provider };
-
-                Api.post('/Account/ExternalLogin?returnUrl=@Model.ReturnUrl', data)
-                    .done(() => {
-
-                    })
-                    .fail((resp) => {
-                        console.log(resp.responseJSON);
-                    });
-            });
-
-        });
-    </script>
     
-    @await Component.InvokeAsync("AdminUIReCaptchaJavaScript", new { action = "login" })
+    @await Component.InvokeAsync("AdminUIReCaptchaJavaScript", new { action = "login", formContainer = "#login-form" })
 
 }
 <div class="app-container">
@@ -47,7 +29,7 @@
                     </h4>
                 </div>
                 <div class="card-body row ">
-                    <div class="@if (Model.ExternalLogins.Count > 0) { @Html.Raw("col-lg-6 col-md-12 login-row") } else { @Html.Raw("col-lg-12 col-md-12 login-row") }">
+                    <div id="login-form" class="@if (Model.ExternalLogins.Count > 0) { @Html.Raw("col-lg-6 col-md-12 login-row") } else { @Html.Raw("col-lg-12 col-md-12 login-row") }">
                         <form id="classic-login" class="" asp-area="Account" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                             <div class="modal-body login-padding">
                                 <div class="h5 modal-title text-center">
@@ -103,8 +85,7 @@
                     </div>
                     @if (Model.ExternalLogins.Count > 0)
                     {
-                        <div class="col-lg-6 col-sm-12 login-row login-row-border">
-                            <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div class="col-lg-6 col-sm-12 login-row login-row-border">                  
                                 <div class="modal-body login-padding">
                                     <div class="h5 modal-title text-center">
                                         <h4 class="mt-2 modal-header-custom">
@@ -116,65 +97,79 @@
                                         {
                                             if (provider.Name == "Google")
                                             {
-                                                <div class="col-md-12">
-                                                    <button type="submit" class="btn btn-block btn-google" value="@provider.Name"
-                                                            title="Log in using your @provider.DisplayName account" name="provider">
+                                                <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                    <div class="col-md-12">
+                                                        <input name="Provider" type="hidden" value="@provider.Name" />
 
-                                                        <i class="fab fa-google-plus-g fa-align-left social-icon" style=""></i>
-                                                        <span class="text">Google</span>
-                                                    </button>
-                                                </div>
+                                                        <button type="submit" class="btn btn-block btn-google" title="Log in using your @provider.DisplayName account">
+                                                            <i class="fab fa-google-plus-g fa-align-left social-icon" style=""></i>
+                                                            <span class="text">Google</span>
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             }
                                             else if (provider.Name == "Facebook")
                                             {
-                                                <div class="col-md-12">
-                                                    <button class="btn-block btn btn-facebook" type="submit" value="@provider.Name"
-                                                            title="Log in using your @provider.DisplayName account" name="provider">
+                                                <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                    <div class="col-md-12">
+                                                        <input name="Provider" type="hidden" value="@provider.Name" />
 
-                                                        <i class="fab fa-facebook-f fa-align-left social-icon"></i>
-                                                        <span class="text">Facebook</span>
-                                                    </button>
-                                                </div>
+                                                        <button class="btn-block btn btn-facebook" type="submit" value="@provider.Name"
+                                                                title="Log in using your @provider.DisplayName account">
+
+                                                            <i class="fab fa-facebook-f fa-align-left social-icon"></i>
+                                                            <span class="text">Facebook</span>
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             }
                                             else if (provider.Name == "Twitter")
                                             {
-                                                <div class="col-md-12">
-                                                    <button class="btn-block btn btn-twitter" type="submit" value="@provider.Name"
-                                                            title="Log in using your @provider.DisplayName account" name="provider">
+                                                <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                    <div class="col-md-12">
+                                                        <input name="Provider" type="hidden" value="@provider.Name" />
+                                                        <button class="btn-block btn btn-twitter" type="submit" value="@provider.Name"
+                                                                title="Log in using your @provider.DisplayName account">
 
-                                                        <i class="fab fa-twitter fa-align-left social-icon"></i>
-                                                        <span class="text">Twitter</span>
-                                                    </button>
-                                                </div>
+                                                            <i class="fab fa-twitter fa-align-left social-icon"></i>
+                                                            <span class="text">Twitter</span>
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             }
                                             else if (provider.Name == "Microsoft")
                                             {
-                                                <div class="col-md-12">
-                                                    <button class="btn-block btn btn-microsoft" type="submit" value="@provider.Name"
-                                                            title="Log in using your @provider.DisplayName account" name="provider">
+                                                <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                    <div class="col-md-12">
+                                                        <input name="Provider" type="hidden" value="@provider.Name" />
+                                                        <button class="btn-block btn btn-microsoft" type="submit" value="@provider.Name"
+                                                                title="Log in using your @provider.DisplayName account">
 
-                                                        <i class="fab fa-microsoft fa-align-left social-icon"></i>
-                                                        <span class="text">Microsoft</span>
-                                                    </button>
-                                                </div>
+                                                            <i class="fab fa-microsoft fa-align-left social-icon"></i>
+                                                            <span class="text">Microsoft</span>
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             }
                                             else
                                             {
-                                                <div class="col-md-12">
-                                                    <button class="btn-block btn btn-other" type="submit" name="provider"
-                                                            value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                                                <form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                    <div class="col-md-12">
+                                                        <input name="Provider" type="hidden" value="@provider.Name" />
+                                                        <button class="btn-block btn btn-other" type="submit" name="provider"
+                                                                title="Log in using your @provider.DisplayName account">
 
-                                                        <i class="fas fa-share-alt fa-align-left social-icon"></i>
-                                                        <span class="text">Sign in with @provider.Name</span>
+                                                            <i class="fas fa-share-alt fa-align-left social-icon"></i>
+                                                            <span class="text">Sign in with @provider.Name</span>
 
 
-                                                    </button>
-                                                </div>
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             }
                                         }
                                     </div>
                                 </div>
-                            </form>
                         </div>
                     }
                 </div>

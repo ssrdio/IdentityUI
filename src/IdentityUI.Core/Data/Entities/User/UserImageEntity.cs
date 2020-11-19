@@ -17,7 +17,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities
 
         public string URL { get { return $"data:image/jpg;base64,{Convert.ToBase64String(BlobImage)}"; } }
 
-        protected UserImageEntity()
+        public UserImageEntity()
         {
         }
 

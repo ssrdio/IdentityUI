@@ -19,13 +19,12 @@ using System.Linq;
 using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
-using SSRD.IdentityUI.Core.Services.User.Models.Add;
 using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
-    public class AddUserService : IAddUserService
+    internal class AddUserService : IAddUserService
     {
         public const string USER_NOT_FOUND = "USER_NOT_FOUND";
         public const string GROUP_NOT_FOUND = "group_not_found";
@@ -40,6 +39,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         protected readonly IEmailConfirmationService _emailService;
         protected readonly IGroupUserService _groupUserService;
+        protected readonly IAddUserFilter _addUserFilter;
 
         protected readonly IBaseDAO<AppUserEntity> _userDAO;
         protected readonly IBaseDAO<InviteEntity> _inviteDAO;
@@ -62,31 +62,32 @@ namespace SSRD.IdentityUI.Core.Services.User
         public AddUserService(
             UserManager<AppUserEntity> userManager,
             SignInManager<AppUserEntity> signInManager,
+            IEmailConfirmationService emailService,
+            IGroupUserService groupUserService,
+            IAddUserFilter addUserFilter,
+            IBaseDAO<AppUserEntity> userDAO,
+            IBaseDAO<InviteEntity> inviteDAO,
+            IBaseDAO<RoleEntity> roleDAO,
+            IOptions<IdentityUIEndpoints> identityUIEndpoints,
             IValidator<NewUserRequest> newUserValidator,
             IValidator<RegisterRequest> registerValidator,
             IValidator<AcceptInviteRequest> acceptInviteValidator,
-            ILogger<AddUserService> logger,
-            IEmailConfirmationService emailService,
-            IGroupUserService groupUserService,
-            IBaseDAO<AppUserEntity> userDAO,
-            IBaseDAO<InviteEntity> inviteDAO,
-            IBaseDAO<GroupEntity> groupDAO,
-            IBaseDAO<GroupUserEntity> groupUserDAO,
-            IBaseDAO<RoleEntity> roleDAO,
             IValidator<ExternalLoginRegisterRequest> externalLoginRequsterRequestValidator,
             IValidator<GroupBaseUserRegisterRequest> groupBaseUserRegisterRequestValidator,
             IValidator<BaseRegisterRequest> baseRegisterValidator,
-            IOptions<IdentityUIEndpoints> identityUIEndpoints,
-            IValidator<IUserAttributeRequest> userAttributeRequestValidator)
+            IValidator<IUserAttributeRequest> userAttributeRequestValidator,
+            ILogger<AddUserService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
 
             _userDAO = userDAO;
             _inviteDAO = inviteDAO;
-            _groupDAO = groupDAO;
-            _groupUserDAO = groupUserDAO;
             _roleDAO = roleDAO;
+
+            _emailService = emailService;
+            _groupUserService = groupUserService;
+            _addUserFilter = addUserFilter;
 
             _newUserValidator = newUserValidator;
             _registerValidator = registerValidator;
@@ -95,9 +96,6 @@ namespace SSRD.IdentityUI.Core.Services.User
             _groupBaseUserRegisterRequestValidator = groupBaseUserRegisterRequestValidator;
             _userAttributeRequestValidator = userAttributeRequestValidator;
             _baseRegisterValidator = baseRegisterValidator;
-
-            _emailService = emailService;
-            _groupUserService = groupUserService;
 
             _identityUIEndpoints = identityUIEndpoints.Value;
 
@@ -326,17 +324,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             return CommonUtils.Result.Result.Ok();
         }
 
-        protected virtual Task<Result> BeforeUserAdd(BaseRegisterRequest baseRegisterRequest)
-        {
-            return Task.FromResult(Result.Ok());
-        }
-
-        protected virtual Task<Result> AfterUserAdded(AppUserEntity appUser)
-        {
-            return Task.FromResult(Result.Ok());
-        }
-
-        private async Task<CommonUtils.Result.Result<AppUserEntity>> AddUser(
+        public virtual async Task<CommonUtils.Result.Result<AppUserEntity>> AddUser(
             BaseRegisterRequest baseRegisterRequest,
             bool setPassword = true,
             bool sendConfirmationMail = true,
@@ -395,10 +383,10 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             baseRegisterRequest.Username.Trim();
 
-            Result result = await BeforeUserAdd(baseRegisterRequest);
-            if(result.Failure)
+            Result beforeUserAddResult = await _addUserFilter.BeforeAdd(baseRegisterRequest);
+            if(beforeUserAddResult.Failure)
             {
-                return Result.Fail<AppUserEntity>(result);
+                return Result.Fail<AppUserEntity>(beforeUserAddResult);
             }
 
             AppUserEntity appUser = new AppUserEntity(
@@ -427,10 +415,10 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail<AppUserEntity>(identityResult.ToResultError());
             }
 
-            Result afterUserAddedCallbackResult = await AfterUserAdded(appUser);
-            if(afterUserAddedCallbackResult.Failure)
+            Result afterUserAddedResult = await _addUserFilter.AfterAdded(appUser);
+            if(afterUserAddedResult.Failure)
             {
-                return Result.Fail<AppUserEntity>(afterUserAddedCallbackResult);
+                return Result.Fail<AppUserEntity>(afterUserAddedResult);
             }
 
             if (sendConfirmationMail)

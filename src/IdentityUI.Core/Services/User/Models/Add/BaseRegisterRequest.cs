@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace SSRD.IdentityUI.Core.Services.User.Models.Add
+namespace SSRD.IdentityUI.Core.Services.User.Models
 {
     public class BaseRegisterRequest : IUserAttributeRequest
     {

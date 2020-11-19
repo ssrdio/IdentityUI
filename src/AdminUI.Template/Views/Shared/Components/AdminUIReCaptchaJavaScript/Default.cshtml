@@ -11,13 +11,23 @@
 
             var reCaptchaRetries = 0;
 
-            $('form').submit(function (event) {
-                if (reCaptchaRetries > 5) {
-                    reCaptchaRetries = 0;
-                    return;
-                }
+            var $formContainer;
+            @if(string.IsNullOrEmpty(Model.FormContainer))
+            {
+                <text> $formContainer = $('form') </text>
+            }
+            else
+            {
+                <text> $formContainer = $('@Model.FormContainer form') </text>
+            }
 
-                let $form = $(event.target);
+            $formContainer.submit(function (event) {
+                    if (reCaptchaRetries > 5) {
+                        reCaptchaRetries = 0;
+                        return;
+                    }
+
+                    let $form = $(event.target);
                 let $reCaptchaInput = $form.find('#recaptcha-token-input');
                 let reCaptchaToken = $reCaptchaInput.val();
 
@@ -26,16 +36,16 @@
                     return;
                 }
 
-                event.preventDefault();
-                grecaptcha.ready(() => {
-                    grecaptcha.execute('@_reCaptchaOptions.Value.SiteKey', { action: '@Model.Action' })
+            event.preventDefault();
+            grecaptcha.ready(() => {
+                grecaptcha.execute('@_reCaptchaOptions.Value.SiteKey', { action: '@Model.Action' })
                         .then((token) => {
                             $reCaptchaInput.val(token);
                             $form.trigger('submit');
-                        });
-                });
+                         });
+            });
 
-                reCaptchaRetries++;
+            reCaptchaRetries++;
             });
         })
     </script>

@@ -91,6 +91,15 @@
         }
     }
 
+    triggerChange() {
+        if (this.$select2 !== null && this.$select2 !== undefined) {
+            this.$select2.trigger('change')
+        }
+        else if (this.$select !== null && this.$select !== undefined) {
+            this.$select.trigger('change')
+        }
+    }
+
     handleTabEvents() {
         // on first focus (bubbles up to document), open the menu
         $(document).on('focus', '.select2-selection.select2-selection--single', e => {

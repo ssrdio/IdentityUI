@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Services.User
 {
-    public class InviteService : IInviteService
+    internal class InviteService : IInviteService
     {
         private const string FAILED_TO_REMOVE_INVITE = "failed_to_remove_invite";
         private const string INVITE_NOT_FOUND = "invite_not_found";
@@ -40,8 +40,8 @@ namespace SSRD.IdentityUI.Core.Services.User
 
         protected readonly IGroupStore _groupStore;
         protected readonly IGroupUserStore _groupUserStore;
-
         protected readonly IEmailService _mailService;
+        protected readonly IAddInviteFilter _addInviteFilter;
 
         protected readonly IValidator<InviteToGroupRequest> _inviteToGroupRequestValidator;
         protected readonly IValidator<InviteRequest> _inviteRequestValidator;
@@ -58,11 +58,12 @@ namespace SSRD.IdentityUI.Core.Services.User
             IGroupStore groupStore,
             IGroupUserStore groupUserStore,
             IEmailService mailService,
+            IAddInviteFilter addInviteFilter,
             IValidator<InviteToGroupRequest> inviteToGroupRequestValidator,
             IValidator<InviteRequest> inviteRequestValidator,
             ILogger<InviteService> logger,
-            IOptionsSnapshot<IdentityUIOptions> identityManagementOptions,
-            IOptionsSnapshot<IdentityUIEndpoints> identityManagementEndpoints)
+            IOptions<IdentityUIOptions> identityManagementOptions,
+            IOptions<IdentityUIEndpoints> identityManagementEndpoints)
         {
             _userDAO = userDAO;
             _roleDAO = roleDAO;
@@ -70,8 +71,8 @@ namespace SSRD.IdentityUI.Core.Services.User
 
             _groupStore = groupStore;
             _groupUserStore = groupUserStore;
-
             _mailService = mailService;
+            _addInviteFilter = addInviteFilter;
 
             _inviteToGroupRequestValidator = inviteToGroupRequestValidator;
             _inviteRequestValidator = inviteRequestValidator;
@@ -110,17 +111,7 @@ namespace SSRD.IdentityUI.Core.Services.User
             return (await AddInvite(inviteRequest.Email, inviteRequest.RoleId, inviteRequest.GroupId, inviteRequest.GroupRoleId)).ToOldResult();
         }
 
-        protected virtual Task<Result> BeforeAdd(string email, string roleId, string groupId, string groupRoleId)
-        {
-            return Task.FromResult(Result.Ok());
-        }
-
-        protected virtual Task<Result> AfterAdded(InviteEntity invite)
-        {
-            return Task.FromResult(Result.Ok());
-        }
-
-        private async Task<Result> AddInvite(string email, string roleId, string groupId, string groupRoleId)
+        public async Task<Result> AddInvite(string email, string roleId = null, string groupId = null, string groupRoleId = null)
         {
             Result inviteAlreadyExistsResult = await InviteAlreadyExits(email);
             if(inviteAlreadyExistsResult.Failure)
@@ -153,7 +144,7 @@ namespace SSRD.IdentityUI.Core.Services.User
                 }
             }
 
-            Result beforeAddResult = await BeforeAdd(email, roleId, groupId, groupRoleId);
+            Result beforeAddResult = await _addInviteFilter.BeforeAdd(email, roleId, groupId, groupRoleId);
             if(beforeAddResult.Failure)
             {
                 return beforeAddResult;
@@ -175,7 +166,7 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Result.Fail(FAILED_TO_ADD_INVITE);
             }
 
-            Result afterAddedResult = await AfterAdded(invite);
+            Result afterAddedResult = await _addInviteFilter.AfterAdded(invite);
             if(afterAddedResult.Failure)
             {
                 return afterAddedResult;

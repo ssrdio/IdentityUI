@@ -4,10 +4,11 @@ namespace SSRD.AdminUI.Template.Views.Shared.Components.AdminUIReCaptchaJavaScri
 {
     public class AdminUIReCaptchaJavaScriptViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke(string action = null)
+        public IViewComponentResult Invoke(string action = null, string formContainer = null)
         {
             ViewModel viewModel = new ViewModel(
-                action: action);
+                action: action,
+                formContainer: formContainer);
 
             return View(viewModel);
         }
@@ -15,10 +16,12 @@ namespace SSRD.AdminUI.Template.Views.Shared.Components.AdminUIReCaptchaJavaScri
         public class ViewModel
         {
             public string Action { get; set; }
+            public string FormContainer { get; set; }
 
-            public ViewModel(string action)
+            public ViewModel(string action, string formContainer)
             {
                 Action = action;
+                FormContainer = formContainer;
             }
         }
     }

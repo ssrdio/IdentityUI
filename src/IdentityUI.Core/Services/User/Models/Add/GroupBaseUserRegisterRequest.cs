@@ -1,6 +1,6 @@
 ﻿using SSRD.IdentityUI.Core.Helper;
 
-namespace SSRD.IdentityUI.Core.Services.User.Models.Add
+namespace SSRD.IdentityUI.Core.Services.User.Models
 {
     public class GroupBaseUserRegisterRequest : BaseRegisterRequest
     {

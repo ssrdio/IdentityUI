@@ -416,7 +416,8 @@
                     </div>
 
                     <div class="button-holder">
-                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_IMPERSONATE_USER, _identityUIClaimPermissions.Value))
+                        @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_IMPERSONATE_USER, _identityUIClaimPermissions.Value)
+                           && _identityUIEndpoints.Value.AllowImpersonation)
                         {
                             <button type="button" id="impersonate-button" class="btn btn-primary custom-submit">Impersonate</button>
                         }

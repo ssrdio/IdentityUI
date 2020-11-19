@@ -299,7 +299,9 @@
                 this.$addExisingUserModal = $('#add-existing-user-to-group-modal');
                 this.$addExisingUserModal.on('hidden.bs.modal', () => {
                     this.userSelectComponent.selectOption(null);
+                    this.userSelectComponent.triggerChange();
                     this.rolesSelectComponent.selectOption(null);
+                    this.rolesSelectComponent.triggerChange();
 
                     this.hideErrors();
                 });
@@ -405,6 +407,7 @@
                 this.$inviteUserModal.on('hidden.bs.modal', () => {
                     this.emailInputComponent.value(null);
                     this.rolesSelectComponent.selectOption(null);
+                    this.rolesSelectComponent.triggerChange();
 
                     this.hideErrors();
                 });

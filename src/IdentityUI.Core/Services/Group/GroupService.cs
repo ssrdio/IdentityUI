@@ -73,6 +73,8 @@ namespace SSRD.IdentityUI.Core.Services.Group
                 return Result.Fail<IdStringModel>(validationResult.ToResultError());
             }
 
+            addGroup.Name = addGroup.Name.Trim();
+
             IBaseSpecification<GroupEntity, GroupEntity> groupExistSpecification = SpecificationBuilder
                 .Create<GroupEntity>()
                 .WithName(addGroup.Name)

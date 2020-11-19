@@ -4,77 +4,76 @@
 
 @{ ViewData["Title"] = "Audit"; }
 
-    <div class="row">
-        <div class="main-card mb-3 card fullWidthCard">
-            <div class="custom_container pb-0">
-                <div class="row">
-                    <div class="col-3">
-                        <div id="object-type" class="form-group">
-                            <div class="d-flex">
-                                <label for="object-type-select" class="control-label">Object Type</label>
-                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                            </div>
-                            <select id="object-type-select" class="form-control select2-container"></select>
+<div class="row">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="custom_container pb-0">
+            <div class="row">
+                <div class="col-3">
+                    <div id="object-type" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-type-select" class="control-label">Object Type</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
                         </div>
-                        <div id="object-identifier" class="form-group">
+                        <select id="object-type-select" class="form-control select2-container"></select>
+                    </div>
+                    <div id="object-identifier" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-identifier-select" class="control-label">Object Identifier</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="object-identifier-select" class="form-control select2-container" disabled></select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div id="subject-type" class="form-group">
+                        <div class="d-flex">
+                            <label for="subject-type-select" class="control-label">Subject Type</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="subject-type-select" class="form-control select2-container"></select>
+                    </div>
+                    <div id="subject-identifier" class="form-group">
+                        <div class="d-flex">
+                            <label for="subject-identifier-select" class="control-label">Subject Identifier</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select id="subject-identifier-select" class="form-control select2-container"></select>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div id="action-type" class="form-group col-6">
                             <div class="d-flex">
-                                <label for="object-identifier-select" class="control-label">Object Identifier</label>
+                                <label for="action-type-select" class="control-label">Action Type</label>
                                 <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
                             </div>
-                            <select id="object-identifier-select" class="form-control select2-container" disabled></select>
+                            <select id="action-type-select" class="form-control select2-container"></select>
+                        </div>
+                        <div id="resource-name" class="form-group col-6">
+                            <div class="d-flex">
+                                <label for="resource-name-select" class="control-label">Resource Name</label>
+                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            </div>
+                            <select id="resource-name-select" class="form-control select2-container"></select>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div id="subject-type" class="form-group">
+                    <div class="row">
+                        <div id="date-time-range-container" class="col-6">
                             <div class="d-flex">
-                                <label for="subject-type-select" class="control-label">Subject Type</label>
+                                <label for="resource-name-select" class="control-label">Range</label>
                                 <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
                             </div>
-                            <select id="subject-type-select" class="form-control select2-container"></select>
-                        </div>
-                        <div id="subject-identifier" class="form-group">
-                            <div class="d-flex">
-                                <label for="subject-identifier-select" class="control-label">Subject Identifier</label>
-                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                            </div>
-                            <select id="subject-identifier-select" class="form-control select2-container"></select>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="row">
-                            <div id="action-type" class="form-group col-6">
-                                <div class="d-flex">
-                                    <label for="action-type-select" class="control-label">Action Type</label>
-                                    <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            <div class="input-group height-1">
+                                <div class="input-group-prepend">
+                                    <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
                                 </div>
-                                <select id="action-type-select" class="form-control select2-container"></select>
-                            </div>
-                            <div id="resource-name" class="form-group col-6">
-                                <div class="d-flex">
-                                    <label for="resource-name-select" class="control-label">Resource Name</label>
-                                    <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                                </div>
-                                <select id="resource-name-select" class="form-control select2-container"></select>
+                                <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
+                                <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
                             </div>
                         </div>
-                        <div class="row">
-                            <div id="date-time-range-container" class="col-6">
-                                <div class="d-flex">
-                                    <label for="resource-name-select" class="control-label">Range</label>
-                                    <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                                </div>
-                                <div class="input-group height-1">
-                                    <div class="input-group-prepend">
-                                        <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
-                                    </div>
-                                    <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
-                                    <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="d-flex h-100 justify-content-end">
-                                    <button id="reset-all-button" type="button" class="btn btn-primary btn-sm align-self-end">Reset all</button>
-                                </div>
+                        <div class="col-6">
+                            <div class="d-flex h-100 justify-content-end">
+                                <button id="reset-all-button" type="button" class="btn btn-primary btn-sm align-self-end">Reset all</button>
                             </div>
                         </div>
                     </div>
@@ -82,193 +81,196 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="main-card mb-3 card fullWidthCard">
-            <div class="custom_container custom_table">
-                <table id="audit-table" class="dataTableClass display "></table>
-            </div>
+</div>
+<div class="row">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="custom_container custom_table">
+            <table id="audit-table" class="dataTableClass display "></table>
         </div>
     </div>
+</div>
 
-        <div id="audit-details-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="audit-details-modal" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Audit Details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
+<div id="audit-details-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="audit-details-modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+
+            <div class="modal-body audit-modal-body">
+                <div id="invite-user-form">
+                    @await Component.InvokeAsync("AdminUIErrorAlert")
+
+                    <div id="audit-details-loader">
+                        @await Component.InvokeAsync("AdminUIDotLoader")
                     </div>
-                    <div class="modal-body audit-modal-body">
-                        <div id="invite-user-form">
-                            @await Component.InvokeAsync("AdminUIErrorAlert")
-
-                            <div id="audit-data-loader" class="loader-holder loader-hidden">
-                                <div class="loader">Loading...</div>
+                    
+                    <div id="audit-data-container">
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Action Type: </label>
+                            <span id="action-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Object Type: </label>
+                            <span id="object-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Object Identifier: </label>
+                            <span id="object-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Subject Type: </label>
+                            <span id="subject-type-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Subject Identifier: </label>
+                            <span id="subject-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Group Identifier: </label>
+                            <span id="group-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Resource Name: </label>
+                            <span id="resource-name-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Host: </label>
+                            <span id="host-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Remote Ip: </label>
+                            <span id="remote-ip-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">User Agent: </label>
+                            <span id="user-agent-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Trace Identifier: </label>
+                            <span id="trace-identifier-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">App Version: </label>
+                            <span id="app-version-container"></span>
+                        </div>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Created: </label>
+                            <span id="created-container"></span>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <label class="col-3 font-weight-bold">Object Metadata: </label>
                             </div>
-
-                            <div id="audit-data-container">
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Action Type: </label>
-                                    <span id="action-type-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Object Type: </label>
-                                    <span id="object-type-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Object Identifier: </label>
-                                    <span id="object-identifier-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Subject Type: </label>
-                                    <span id="subject-type-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Subject Identifier: </label>
-                                    <span id="subject-identifier-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Group Identifier: </label>
-                                    <span id="group-identifier-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Resource Name: </label>
-                                    <span id="resource-name-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Host: </label>
-                                    <span id="host-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Remote Ip: </label>
-                                    <span id="remote-ip-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">User Agent: </label>
-                                    <span id="user-agent-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Trace Identifier: </label>
-                                    <span id="trace-identifier-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">App Version: </label>
-                                    <span id="app-version-container"></span>
-                                </div>
-                                <div class="row">
-                                    <label class="col-3 font-weight-bold">Created: </label>
-                                    <span id="created-container"></span>
-                                </div>
-                                <div>
-                                    <div class="row">
-                                        <label class="col-3 font-weight-bold">Object Metadata: </label>
-                                    </div>
-                                    <span id="object-metadata-container"></span>
-                                </div>
-                                <div>
-                                    <div class="row">
-                                        <label class="col-3 font-weight-bold">Subject Metadata: </label>
-                                    </div>
-                                    <span id="subject-metadata-container"></span>
-                                </div>
-                                <div>
-                                    <div class="row">
-                                        <label class="col-3 font-weight-bold">Metadata: </label>
-                                    </div>
-                                    <span id="metadata-container"></span>
-                                </div>
+                            <span id="object-metadata-container"></span>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <label class="col-3 font-weight-bold">Subject Metadata: </label>
                             </div>
+                            <span id="subject-metadata-container"></span>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <label class="col-3 font-weight-bold">Metadata: </label>
+                            </div>
+                            <span id="metadata-container"></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div id="status-alert-container">
-            @await Component.InvokeAsync("IdentityStatusAlertJs")
-        </div>
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
 
-        @section style {
-            <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
-            <link rel="stylesheet" href="~/adminUI/app/lib/jjsonviewer-master/css/jjsonviewer.css" asp-append-version="true" />
-            <link rel="stylesheet" href="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.css" asp-append-version="true" />
-            <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
+@section style {
+    <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/jjsonviewer-master/css/jjsonviewer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
 
-            <style>
-                .height-1 {
-                    height: 1em;
-                }
-
-                .line-height-02 {
-                    line-height: 0.2
-                }
-
-                .select2-selection.select2-selection--single {
-                    border-radius: 2px;
-                    border: 1px solid #c9c8c8;
-                }
-
-                .audit-modal-body {
-                    max-height: 70vh;
-                    overflow: auto;
-                    margin-bottom: 30px;
-                }
-
-                table.dataTable thead .sorting,
-                table.dataTable thead .sorting_asc,
-                table.dataTable thead .sorting_desc,
-                table.dataTable thead .sorting_asc_disabled,
-                table.dataTable thead .sorting_desc_disabled {
-                    cursor: pointer;
-                    background-repeat: no-repeat;
-                    background-position: center right;
-                }
-
-                table.dataTable thead th {
-                    position: relative;
-                    background-image: none !important;
-                }
-
-                    table.dataTable thead th.sorting:after,
-                    table.dataTable thead th.sorting_asc:after,
-                    table.dataTable thead th.sorting_desc:after {
-                        position: absolute;
-                        top: 12px;
-                        right: 8px;
-                        display: block;
-                        font-family: "Font Awesome 5 Free";
-                    }
-
-                    table.dataTable thead th.sorting:after {
-                        content: "\f0dc";
-                        color: #ddd;
-                        font-size: 0.8em;
-                        padding-top: 0.12em;
-                    }
-
-                    table.dataTable thead th.sorting_asc:after {
-                        content: "\f0de";
-                    }
-
-                    table.dataTable thead th.sorting_desc:after {
-                        content: "\f0dd";
-                    }
-            </style>
+    <style>
+        .height-1 {
+            height: 1em;
         }
 
-        @section script {
-            <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
-            <script type="text/javascript" src="~/adminUI/app/lib/select2-4.0.13/dist/js/select2.min.js" asp-append-version="true"></script>
-            <script type="text/javascript" src="~/adminUI/app/lib/datatables/datatables.min.js" asp-append-version="true"></script>
-            <script type="text/javascript" src="~/adminUI/app/lib/jjsonviewer-master/js/jjsonviewer.js" asp-append-version="true"></script>
-            <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
-            <script type="text/javascript" src="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.js" asp-append-version="true"></script>
+        .line-height-02 {
+            line-height: 0.2
+        }
 
-            <script type="text/javascript" src="~/adminUI/app/js/components/range-picker.js" asp-append-version="true"></script>
-            <script type="text/javascript" src="~/identityAdmin/app/audit/audit-main.js" asp-append-version="true"></script>
+        .select2-selection.select2-selection--single {
+            border-radius: 2px;
+            border: 1px solid #c9c8c8;
+        }
 
-            <script>
+        .audit-modal-body {
+            max-height: 70vh;
+            overflow: auto;
+            margin-bottom: 30px;
+        }
+
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc,
+        table.dataTable thead .sorting_asc_disabled,
+        table.dataTable thead .sorting_desc_disabled {
+            cursor: pointer;
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+
+        table.dataTable thead th {
+            position: relative;
+            background-image: none !important;
+        }
+
+            table.dataTable thead th.sorting:after,
+            table.dataTable thead th.sorting_asc:after,
+            table.dataTable thead th.sorting_desc:after {
+                position: absolute;
+                top: 12px;
+                right: 8px;
+                display: block;
+                font-family: "Font Awesome 5 Free";
+            }
+
+            table.dataTable thead th.sorting:after {
+                content: "\f0dc";
+                color: #ddd;
+                font-size: 0.8em;
+                padding-top: 0.12em;
+            }
+
+            table.dataTable thead th.sorting_asc:after {
+                content: "\f0de";
+            }
+
+            table.dataTable thead th.sorting_desc:after {
+                content: "\f0dd";
+            }
+    </style>
+}
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/select2-4.0.13/dist/js/select2.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/datatables/datatables.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/jjsonviewer-master/js/jjsonviewer.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/js/components/range-picker.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/identityAdmin/app/audit/audit-main.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+
+    <script>
 
         $(document).ready(function () {
             new AuditTable(@Json.Serialize(Model.ActionTypes), @Json.Serialize(Model.SubjectTypes));

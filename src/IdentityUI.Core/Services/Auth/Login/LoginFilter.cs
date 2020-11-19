@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Login
 {
-    public class CanLoginService : ICanLoginService
+    public class LoginFilter : ILoginFilter
     {
         private string CAN_NOT_LOGIN = "can_not_login";
 
-        protected ILogger<CanLoginService> _logger;
+        protected ILogger<LoginFilter> _logger;
 
-        public CanLoginService(ILogger<CanLoginService> logger)
+        public LoginFilter(ILogger<LoginFilter> logger)
         {
             _logger = logger;
         }
 
-        public virtual Task<Result> CanLogin(AppUserEntity appUserEntity)
+        public virtual Task<Result> BeforeAdd(AppUserEntity appUserEntity)
         {
             if (!appUserEntity.Enabled)
             {
@@ -26,6 +26,11 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Login
                 return Task.FromResult(Result.Fail(CAN_NOT_LOGIN));
             }
 
+            return Task.FromResult(Result.Ok());
+        }
+
+        public Task<Result> AfterAdded(AppUserEntity appUserEntity)
+        {
             return Task.FromResult(Result.Ok());
         }
     }

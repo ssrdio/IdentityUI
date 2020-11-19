@@ -7,8 +7,9 @@
 
         this.actionTypes = actionTypes;
 
-        this.$auditDataContiner = this.$modal.find('#audit-data-container');
-        this.$loader = this.$modal.find('#audit-data-loader');
+        this.$auditDataContiner = this.$modal.find('#audit-data-container')
+
+        this.loader = new DotLoader(this.$modal.find('#audit-details-loader'), this.$auditDataContiner);
 
         this.$actionType = this.$auditDataContiner.find('#action-type-container');
 
@@ -31,16 +32,6 @@
         this.$metadata = this.$auditDataContiner.find('#metadata-container');
 
         this.$created = this.$auditDataContiner.find('#created-container');
-    }
-
-    showLoader() {
-        this.$auditDataContiner.hide();
-        this.$loader.removeClass('loader-hidden');
-    }
-
-    hideLoader() {
-        this.$auditDataContiner.show();
-        this.$loader.addClass('loader-hidden');
     }
 
     showModal(id) {
@@ -102,7 +93,7 @@
     }
 
     get(id) {
-        this.showLoader();
+        this.loader.show();
 
         Api.get(`/IdentityAdmin/Audit/Get/${id}`)
             .done((data) => {
@@ -112,7 +103,7 @@
                 console.error('failed to get audit details');
             })
             .always(() => {
-                this.hideLoader();
+                this.loader.hide();
             })
     }
 }
@@ -476,11 +467,17 @@ class AuditTableFilters {
     }
 
     resetObjectType() {
+        const onChange = this.onChange;
+        this.onChange = null;
+
         this.$objectTypeSelect.val(null).trigger('change');
         //TODO: remove options
 
         this.resetObjectIdentifierSelect();
         this.$objectIdentifierSelect.prop('disabled', true);
+
+        this.onChange = onChange;
+        this.change();
     }
 
     resetObjectIdentifierSelect() {

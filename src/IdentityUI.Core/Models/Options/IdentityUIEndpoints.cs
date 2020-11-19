@@ -54,5 +54,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
         public bool CanRemoveGroup { get; set; } = true;
 
         public bool CanRemoveUser { get; set; } = true;
+
+        public bool AllowImpersonation { get; set; } = true;
     }
 }

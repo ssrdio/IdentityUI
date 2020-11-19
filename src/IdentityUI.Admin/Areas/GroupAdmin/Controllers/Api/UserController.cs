@@ -33,6 +33,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         private readonly IGroupAdminUserDataService _groupAdminUserDataService;
 
         private readonly IdentityUIClaimOptions _identityUIClaimOptions;
+        private readonly IdentityUIEndpoints _identityUIEndpoints;
 
         public UserController(
             IGroupUserDataService groupUserDataService,
@@ -40,7 +41,8 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
             IManageUserService manageUserService,
             IImpersonateService impersonateService,
             IGroupAdminUserDataService groupAdminUserDataService,
-            IOptions<IdentityUIClaimOptions> identityUICalimOptions)
+            IOptions<IdentityUIClaimOptions> identityUICalimOptions,
+            IOptions<IdentityUIEndpoints> identityUIEndpoints)
         {
             _groupUserDataService = groupUserDataService;
             _groupUserService = groupUserService;
@@ -51,6 +53,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
             _groupAdminUserDataService = groupAdminUserDataService;
 
             _identityUIClaimOptions = identityUICalimOptions.Value;
+            _identityUIEndpoints = identityUIEndpoints.Value;
         }
 
         [GroupAdminAuthorize(IdentityUIPermissions.GROUP_CAN_SEE_USERS)]
@@ -161,6 +164,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> StartImpersonation([FromRoute] long groupUserId)
         {
+            if(!_identityUIEndpoints.AllowImpersonation)
+            {
+                return NotFound();
+            }
+
             Result result = await _impersonateService.Start(groupUserId);
 
             return result.ToApiResult();
@@ -171,6 +179,11 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Controllers.Api
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> StopImpersonation()
         {
+            if (!_identityUIEndpoints.AllowImpersonation)
+            {
+                return NotFound();
+            }
+
             Result result = await _impersonateService.Stop();
 
             return result.ToApiResult();
