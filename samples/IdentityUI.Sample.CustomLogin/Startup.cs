@@ -40,6 +40,7 @@ namespace IdentityUI.CustomLogin
                 endpoints.RegisterEnabled = true;
                 endpoints.UseEmailSender = false;
             })
+            .UseInMemoryDatabase()
             .AddIdentityUI(options =>
             {
                 options.Password.RequireDigit = false;

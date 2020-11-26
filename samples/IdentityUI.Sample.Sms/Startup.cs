@@ -45,6 +45,7 @@ namespace IdentityUI.Sample.Sms
 
                 endpoints.UseSmsGateway = true;
             })
+            .UseInMemoryDatabase()
             .AddIdentityUI(options =>
             {
                 options.Password.RequireDigit = false;

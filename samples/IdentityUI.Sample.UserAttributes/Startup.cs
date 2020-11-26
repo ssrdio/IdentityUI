@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SSRD.Audit.Extensions;
 using SSRD.IdentityUI.Account;
 using SSRD.IdentityUI.Admin;
 using SSRD.IdentityUI.Core;
@@ -46,6 +47,7 @@ namespace IdentityUI.Sample.UserAttributes
                 endpoints.UseEmailSender = true;
                 endpoints.UseSmsGateway = true;
             })
+            .UseInMemoryDatabase()
             .AddIdentityUI(options =>
             {
                 options.Password.RequireDigit = false;
@@ -91,7 +93,7 @@ namespace IdentityUI.Sample.UserAttributes
                 options.Version = Assembly.GetExecutingAssembly().GetName()?.Version?.ToString();
             });
 
-            services.AddSingleton<FluentValidation.IValidator<SSRD.IdentityUI.Core.Services.User.Models.IUserAttributeRequest>, UserAttributeValidator>();
+            services.AddSingleton<FluentValidation.IValidator<SSRD.IdentityUI.Core.Services.User.Models.RegisterRequest>, UserAttributeValidator>();
 
             services.AddControllersWithViews();
         }

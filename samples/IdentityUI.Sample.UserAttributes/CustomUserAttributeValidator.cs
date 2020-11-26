@@ -4,7 +4,7 @@ using SSRD.IdentityUI.Core.Services.User.Models;
 
 namespace IdentityUI.Sample.UserAttributes
 {
-    public class UserAttributeValidator : AbstractValidatorWithNullCheck<IUserAttributeRequest>
+    public class UserAttributeValidator : AbstractValidatorWithNullCheck<RegisterRequest>
     {
         public UserAttributeValidator()
         {
