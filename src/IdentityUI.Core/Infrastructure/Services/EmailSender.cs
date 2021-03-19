@@ -8,10 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
-#if NET_CORE3
-using Microsoft.Extensions.Hosting;
-#endif
-
 namespace SSRD.IdentityUI.Core.Infrastructure.Services
 {
     public class EmailSender : IEmailSender
@@ -71,7 +67,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Services
             catch(Exception ex)
             {
                 _logger.LogError($"Error during sending email. {ex}");
-                throw ex;
+                throw;
             }
 
             return Task.CompletedTask;

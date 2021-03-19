@@ -47,8 +47,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment
 
 #if NET_CORE2
             context.Database.ExecuteSqlCommand(sql);
-#endif
-#if NET_CORE3
+#else
             context.Database.ExecuteSqlRaw(sql);
 #endif
 

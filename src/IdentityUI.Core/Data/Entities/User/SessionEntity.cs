@@ -8,7 +8,7 @@ using System.Text;
 namespace SSRD.IdentityUI.Core.Data.Entities
 {
     [AuditIgnore]
-    public class SessionEntity : IBaseEntity, ISoftDelete
+    public class SessionEntity : IIdentityUIEntity, ITimestampEntity, ISoftDelete
     {
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }

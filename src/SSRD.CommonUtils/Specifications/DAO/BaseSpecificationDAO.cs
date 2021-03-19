@@ -33,13 +33,24 @@ namespace SSRD.CommonUtils.Specifications.DAO
                 .CountAsync();
         }
 
-        public virtual Task<TData> SingleOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification)
+        public virtual Task<TData> SingleOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification, bool withTracking = false)
         {
-            return _dbContext
-                .Set<TEntity>()
-                .AsNoTracking()
-                .ApplyBaseSpecification(baseSpecification)
-                .SingleOrDefaultAsync();
+            if(withTracking)
+            {
+                return _dbContext
+                    .Set<TEntity>()
+                    .ApplyBaseSpecification(baseSpecification)
+                    .SingleOrDefaultAsync();
+            }
+            else
+            {
+                return _dbContext
+                    .Set<TEntity>()
+                    .AsNoTracking()
+                    .ApplyBaseSpecification(baseSpecification)
+                    .SingleOrDefaultAsync();
+            }
+
         }
 
         public Task<bool> Exist<TData>(IBaseSpecification<TEntity, TData> baseSpecification)
@@ -54,6 +65,7 @@ namespace SSRD.CommonUtils.Specifications.DAO
         {
             return _dbContext
                 .Set<TEntity>()
+                .AsNoTracking()
                 .ApplyBaseSpecification(baseSpecification)
                 .FirstOrDefaultAsync();
         }

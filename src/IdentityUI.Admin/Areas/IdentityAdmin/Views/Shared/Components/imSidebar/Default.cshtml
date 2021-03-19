@@ -42,7 +42,7 @@
             </li>
         }
         @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_SEE_USERS)
-            || _identityUIUserInfoService.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
+          || _identityUIUserInfoService.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Group ? "active" : "")">
                 @if (_identityUIUserInfoService.HasPermission(IdentityUIPermissions.IDENTITY_UI_CAN_MANAGE_GROUPS))
@@ -62,7 +62,7 @@
             </li>
         }
         @if (_identityUIUserInfoService.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE)
-             && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
+           && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
         {
             <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Invite ? "active" : "")">
                 <a class="nav-link" href="@PagePath.INVITE">
@@ -86,6 +86,24 @@
                 <a class="nav-link" href="@PagePath.SETTING">
                     <i class="fas fa-cogs sidebar-icon-container"></i>
                     <span class="menu-title i-mar">Settings</span>
+                </a>
+            </li>
+        }
+        @if (_identityUIUserInfoService.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.Client ? "active" : "")">
+                <a class="nav-link" href="@PagePath.CLIENT">
+                    <i class="fas fa-cogs sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Clients</span>
+                </a>
+            </li>
+        }
+        @if (_identityUIUserInfoService.HasRole(IdentityUIRoles.IDENTITY_MANAGMENT_ROLE))
+        {
+            <li class="nav-item @(SidebarSelection.SelectedOption == SidebarOptions.ClientScope ? "active" : "")">
+                <a class="nav-link" href="@PagePath.CLIENT_SCOPE">
+                    <i class="fas fa-cogs sidebar-icon-container"></i>
+                    <span class="menu-title i-mar">Client Scopes</span>
                 </a>
             </li>
         }

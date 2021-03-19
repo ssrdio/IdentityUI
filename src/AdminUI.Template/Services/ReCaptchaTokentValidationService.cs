@@ -51,7 +51,7 @@ namespace SSRD.AdminUI.Template.Services
                 {
 #if NET_CORE2
                     ReCaptchaResponse reCaptchaResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<ReCaptchaResponse>(response);
-#elif NET_CORE3
+#else
                     ReCaptchaResponse reCaptchaResponse = System.Text.Json.JsonSerializer.Deserialize<ReCaptchaResponse>(response);
 #endif
 

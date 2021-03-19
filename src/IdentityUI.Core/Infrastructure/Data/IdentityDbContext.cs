@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Config.Identity;
@@ -18,9 +17,10 @@ using SSRD.IdentityUI.Core.Infrastructure.Data.Config.User;
 using Microsoft.EntityFrameworkCore.Storage;
 using SSRD.Audit.Data;
 using SSRD.Audit.Services;
-using Microsoft.Extensions.DependencyInjection;
 using SSRD.Audit.Models;
 using Microsoft.Extensions.Logging;
+using SSRD.IdentityUI.Core.Data.Entities.OpenIdConnect;
+using SSRD.IdentityUI.Core.Infrastructure.Data.Config.OpenIddict;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data
 {
@@ -41,6 +41,12 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         public DbSet<InviteEntity> Invite { get; set; }
         public DbSet<EmailEntity> Emails { get; set; }
         public DbSet<AuditEntity> Audit { get; set; }
+        public DbSet<AuditCommentEntity> AuditComment { get; set; }
+
+        public DbSet<ClientEntity> Clients { get; set; }
+        public DbSet<ClientConsentEntity> ClientConsents { get; set; }
+        public DbSet<ClientScopeEntity> ClientScopes { get; set; }
+        public DbSet<ClientTokenEntity> ClientTokens { get; set; }
 
         private readonly IAuditSubjectDataService _auditDataService;
         private readonly ILogger<IdentityDbContext> _logger;
@@ -64,6 +70,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             builder.ConfigureIdentity();
             builder.ConfigureGroup();
             builder.ConfigureUser();
+            builder.ConfigureOpendict();
+            builder.ConfigureAudit();
 
             builder.ApplyConfiguration(new RoleAssignmentConfiguration());
             builder.ApplyConfiguration(new PermissionConfiguration());
@@ -76,8 +84,8 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
             builder.Entity<SessionEntity>().HasQueryFilter(x => x._DeletedDate == null);
             builder.Entity<AppUserEntity>().HasQueryFilter(x => x._DeletedDate == null);
             builder.Entity<GroupEntity>().HasQueryFilter(x => x._DeletedDate == null);
+            builder.Entity<ClientEntity>().HasQueryFilter(x => x._DeletedDate == null);
 
-            builder.ApplyConfiguration(new AuditEntityConfiguration());
         }
 
         public override int SaveChanges()
@@ -161,7 +169,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
 #if NET_CORE2
                         dbTransaction.Commit();
-#elif NET_CORE3
+#else
                         await dbTransaction.CommitAsync(cancellationToken);
 #endif
                         return changes;
@@ -172,7 +180,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
 #if NET_CORE2
                         dbTransaction.Rollback();
-#elif NET_CORE3
+#else
                         await dbTransaction.RollbackAsync(cancellationToken);
 #endif
 
@@ -200,15 +208,15 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         {
             IEnumerable<EntityEntry> entities = ChangeTracker
                 .Entries()
-                .Where(x => x.Entity is IBaseEntity && (x.State == EntityState.Added || x.State == EntityState.Modified));
+                .Where(x => x.Entity is ITimestampEntity && (x.State == EntityState.Added || x.State == EntityState.Modified));
 
             foreach (EntityEntry entity in entities)
             {
                 if (entity.State == EntityState.Added)
                 {
-                    ((IBaseEntity)entity.Entity)._CreatedDate = DateTimeOffset.UtcNow;
+                    ((ITimestampEntity)entity.Entity)._CreatedDate = DateTimeOffset.UtcNow;
                 }
-                ((IBaseEntity)entity.Entity)._ModifiedDate = DateTimeOffset.UtcNow;
+                ((ITimestampEntity)entity.Entity)._ModifiedDate = DateTimeOffset.UtcNow;
             }
         }
 

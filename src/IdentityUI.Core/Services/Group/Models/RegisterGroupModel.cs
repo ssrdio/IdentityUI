@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using SSRD.AdminUI.Template.Services;
-using SSRD.IdentityUI.Core.Helper;
+using SSRD.CommonUtils.Validation;
 using SSRD.IdentityUI.Core.Services.User.Models;
 
 namespace SSRD.IdentityUI.Core.Services.Group.Models

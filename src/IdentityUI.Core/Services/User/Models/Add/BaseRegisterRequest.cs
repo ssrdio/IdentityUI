@@ -1,9 +1,6 @@
 ﻿using FluentValidation;
-using SSRD.IdentityUI.Core.Helper;
-using System;
+using SSRD.CommonUtils.Validation;
 using System.Collections.Generic;
-using System.Data;
-using System.Text;
 
 namespace SSRD.IdentityUI.Core.Services.User.Models
 {

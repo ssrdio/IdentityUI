@@ -45,7 +45,7 @@ namespace SSRD.IdentityUI.Core.Services
 
 #if NET_CORE2
             json = Newtonsoft.Json.JsonConvert.SerializeObject(subjectMetadataModel);
-#elif NET_CORE3
+#else
             json = System.Text.Json.JsonSerializer.Serialize<SubjectMetadataModel>(subjectMetadataModel);
 #endif
 

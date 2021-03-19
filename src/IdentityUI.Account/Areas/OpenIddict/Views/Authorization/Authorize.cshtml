@@ -1,0 +1,42 @@
+﻿@model SSRD.IdentityUI.Account.Areas.OpenIddict.AuthorizeViewModel
+
+@{
+    ViewData["Title"] = "Consent";
+}
+
+<div class="app-container">
+    <div class="h-100 bg-plum-plate bg-animation">
+        <div class="d-flex min-vh-100 justify-content-center align-items-center">
+            <div class="mx-auto app-login-box col-md-8">
+                <div class="modal-dialog w-100 mx-auto">
+                    <div class="modal-content">
+                        <div class="modal-body extra-body-padding">
+                            <div class="h5 modal-title text-center">
+                                <h4 class="mt-2 modal-header-custom">
+                                    <div>Consent required</div>
+                                </h4>
+                            </div>
+
+                            <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
+
+                            <div class="modal-footer clearfix">
+                                <form asp-area="OpenIddict" asp-controller="Authorization" asp-action="Authorize" method="post">
+
+                                    @foreach (var parameter in Context.Request.HasFormContentType ?
+                                        (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
+                                    {
+                                        <input type="hidden" name="@parameter.Key" value="@parameter.Value" />
+                                    }
+
+                                    <input class="btn btn-light btn-lg lBtnMarg" name="submit.Deny" type="submit" value="No" />
+                                    <input class="btn btn-primary btn-lg" name="submit.Accept" type="submit" value="Yes" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center text-white opacity-8 mt-3">Copyright © @SSRD.AdminUI.Template.Models.CopyRightModel.NAME @SSRD.AdminUI.Template.Models.CopyRightModel.YEAR </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 {
-    public class RoleEntity : IdentityRole, IBaseEntity
+    public class RoleEntity : IdentityRole, IIdentityUIEntity, ITimestampEntity
     {
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }

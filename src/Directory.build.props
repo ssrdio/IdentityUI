@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <TargetsToBuild>All</TargetsToBuild> 
+    <!--<TargetsToBuild>NetCore2</TargetsToBuild>-->
+    <!-- <TargetsToBuild>NetCore3</TargetsToBuild> -->
+    <!-- <TargetsToBuild>Net5</TargetsToBuild>  -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
+    <TargetsToBuild>All</TargetsToBuild>
+  </PropertyGroup>
+</Project>

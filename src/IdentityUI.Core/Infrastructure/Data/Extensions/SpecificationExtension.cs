@@ -10,10 +10,11 @@ using SSRD.Audit.Data;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Extensions
 {
+    [Obsolete]
     internal static class SpecificationExtension
     {
         public static IQueryable<TEntity> ApplayBaseSpecification<TEntity>(this IQueryable<TEntity> query, IBaseSpecification<TEntity> specification) 
-            where TEntity : class, IBaseEntity
+            where TEntity : class, ITimestampEntity
         {
             if(specification == null)
             {
@@ -37,7 +38,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Extensions
         }
 
         public static IQueryable<TData> ApplaySelectSpecification<TEntity, TData>(this IQueryable<TEntity> query, ISelectSpecification<TEntity, TData> specification)
-            where TEntity : class, IBaseEntity
+            where TEntity : class, ITimestampEntity
         {
             if (specification == null)
             {
@@ -55,7 +56,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Extensions
         }
 
         public static IQueryable<TData> ApplyPaginationSpecification<TEntity, TData>(this IQueryable<TEntity> query, IPaginationSpecification<TEntity, TData> specification)
-            where TEntity : class, IBaseEntity
+            where TEntity : class, ITimestampEntity
         {
             if (specification == null)
             {

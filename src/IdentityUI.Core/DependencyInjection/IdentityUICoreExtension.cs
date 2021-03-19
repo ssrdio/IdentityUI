@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -7,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using OpenIddict.Abstractions;
 using SSRD.AdminUI.Template.Models;
 using SSRD.Audit.Data;
 using SSRD.Audit.Extensions;
@@ -14,8 +17,8 @@ using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Entities.Group;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
+using SSRD.IdentityUI.Core.Data.Entities.OpenIdConnect;
 using SSRD.IdentityUI.Core.Data.Entities.User;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.DependencyInjection;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
 using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment;
@@ -30,6 +33,7 @@ using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.IdentityUI.Core.Interfaces.Services.Role;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Services;
+using SSRD.IdentityUI.Core.Services.Audit;
 using SSRD.IdentityUI.Core.Services.Auth;
 using SSRD.IdentityUI.Core.Services.Auth.Email;
 using SSRD.IdentityUI.Core.Services.Auth.Login;
@@ -37,14 +41,13 @@ using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth;
 using SSRD.IdentityUI.Core.Services.Email;
 using SSRD.IdentityUI.Core.Services.Group;
 using SSRD.IdentityUI.Core.Services.Identity;
+using SSRD.IdentityUI.Core.Services.OpenIdConnect;
 using SSRD.IdentityUI.Core.Services.Permission;
 using SSRD.IdentityUI.Core.Services.Role;
 using SSRD.IdentityUI.Core.Services.Role.Models;
 using SSRD.IdentityUI.Core.Services.User;
 using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Core
 {
@@ -94,13 +97,15 @@ namespace SSRD.IdentityUI.Core
             DatabaseOptions databaseOptions = new DatabaseOptions
             {
                 Type = identityUIOptions.Database?.Type ?? DatabaseTypes.InMemory,
-                ConnectionString = identityUIOptions.Database?.ConnectionString
+                ConnectionString = identityUIOptions.Database?.ConnectionString,
+                OpenIddictConnectionString = identityUIOptions.Database.OpenIddictConnectionString,
             };
 
             services.Configure<DatabaseOptions>(options =>
             {
                 options.Type = databaseOptions.Type;
                 options.ConnectionString = databaseOptions.ConnectionString;
+                options.OpenIddictConnectionString = databaseOptions.OpenIddictConnectionString;
             });
 
             services.Configure<EmailSenderOptions>(options =>
@@ -192,7 +197,7 @@ namespace SSRD.IdentityUI.Core
                 Audit.Services.IBackgroundServiceContextAccessor backgroundServiceContextAccessor = x.GetRequiredService<Audit.Services.IBackgroundServiceContextAccessor>();
                 if (backgroundServiceContextAccessor.BackgroundServiceContext != null)
                 {
-                    return new Audit.Services.BackgroundServiceAuditSubjectDataService(backgroundServiceContextAccessor);
+                    return new Audit.Services.BackgroundServiceAuditSubjectDataService(backgroundServiceContextAccessor, auditOptions);
                 }
 
                 return new Audit.Services.DefaultAuditSubjectService(auditOptions);
@@ -245,6 +250,8 @@ namespace SSRD.IdentityUI.Core
             //{
 
             //});
+
+            builder.AddOpenIdConnect();
 
 
             return builder;
@@ -328,7 +335,26 @@ namespace SSRD.IdentityUI.Core
         {
             builder.Services.ConfigureApplicationCookie(optionsAction);
 
-            Microsoft.AspNetCore.Authentication.AuthenticationBuilder authenticationBuilder = builder.Services.AddAuthentication();
+            Microsoft.AspNetCore.Authentication.AuthenticationBuilder authenticationBuilder = builder.Services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                })
+                .AddOpenIdConnect(options =>
+                {
+                    //TODO: change this
+
+                    options.Authority = "http://localhost:5000";
+                    options.ClientId = "new_mvc";
+                    options.ResponseType = OpenIdConnectResponseType.Code;
+
+                    options.RequireHttpsMetadata = false;
+                    options.SaveTokens = true;
+
+                    options.Scope.Clear();
+                    options.Scope.Add("openid");
+                });
 
             if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:Microsoft:ClientId"]) && !string.IsNullOrEmpty(builder.Configuration["IdentityUI:Microsoft:ClientSecret"]))
             {
@@ -376,6 +402,60 @@ namespace SSRD.IdentityUI.Core
                 });
             }
 
+            builder.Services
+                .AddOpenIddict()
+                .AddCore(options =>
+                {
+                    options
+                        .UseEntityFrameworkCore()
+                        .UseDbContext<IdentityDbContext>()
+                        .ReplaceDefaultEntities<ClientEntity, ClientConsentEntity, ClientScopeEntity, ClientTokenEntity, string>();
+                })
+                .AddServer(options =>
+                {
+                    options
+                        .AllowClientCredentialsFlow()
+                        .AllowAuthorizationCodeFlow()
+                        .AllowRefreshTokenFlow()
+                        .AllowImplicitFlow()
+                        .AllowHybridFlow();
+
+                    options
+                        .SetAuthorizationEndpointUris("/connect/authorize")
+                        .SetLogoutEndpointUris("/connect/logout")
+                        .SetTokenEndpointUris("/connect/token")
+                        .SetUserinfoEndpointUris("/connect/userinfo")
+                        .SetVerificationEndpointUris("/connect/verify");
+
+                    //TODO: change this
+                    options
+                        .AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+
+                    options.RequireProofKeyForCodeExchange();
+
+                    options
+                        .UseAspNetCore()
+                        .EnableAuthorizationEndpointPassthrough()
+                        .EnableLogoutEndpointPassthrough()
+                        .EnableStatusCodePagesIntegration()
+                        .EnableTokenEndpointPassthrough()
+                        .EnableUserinfoEndpointPassthrough()
+                        .EnableVerificationEndpointPassthrough()
+                        .DisableTransportSecurityRequirement(); //TODO: make this optional
+                })
+                .AddValidation(options =>
+                {
+                    options.AddAudiences();
+                    options.UseLocalServer();
+                    options.UseAspNetCore();
+                });
+
+            builder.Services.Configure<ClaimsIdentityOptions>(options =>
+            {
+                options.UserIdClaimType = OpenIddictConstants.Claims.Subject;
+            });
+
             return builder;
         }
 
@@ -391,6 +471,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddTransient(typeof(IBaseRepositoryAsync<>), typeof(BaseRepositoryAsync<>));
 
             builder.Services.AddTransient<IBaseDAO<AuditEntity>, AuditBaseDAO<AuditEntity>>();
+            builder.Services.AddTransient<IBaseDAO<AuditCommentEntity>, AuditBaseDAO<AuditCommentEntity>>();
+            builder.Services.AddTransient<Interfaces.Data.IAuditCommentDAO, Infrastructure.Data.DAO.AuditCommentDAO>();
 
             builder.Services.AddTransient<IBaseDAO<AppUserEntity>, IdentityUIBaseDAO<AppUserEntity>>();
             builder.Services.AddTransient<IBaseDAO<RoleClaimEntity>, IdentityUIBaseDAO<RoleClaimEntity>>();
@@ -471,6 +553,8 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddScoped<IAddUserFilter, NullAddUserFilter>();
             builder.Services.AddScoped<IAddGroupUserFilter, NullAddGroupUserFilter>();
             builder.Services.AddScoped<IAddInviteFilter, NullAddInviteFilter>();
+
+            builder.Services.AddScoped<IAuditService, AuditService>();
         }
 
         private static void AddValidators(this IdentityUIServicesBuilder builder)
@@ -539,6 +623,10 @@ namespace SSRD.IdentityUI.Core
             builder.Services.AddSingleton<IValidator<Services.Group.Models.RegisterGroupModel>, Services.Group.Models.RegisterGroupModelValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.BaseRegisterRequest>, Services.User.Models.BaseRegisterRequestValidator>();
             builder.Services.AddSingleton<IValidator<Services.User.Models.GroupBaseUserRegisterRequest>, Services.User.Models.GroupBaseUserRegisterRequestValidator>();
+
+            builder.Services.AddSingleton<IValidator<Services.Audit.AddAuditCommentModel>, Services.Audit.AddAuditCommentModelValidator>();
+
+            builder.Services.AddSingleton<IValidator<List<string>>, Helper.Validator.DefaultListValidator<string>>();
         }
 
         /// <summary>
@@ -550,7 +638,7 @@ namespace SSRD.IdentityUI.Core
         public static IdentityUIAppBuilder UseIdentityUI(this IApplicationBuilder app, bool enableMigrations = false)
         {
             app.UseAuthentication();
-#if NET_CORE3
+#if (NET_CORE3 || NET5)
             app.UseAuthorization();
 #endif
 

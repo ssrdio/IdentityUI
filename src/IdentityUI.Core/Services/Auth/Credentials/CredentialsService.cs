@@ -2,25 +2,18 @@
 using FluentValidation.Results;
 using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
-using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
 using SSRD.IdentityUI.Core.Models.Result;
 using SSRD.IdentityUI.Core.Services.Auth.Credentials.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using SSRD.IdentityUI.Core.Interfaces.Services;
-using Microsoft.AspNetCore.Http;
-using SSRD.IdentityUI.Core.Services.Identity;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Credentials
 {

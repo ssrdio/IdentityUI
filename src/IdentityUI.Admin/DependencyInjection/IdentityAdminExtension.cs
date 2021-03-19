@@ -14,14 +14,13 @@ using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Group;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Group;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Role;
-using Microsoft.AspNetCore.DataProtection;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.Setting;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.Setting;
-using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Menu;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit;
 using SSRD.IdentityUI.Admin.Areas.GroupAdmin;
+using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.OpenIdConnect;
 
 namespace SSRD.IdentityUI.Admin
 {
@@ -72,6 +71,7 @@ namespace SSRD.IdentityUI.Admin
             builder.Services.AddScoped<Interfaces.IGroupAttributeDataService, Services.GroupAttributeDataService>();
 
             builder.AddGroupAdmin();
+            builder.AddOpenidConnect();
 
             return builder;
         }
@@ -92,8 +92,7 @@ namespace SSRD.IdentityUI.Admin
                     areaName: "IdentityAdmin",
                     template: "IdentityAdmin/{controller=Home}/{action=Index}/{id?}");
             });
-#endif
-#if NET_CORE3
+#else
             builder.App.UseEndpoints(endpoints => 
             {
                 endpoints.MapAreaControllerRoute(
@@ -114,7 +113,7 @@ namespace SSRD.IdentityUI.Admin
                 areaName: "IdentityAdmin",
                 template: "IdentityAdmin/{controller=Home}/{action=Index}/{id?}");
         }
-#elif NET_CORE3
+#else
         public static void MapIdentityAdmin(this IEndpointRouteBuilder endpoints)
         {
             endpoints.MapAreaControllerRoute(

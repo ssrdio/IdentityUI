@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Group
 {
-    public class GroupAttributeEntity : IBaseEntity
+    public class GroupAttributeEntity : IIdentityUIEntity, ITimestampEntity
     {
         public long Id { get; private set; }
 

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities
 {
-    public class PermissionEntity : IBaseEntity
+    public class PermissionEntity : IIdentityUIEntity, ITimestampEntity
     {
         public string Id { get; private set; }
 

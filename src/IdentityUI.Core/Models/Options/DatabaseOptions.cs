@@ -8,6 +8,7 @@ namespace SSRD.IdentityUI.Core.Models.Options
     {
         public DatabaseTypes Type { get; set; }
         public string ConnectionString { get; set; }
+        public string OpenIddictConnectionString { get; set; }
     }
 
     public enum DatabaseTypes

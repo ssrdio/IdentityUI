@@ -1,8 +1,5 @@
 ﻿using FluentValidation;
-using SSRD.IdentityUI.Core.Helper;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using SSRD.CommonUtils.Validation;
 
 namespace SSRD.IdentityUI.Core.Services.User.Models.Attribute
 {

@@ -49,53 +49,52 @@
     }
 
     addOptions(options) {
-        if (this.$select2 !== null && this.$select2 !== undefined) {
+        if (this.$select2 !== null && this.$select2 !== undefined && this.$select2.length > 0) {
             options.forEach((option) => {
                 this.$select2.append($('<option />').val(option.id).text(option.text));
             });
         }
-        else if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined && this.$select.length > 0) {
             options.forEach((option) => {
-                console.log(option)
                 this.$select.append($('<option />').val(option.id).text(option.text));
             });
         }
     }
 
     append($option) {
-        if (this.$select2 !== null && this.$select2 !== undefined) {
+        if (this.$select2 !== null && this.$select2 !== undefined && this.$select2.length > 0) {
             this.$select2.append($option);
         }
-        else if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined && this.$select.length > 0) {
             this.$select.append($option);
         }
     }
 
     addSelectedOption(option) {
-        if (this.$select2 !== null && this.$select2 !== undefined) {
+        if (this.$select2 !== null && this.$select2 !== undefined && this.$select2.length > 0) {
             this.$select2.append($('<option />').val(option.id).text(option.text));
             this.$select2.val(option.text);
         }
-        else if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined && this.$select.length > 0) {
             this.$select.append($('<option />').val(option.id).text(option.text));
             this.$select.val(option.text);
         }
     }
 
     selectOption(value) {
-        if (this.$select2 !== null && this.$select2 !== undefined) {
+        if (this.$select2 !== null && this.$select2 !== undefined && this.$select2.length > 0) {
             this.$select2.val(value);
         }
-        else if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined && this.$select.length > 0) {
             this.$select.val(value);
         }
     }
 
     triggerChange() {
-        if (this.$select2 !== null && this.$select2 !== undefined) {
+        if (this.$select2 !== null && this.$select2 !== undefined && this.$select2.length > 0) {
             this.$select2.trigger('change')
         }
-        else if (this.$select !== null && this.$select !== undefined) {
+        else if (this.$select !== null && this.$select !== undefined && this.$select.length > 0) {
             this.$select.trigger('change')
         }
     }

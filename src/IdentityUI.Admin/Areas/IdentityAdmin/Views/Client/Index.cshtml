@@ -1,0 +1,71 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.Client;
+}
+
+@{
+    ViewData["Title"] = "Clients";
+}
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Clients:
+            </h5>
+            <a class="header-button" href="@PagePath.CLIENT_ADD">Add Client</a>
+        </div>
+        <div class="custom_container custom_table">
+            <table id="client-table" class="dataTableClass display "></table>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script>
+
+        $(document).ready(function () {
+            new ClientIndex();
+        });
+
+        class ClientIndex {
+            constructor() {
+                this.$clientTable = $('#client-table');
+
+                this.initTable();
+            }
+
+            initTable() {
+                this.$clientTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    targets: 'no-sort',
+                    bSort: false,
+                    order: [],
+                    ajax: {
+                        url: `/api/IdentityAdmin/Client/Get`,
+                        type: 'GET'
+                    },
+                    columns: [
+                        {
+                            data: 'name',
+                            title: 'Name',
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: 'type',
+                            title: 'Type',
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            mRender: (data) => {
+                                return `<a class="btn btn-primary table-button" href="/IdentityAdmin/Client/Details/${data.id}">Details</a>`;
+                            }
+                        }
+                    ]
+                });
+            }
+        }
+
+    </script>
+}

@@ -56,8 +56,7 @@ namespace SSRD.IdentityUI.Account
                     areaName: "Account",
                     template: "Account/{controller=Home}/{action=Index}/{id?}");
             });
-#endif
-#if NET_CORE3
+#else
             builder.App.UseEndpoints(endpoints =>
             {
                 endpoints.MapAreaControllerRoute(
@@ -77,7 +76,7 @@ namespace SSRD.IdentityUI.Account
                 areaName: "Account",
                 template: "Account/{controller=Home}/{action=Index}/{id?}");
         }
-#elif NET_CORE3
+#else
         public static void MapAccountManagement(this IEndpointRouteBuilder endpoints)
         {
             endpoints.MapAreaControllerRoute(

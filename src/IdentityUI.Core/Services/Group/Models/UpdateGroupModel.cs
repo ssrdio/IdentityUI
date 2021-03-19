@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SSRD.IdentityUI.Core.Helper;
+using SSRD.CommonUtils.Validation;
 
 namespace SSRD.IdentityUI.Core.Services.Group.Models
 {

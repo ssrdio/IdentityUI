@@ -28,7 +28,7 @@ namespace SSRD.Audit.Extensions
                 IBackgroundServiceContextAccessor backgroundServiceContextAccessor = x.GetRequiredService<IBackgroundServiceContextAccessor>();
                 if(backgroundServiceContextAccessor.BackgroundServiceContext != null)
                 {
-                    return new BackgroundServiceAuditSubjectDataService(backgroundServiceContextAccessor);
+                    return new BackgroundServiceAuditSubjectDataService(backgroundServiceContextAccessor, auditOptions);
                 }
 
                 return new DefaultAuditSubjectService(auditOptions);

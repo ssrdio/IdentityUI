@@ -1,6 +1,7 @@
 ﻿using SSRD.CommonUtils.Specifications.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -44,6 +45,7 @@ namespace SSRD.CommonUtils.Specifications
             _ignoreQueryFilters = ignoreQueryFilters;
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecification<TEntity, TEntity> Build()
         {
             return new BaseSpecification<TEntity, TEntity>(
@@ -61,6 +63,7 @@ namespace SSRD.CommonUtils.Specifications
                 _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> IgnoreQueryFilters()
         {
             return new SpecificationBuilder<TEntity>(
@@ -74,6 +77,7 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: true);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> Include(Expression<Func<TEntity, object>> expression)
         {
             if (expression == null)
@@ -94,6 +98,7 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> OrderBy(Expression<Func<TEntity, object>> expression, OrderByTypes orderBy)
         {
             if (expression == null)
@@ -112,6 +117,7 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> OrderByAssending(Expression<Func<TEntity, object>> expression)
         {
             if (expression == null)
@@ -130,6 +136,7 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> OrderByDessending(Expression<Func<TEntity, object>> expression)
         {
             if (expression == null)
@@ -148,6 +155,7 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> Paginate(int start, int lenght)
         {
             if (lenght < 0)
@@ -179,6 +187,7 @@ namespace SSRD.CommonUtils.Specifications
                 ignoreQueryFilters: _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> Select<TData>(Expression<Func<TEntity, TData>> expression)
         {
             if (expression == null)
@@ -201,6 +210,7 @@ namespace SSRD.CommonUtils.Specifications
                 _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TEntity> Select()
         {
             return new SelectSpecificationBuilder<TEntity, TEntity>(
@@ -218,6 +228,7 @@ namespace SSRD.CommonUtils.Specifications
                 _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecificationBuilder<TEntity> Where(Expression<Func<TEntity, bool>> filter)
         {
             if (filter == null)
@@ -288,6 +299,7 @@ namespace SSRD.CommonUtils.Specifications
             _ignoreQueryFilters = ignoreQueryFilters;
         }
 
+        [DebuggerStepThrough]
         public IBaseSpecification<TEntity, TData> Build() => new BaseSpecification<TEntity, TData>(
             _filters,
             _includes,
@@ -302,6 +314,7 @@ namespace SSRD.CommonUtils.Specifications
             _paginate,
             _ignoreQueryFilters);
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> Distinct()
         {
             return new SelectSpecificationBuilder<TEntity, TData>(
@@ -319,6 +332,7 @@ namespace SSRD.CommonUtils.Specifications
             _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> IgnoreQueryFilters()
         {
             return new SelectSpecificationBuilder<TEntity, TData>(
@@ -336,6 +350,7 @@ namespace SSRD.CommonUtils.Specifications
             true);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> OrderBy(Expression<Func<TData, object>> expression, OrderByTypes orderBy)
         {
             if (expression == null)
@@ -358,6 +373,7 @@ namespace SSRD.CommonUtils.Specifications
                 _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> OrderByAssending(Expression<Func<TData, object>> expression)
         {
             if (expression == null)
@@ -380,6 +396,7 @@ namespace SSRD.CommonUtils.Specifications
                 _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> OrderByDessending(Expression<Func<TData, object>> expression)
         {
             if (expression == null)
@@ -402,6 +419,7 @@ namespace SSRD.CommonUtils.Specifications
                 _ignoreQueryFilters);
         }
 
+        [DebuggerStepThrough]
         public ISelectSpecificationBuilder<TEntity, TData> Paginate(int start, int lenght)
         {
             if (lenght < 0)
@@ -444,6 +462,7 @@ namespace SSRD.CommonUtils.Specifications
 
     public static class SpecificationBuilder
     {
+        [DebuggerStepThrough]
         public static IBaseSpecificationBuilder<TEntity> Create<TEntity>()
         {
             SpecificationBuilder<TEntity> specificationBuilder = new SpecificationBuilder<TEntity>();

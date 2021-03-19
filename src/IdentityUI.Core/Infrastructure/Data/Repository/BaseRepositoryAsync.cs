@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
 {
-    internal class BaseRepositoryAsync<TEntity> : IBaseRepositoryAsync<TEntity> where TEntity : class, IBaseEntity
+    [Obsolete]
+    internal class BaseRepositoryAsync<TEntity> : IBaseRepositoryAsync<TEntity> where TEntity : class, ITimestampEntity
     {
         protected readonly IdentityDbContext _context;
 

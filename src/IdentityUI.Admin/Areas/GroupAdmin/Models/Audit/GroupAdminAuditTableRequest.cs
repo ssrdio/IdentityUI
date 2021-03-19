@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using SSRD.AdminUI.Template.Models;
 using SSRD.Audit.Data;
 using SSRD.CommonUtils.Specifications;
+using SSRD.CommonUtils.Validation;
 using System;
 
 namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin.Models.Audit

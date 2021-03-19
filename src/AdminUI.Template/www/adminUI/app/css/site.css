@@ -317,3 +317,44 @@ table.dataTableClass > tbody > tr > td {
     resize: vertical;
 }
 
+.main-error-text {
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #ff3333;
+}
+
+.error-message-text {
+    text-align: center;
+    font-weight: bold;
+    margin: 0px;
+    color: #8c8c8c;
+}
+
+.list-view-input {
+    width: 100%;
+    border: none;
+    background-color: transparent;
+    color: #495057;
+    padding: 0.75rem 1.25rem;
+}
+
+.list-view-select {
+    width: 100%;
+    background-color: transparent;
+    color: #495057;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    appearance: none;
+}
+
+.list-view-item {
+    padding: 0.75rem 1.25rem;
+}
+
+.list-view-button {
+    font-size: 1em;
+    height: 100%;
+    border: none;
+    background-color: transparent;
+}

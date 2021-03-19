@@ -2,8 +2,14 @@
 using System.Security.Claims;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models;
 using System.Diagnostics;
-using Newtonsoft.Json;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Attributes;
+using System.Threading.Tasks;
+using System.Text.Json;
+using System.IO;
+using System.Net.Mime;
+using SSRD.CommonUtils.Result;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
@@ -32,7 +38,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 
         protected void SaveTempData<T>(string key, T data)
         {
-            TempData[key] = JsonConvert.SerializeObject(data);
+            TempData[key] = JsonSerializer.Serialize(data);
         }
 
         protected T GetTempData<T>(string key)
@@ -43,7 +49,27 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
                 return default;
             }
 
-            return JsonConvert.DeserializeObject<T>((string)obj);
+            return JsonSerializer.Deserialize<T>((string)obj);
+        }
+
+        protected async Task<IActionResult> JsonFile<T>(Result<T> result, string fileName)
+        {
+            if(result.Failure)
+            {
+                return result.ToApiResult();
+            }
+
+            MemoryStream memoryStream = new MemoryStream();
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            };
+
+            await JsonSerializer.SerializeAsync(memoryStream, result.Value, jsonSerializerOptions);
+
+            //TODO: try to change that it works with stream
+            return File(memoryStream.ToArray(), MediaTypeNames.Application.Json, fileName);
         }
     }
 }

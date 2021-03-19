@@ -57,12 +57,12 @@ namespace IdentityUI.Dev
                 IServiceProvider serviceProvider = serviceScope.ServiceProvider;
                 IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
 
-                serviceProvider.RunIdentityMigrations();
+                //serviceProvider.RunIdentityMigrations();
                 //serviceProvider.CreateIdentityDatabase();
 
-                serviceProvider.SeedSystemEntities();
+                //serviceProvider.SeedSystemEntities();
 
-                serviceProvider.SeedDatabase(adminUserName: configuration["IdentityUI:Admin:Username"], adminPassword: configuration["IdentityUI:Admin:Password"]);
+                //serviceProvider.SeedDatabase(adminUserName: configuration["IdentityUI:Admin:Username"], adminPassword: configuration["IdentityUI:Admin:Password"]);
             }
         }
 

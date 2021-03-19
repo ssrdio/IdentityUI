@@ -1,19 +1,17 @@
 ﻿using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Extensions;
-using SSRD.IdentityUI.Core.Interfaces.Data;
 using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
 using SSRD.IdentityUI.Core.Interfaces.Data.Specification;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Repository
 {
-    internal class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class, IBaseEntity
+    [Obsolete]
+    internal class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class, ITimestampEntity
     {
         protected readonly IdentityDbContext _context;
 

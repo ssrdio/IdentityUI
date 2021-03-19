@@ -1,0 +1,513 @@
+﻿@model ClientConsentViewModel
+
+@await Component.InvokeAsync("ClientMenu", Model.ClientMenu.ToMenuViewModel(ClientMenuViewComponent.TabSelected.Consents))
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="tab-content">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Consents
+                </h5>
+                <div id="actions-dropdown" class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle header-button" type="button" data-toggle="dropdown" disabled>
+                        Actions
+                    </button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item validate">Validate</button>
+                        <button class="dropdown-item revoke">Revoke</button>
+                    </div>
+                </div>
+            </div>
+            <!--#region table filters-->
+            <div id="consent-table-filters" class="row custom_container pb-0">
+                <div class="col-1">
+                    <div id="page-lenght-select" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-type-select" class="control-label">Show entries</label>
+                        </div>
+                        <select class="form-control select2-container"></select>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div id="status-select" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-type-select" class="control-label">Status</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select class="form-control select2-container"></select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div id="subject-select" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-type-select" class="control-label">Subject</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select class="form-control select2-container"></select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div id="scope-select" class="form-group">
+                        <div class="d-flex">
+                            <label for="object-type-select" class="control-label">Scope</label>
+                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        </div>
+                        <select class="form-control select2-container"></select>
+                    </div>
+                </div>
+                <div id="date-time-range-container" class="col-3">
+                    <div class="d-flex">
+                        <label for="resource-name-select" class="control-label">Range</label>
+                        <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                    </div>
+                    <div class="input-group height-1">
+                        <div class="input-group-prepend">
+                            <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
+                        </div>
+                        <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
+                        <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
+                    </div>
+                </div>
+            </div>
+            <!--#endregion-->
+            <div class="custom_container custom_table pt-0">
+                <table id="client-consent-table" class="dataTableClass display"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section style {
+    <link rel="stylesheet" href="~/adminUI/app/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
+
+    <style>
+        .height-1 {
+            height: 1em;
+        }
+
+        .line-height-02 {
+            line-height: 0.2
+        }
+
+        .select2-selection.select2-selection--single {
+            border-radius: 2px;
+            border: 1px solid #c9c8c8;
+        }
+
+        .table-link {
+            color: rgb(80 80 80);
+        }
+
+            .table-link:hover {
+                color: rgb(80 80 80);
+                text-decoration: none;
+            }
+    </style>
+}
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/lib/select2-4.0.13/dist/js/select2.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/daterangepicker-3.1/daterangepicker.js" asp-append-version="true"></script>
+
+    <script type="text/javascript" src="~/adminUI/app/js/components/range-picker.js" asp-append-version="true"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            new ClientConsents('@Model.ClientMenu.Id', @Json.Serialize(Model.Statuses));
+        });
+
+        class ClientConsentTableFilters
+        {
+            constructor(id, consentStatuses, onChange) {
+                this.id = id;
+                this.onChange = onChange;
+
+                const $container = $('#consent-table-filters');
+
+                this.$pageLenghtContainer = $container.find('#page-lenght-select');
+                this.initPageLenghtSelect();      
+
+                this.$statusSelectContainer = $container.find('#status-select');
+                this.initStatusSelect(consentStatuses);
+
+                this.$subjectSelectContainer = $container.find('#subject-select');
+                this.initSubjectSelect();
+
+                this.$scopeSelectContainer = $container.find('#scope-select');
+                this.initScopeSelect();
+
+                this.$dateTimeRangeContainer = $container.find('#date-time-range-container');
+                this.initDateTimeRangePicker();
+            }
+
+            initPageLenghtSelect() {
+                var data = [
+                    {
+                        id: 10,
+                        text: '10',
+                        selected: true
+                    },
+                    {
+                        id: 20,
+                        text: '20'
+                    },
+                    {
+                        id: 50,
+                        text: '50'
+                    },
+                    {
+                        id: 100,
+                        text: '100'
+                    },
+                    {
+                        id: -1,
+                        text: 'All'
+                    }]
+
+                const $select = this.$pageLenghtContainer.find('select');
+
+                $select.select2({
+                    data: data,
+                    minimumResultsForSearch: Infinity
+                });
+
+                this.pageLength = 10;
+
+                $select.on('change', () => {
+                    this.pageLength = $select.val();
+
+                    this.onChange();
+                });
+            }
+
+            initStatusSelect(consentStatuses) {
+                const $select = this.$statusSelectContainer.find('select');
+
+                $select.select2({
+                    data: consentStatuses,
+                    minimumResultsForSearch: Infinity
+                });
+
+                $select.val(null).trigger('change');
+
+                this.$statusSelectContainer.on('click', 'button.reset-button', () => {
+                    $select.val(null).trigger('change');
+                });
+
+                $select.on('change', () => {
+                    this.consentStatus = $select.val();
+
+                    this.onChange();
+                });
+            }
+
+            initSubjectSelect() {
+                const $select = this.$subjectSelectContainer.find('select');
+
+                $select.select2({
+                    ajax: {
+                        url: `/api/IdentityAdmin/Client/GetConsentSubjects/${this.id}`,
+                        delay: 100,
+                        data: (params) => {
+                            params.page = params.page ?? 1;
+
+                            return params;
+                        }
+                    }
+                })
+
+                this.$subjectSelectContainer.on('click', 'button.reset-button', () => {
+                    $select.val(null).trigger('change');
+                });
+
+                $select.on('change', () => {
+                    this.subject = $select.val();
+
+                    this.onChange();
+                });
+            }
+
+            initScopeSelect() {
+                const $select = this.$scopeSelectContainer.find('select');
+
+                $select.select2({
+                    ajax: {
+                        url: `/api/IdentityAdmin/ClientScope/GetSelect`,
+                        delay: 100,
+                        data: (params) => {
+                            params.page = params.page ?? 1;
+
+                            return params;
+                        }
+                    }
+                })
+
+                this.$scopeSelectContainer.on('click', 'button.reset-button', () => {
+                    $select.val(null).trigger('change');
+                });
+
+                $select.on('change', () => {
+                    this.scope = $select.val();
+
+                    this.onChange();
+                });
+            }
+
+            initDateTimeRangePicker() {
+                const $dateTimeRangePicker = $('#date-time-range-container');
+
+                this.daterangePicker = new RangePicker($dateTimeRangePicker, this.statusAlert, () => {
+                    this.onChange();
+                });
+
+                $dateTimeRangePicker.on('click', 'button.reset-button', () => {
+                    this.daterangePicker.reset();
+                });
+            }
+
+            getFilters() {
+                var filters = {};
+                filters.length = this.pageLength;
+                filters.status = this.consentStatus;
+                filters.subject = this.subject;
+                filters.scope = this.scope;
+
+                filters.from = this.daterangePicker.getFrom();
+                filters.to = this.daterangePicker.getTo();
+
+                return filters;
+            }
+        }
+
+        class ClientConsents {
+            constructor(id, consentStatuses) {
+                this.id = id;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                this.$clientConsentTable = $('#client-consent-table');
+
+                this.$actionsDropdown = $('#actions-dropdown');
+                this.disableActions();
+
+                this.$actionsDropdown.on('click', 'button.validate', () => {
+                    this.validate();
+                });
+                this.$actionsDropdown.on('click', 'button.revoke', () => {
+                    this.revoke();
+                });
+
+                this.tableFilters = new ClientConsentTableFilters(id, consentStatuses, () => {
+                    this.reloadTable();
+                })
+
+                this.initTable();
+            }
+
+            initTable() {
+                this.$clientConsentTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    targets: 'no-sort',
+                    bSort: false,
+                    order: [],
+                    lengthChange: false,
+                    pageLength: 10,
+                    searching: false,
+                    ajax: {
+                        url: `/api/IdentityAdmin/Client/GetConsents/${this.id}`,
+                        type: 'GET',
+                        data: (params) => {
+                            let dataTableParams = {
+                                draw: params.draw,
+                                start: params.start
+                            };
+
+                            const filters = this.tableFilters.getFilters();
+
+                            const finalParams = { ...dataTableParams, ...filters }
+
+                            return finalParams;
+                        },
+                        error: (xhr, error, code) => {
+                            if (xhr.responseJSON[''] !== undefined && xhr.responseJSON[''] !== null) {
+                                this.statusAlert.showErrors(xhr.responseJSON[''])
+                            }
+                            else {
+                                this.statusAlert.showError('Error');
+                            }
+                        }
+                    },
+                    drawCallback: () => {
+                        this.$clientConsentTable.find('input.select-all').first().prop('checked', false);
+                        this.disableActions();
+                    },
+                    columns: [
+                        {
+                            data: 'id',
+                            className: 'checkbox-holder',
+                            title: `<input type="checkbox" id="selectAll" class="form-control select-all styled-checkbox"/><label for="selectAll"></label>`,
+                            mRender: (id) => {
+                                return `<input type="checkbox" class="form-control styled-checkbox consent-checkbox" data-id="${id}" id="consent-${id}"/><label for="consent-${id}"></label>`
+                            }
+                        },
+                        {
+                            data: 'status',
+                            title: 'Status',
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: 'type',
+                            title: 'Type',
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: 'subject',
+                            title: 'Subject',
+                            mRender: (subject) => {
+                                return `<a class="table-link" href="/IdentityAdmin/User/Details/${subject}" target="_blank">${subject}</a>`
+                            }
+                        },
+                        {
+                            data: 'scopes',
+                            title: 'Scopes',
+                            mRender: (scopes) => {
+                                let scopeArray = JSON.parse(scopes);
+                                let scopeText = '';
+                                scopeArray.forEach((element, index) => {
+                                    if (index === 0) {
+                                        scopeText += element;
+                                    }
+                                    else {
+                                        scopeText += `, ` + element;
+                                    }
+                                });
+
+                                let template = '<span>{{text}}</span>';
+
+                                let span = Mustache.render(template, { text: scopeText });
+
+                                return span;
+                            }
+                        },
+                        {
+                            data: 'createdDate',
+                            title: 'Created',
+                            render: $.fn.dataTable.render.text()
+                        }
+                    ]
+                });
+
+                this.$clientConsentTable.on('change', 'input.consent-checkbox', (event) => {
+                    let checked = event.currentTarget.checked;
+
+                    if (checked === true) {
+                        let all = this.$clientConsentTable.find('input.consent-checkbox').length;
+
+                        if (all > 0) {
+                            let selected = this.$clientConsentTable.find('input.consent-checkbox:checked').length;
+                            if (all === selected) {
+                                this.$clientConsentTable.find('input.select-all').first().prop('checked', true);
+                            }
+                        }
+                    }
+                    else if (checked == false) {
+                        this.$clientConsentTable.find('input.select-all').first().prop('checked', false);
+                    }
+
+                    let checkedRow = this.$clientConsentTable.find('input.consent-checkbox:checked').first();
+                    if (checkedRow !== undefined && checkedRow !== null && checkedRow.length !== 0) {
+                        this.enableActions();
+                    }
+                    else {
+                        this.disableActions();
+                    }
+                });
+
+                this.$clientConsentTable.on('change', 'input.select-all', (event) => {
+                    let checked = event.currentTarget.checked;
+
+                    if (checked === true) {
+                        this.enableActions();
+                        this.$clientConsentTable.find('input.consent-checkbox').prop('checked', true);
+                    }
+                    else if (checked === false) {
+                        this.disableActions();
+                        this.$clientConsentTable.find('input.consent-checkbox').prop('checked', false);
+                    }
+                });
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+            }
+
+            reloadTable() {
+                this.$clientConsentTable.DataTable()
+                    .clear()
+                    .draw();
+            }
+
+            getSelectedItems() {
+                let selectedConsents = this.$clientConsentTable.find('input.consent-checkbox:checked').map((index, item) => {
+                    return $(item).data('id');
+                });
+
+                return selectedConsents.toArray();
+            }
+
+            validate() {
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/ValidateConsents/${this.id}`, this.getSelectedItems())
+                    .done(() => {
+                        this.statusAlert.showSuccess('Consent status was updated to valid');
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.reloadTable();
+                    })
+            }
+
+            revoke() {
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/RevokeConsents/${this.id}`, this.getSelectedItems())
+                    .done(() => {
+                        this.statusAlert.showSuccess('Consent status was updated to revoked');
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.reloadTable();
+                    })
+            }
+
+            enableActions() {
+                this.$actionsDropdown.find('.header-button').prop('disabled', false);
+            }
+
+            disableActions() {
+                this.$actionsDropdown.find('.header-button').prop('disabled', true);
+            }
+        }
+    </script>
+}

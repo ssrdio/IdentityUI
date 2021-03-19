@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 {
-    public class UserClaimEntity : IdentityUserClaim<string>, IBaseEntity
+    public class UserClaimEntity : IdentityUserClaim<string>, IIdentityUIEntity, ITimestampEntity
     {
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }

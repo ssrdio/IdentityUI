@@ -9,6 +9,7 @@ namespace SSRD.Audit.Data
     public interface IAuditDbContext
     {
         DbSet<AuditEntity> Audit { get; set; }
+        DbSet<AuditCommentEntity> AuditComment { get; set; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync();

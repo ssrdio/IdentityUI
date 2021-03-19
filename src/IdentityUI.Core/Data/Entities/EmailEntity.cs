@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities
 {
-    public class EmailEntity : IBaseEntity
+    public class EmailEntity : IIdentityUIEntity, ITimestampEntity
     {
         public long Id { get; private set; }
 

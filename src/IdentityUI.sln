@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.Audit", "SSRD.Audit\SS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.CommonUtils", "SSRD.CommonUtils\SSRD.CommonUtils.csproj", "{680743D1-8DF8-47B9-9795-2E2D5FEF8873}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSRD.IdentityUI.Core.Tests", "SSRD.IdentityUI.Core.Tests\SSRD.IdentityUI.Core.Tests.csproj", "{230BBB51-A034-40F5-86B9-9D5C1DB95990}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSRD.IdentityUI.Core.Tests", "SSRD.IdentityUI.Core.Tests\SSRD.IdentityUI.Core.Tests.csproj", "{230BBB51-A034-40F5-86B9-9D5C1DB95990}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityUI.Dev.Net5", "IdentityUI.Dev.Net5\IdentityUI.Dev.Net5.csproj", "{A3BE80F6-0D9F-4579-BEBE-3E50EB311279}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{230BBB51-A034-40F5-86B9-9D5C1DB95990}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{230BBB51-A034-40F5-86B9-9D5C1DB95990}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{230BBB51-A034-40F5-86B9-9D5C1DB95990}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3BE80F6-0D9F-4579-BEBE-3E50EB311279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3BE80F6-0D9F-4579-BEBE-3E50EB311279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3BE80F6-0D9F-4579-BEBE-3E50EB311279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3BE80F6-0D9F-4579-BEBE-3E50EB311279}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

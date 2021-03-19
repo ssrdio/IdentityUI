@@ -3,7 +3,7 @@ using SSRD.IdentityUI.Core.Data.Entities.Identity;
 
 namespace SSRD.IdentityUI.Core.Data.Entities
 {
-    public class UserImageEntity : IBaseEntity
+    public class UserImageEntity : IIdentityUIEntity, ITimestampEntity
     {
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }

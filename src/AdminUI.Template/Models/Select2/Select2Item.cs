@@ -44,5 +44,9 @@ namespace SSRD.AdminUI.Template.Models.Select2
         public Select2Item(string id, string text) : base(id, text, false, false)
         {
         }
+
+        public Select2Item(string text) : base(text, text, false, false)
+        {
+        }
     }
 }

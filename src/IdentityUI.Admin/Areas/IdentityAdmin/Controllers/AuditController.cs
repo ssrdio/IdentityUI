@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,8 @@ using SSRD.Audit.Data;
 using SSRD.CommonUtils.Result;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit;
+using SSRD.IdentityUI.Core.Interfaces.Services;
+using SSRD.IdentityUI.Core.Services.Audit;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
 {
@@ -18,10 +21,12 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
     public class AuditController : BaseController
     {
         private readonly IAuditDataService _auditDataService;
+        private readonly IAuditService _auditService;
 
-        public AuditController(IAuditDataService auditDataService)
+        public AuditController(IAuditDataService auditDataService, IAuditService auditService)
         {
             _auditDataService = auditDataService;
+            _auditService = auditService;
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -100,6 +105,36 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers
             Result<Select2Result<Select2Item>> result = await _auditDataService.GetResourceNames(select2Request);
 
             return result.ToApiResult();
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(List<>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetComments([FromRoute] long id)
+        {
+            Result<List<AuditCommentModel>> result = await _auditDataService.GetComments(id);
+
+            return result.ToApiResult();
+        }
+
+        [HttpPost("{id}")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AddComment([FromRoute] long id, [FromBody] AddAuditCommentModel addAuditCommentModel)
+        {
+            Result result = await _auditService.AddComment(id, addAuditCommentModel);
+
+            return result.ToApiResult();
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IDictionary<string, string[]>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Export([FromQuery] AuditTableRequest auditTableRequest)
+        {
+            Result<List<AuditExportModel>> result = await _auditDataService.GetExportData(auditTableRequest);
+
+            return await JsonFile(result, $"audit_export_{DateTime.Now:yyyy-MM-dd}.json");
         }
     }
 }

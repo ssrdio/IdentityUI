@@ -37,6 +37,8 @@ namespace SSRD.Audit.Data
         /// </summary>
         public DateTime Created { get; set; }
 
+        public IList<AuditCommentEntity> Comments { get; set; }
+
         protected AuditEntity()
         {
         }

@@ -1,0 +1,273 @@
+﻿@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.OpenIdConnect.Models.ClientDetailsViewModel
+
+@{
+    SidebarSelection.SelectedOption = SidebarOptions.Client;
+}
+
+@{
+    ViewData["Title"] = "Client";
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+@await Component.InvokeAsync("ClientMenu", Model.ClientMenu.ToMenuViewModel(ClientMenuViewComponent.TabSelected.Details))
+
+<div>
+    <div id="status-alert">
+        @await Component.InvokeAsync("IdentityStatusAlertJs")
+    </div>
+
+    <div class="tab-content">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+            <div class="card-body">
+                <div class="card-title-space">
+                    <h5 class="card-title">
+                        Details
+                    </h5>
+                </div>
+
+                <div id="details-loader">
+                    @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
+                </div>
+
+                <div id="client-form" class="custom-form" style="display:none;">
+                    <div id="name-input" class="form-group">
+                        <label class="control-label">Name</label>
+                        <input class="form-control" />
+                        <span class="text-danger"></span>
+                    </div>
+
+                    <div id="redirect-urls-list-view" class="form-group">
+                        <label class="control-label">Redirect Urls</label>
+                        <div class="list-view"></div>
+                        <span class="error text-danger"></span>
+                    </div>
+
+                    <div id="post-logout-redirect-urls-list-view" class="form-group">
+                        <label class="control-label">Post logout redirect Urls</label>
+                        <div class="list-view"></div>
+                        <span class="error text-danger"></span>
+                    </div>
+
+                    <div id="endpoints-list-view" class="form-group">
+                        <label class="control-label">Endpoints</label>
+                        <div class="list-view"></div>
+                        <span class="error text-danger"></span>
+                    </div>
+
+                    <div id="grant-types-list-view" class="form-group">
+                        <label class="control-label">Grant Types</label>
+                        <div class="list-view"></div>
+                        <span class="error text-danger"></span>
+                    </div>
+
+                    <div id="response-types-list-view" class="form-group">
+                        <label class="control-label">Response Types</label>
+                        <div class="list-view"></div>
+                        <span class="error text-danger"></span>
+                    </div>
+
+                    <div class="details-checkboxes">
+                        <div id="require-consent-toggle" class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                <input id="require-consent-checkbox-input" type="checkbox" class="custom-control-input">
+                                <label class="custom-control-label" for="require-consent-checkbox-input">Require Consent</label>
+                            </div>
+                        </div>
+                        <div id="require-pkce-toggle" class="form-group form-check">
+                            <div class="custom-control custom-switch">
+                                <input id="require-pkce-checkbox-input" type="checkbox" class="custom-control-input">
+                                <label class="custom-control-label" for="require-pkce-checkbox-input">Require Pkce</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-holder">
+                        <button type="button" class="btn btn-primary custom-submit update">Update</button>
+                        <button type="button" class="btn btn-danger remove-button delete">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/list-view.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/toggle-component.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            new ClientDetails(
+                '@Model.ClientMenu.Id',
+                @Html.Raw(Json.Serialize(Model.Endpoints)),
+                @Html.Raw(Json.Serialize(Model.GrantTypes)),
+                @Html.Raw(Json.Serialize(Model.ResponseTypes)));
+        });
+
+        class ClientDetails {
+            constructor(id, endpoints, grantTypes, returnTypes) {
+                this.id = id;
+
+                this.confirmationModal = new conformationModal(
+                    $(`#modalContainer`),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeClient') {
+                            this.remove();
+                        }
+                    }
+                );
+
+                const $form = $('#client-form');
+                this.loader = new DotLoader($('#details-loader'), $form);
+
+                this.nameInput = new InputComponent($form, '#name-input');
+
+                this.redirectUrlsListView = new ListView({
+                    $container: $form.find('#redirect-urls-list-view'),
+                    newItemPlaceholder: 'New Redirect Uri',
+
+                });
+                this.postLogoutRedirectUrlsListView = new ListView({
+                    $container: $form.find('#post-logout-redirect-urls-list-view'),
+                    newItemPlaceholder: 'New post logout redirect uri'
+                });
+
+                this.endpointsListView = new PredefinedListView({
+                    $container: $form.find('#endpoints-list-view'),
+                    newItemPlaceholder: 'New permission',
+                    predefinedItems: endpoints
+                });
+
+                this.grantTypesListView = new PredefinedListView({
+                    $container: $form.find('#grant-types-list-view'),
+                    newItemPlaceholder: 'New Grant Type',
+                    predefinedItems: grantTypes
+                });
+
+                this.responseTypesListView = new PredefinedListView({
+                    $container: $form.find('#response-types-list-view'),
+                    newItemPlaceholder: 'New Response Type',
+                    predefinedItems: returnTypes
+                });
+
+                this.requireConsentToggle = new ToggleComponent($form, '#require-consent-toggle');
+                this.requirePkceToggle = new ToggleComponent($form, '#require-pkce-toggle');
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                $form.on('click', 'button.update', () => {
+                    this.update();
+                });
+
+                $form.on('click', 'button.delete', () => {
+                    this.confirmationModal.show({ key: 'removeClient' }, 'Are you sure you want to remove client?');
+                });
+
+                this.get();
+            }
+
+            showClient(data) {
+                this.nameInput.value(data.name);
+
+                this.redirectUrlsListView.setValue(data.redirectUrls);
+                this.postLogoutRedirectUrlsListView.setValue(data.postLogoutUrls);
+                this.endpointsListView.setValue(data.endpoints);
+                this.grantTypesListView.setValue(data.grantTypes);
+                this.responseTypesListView.setValue(data.responseTypes);
+
+                this.requireConsentToggle.setValue(data.requireConsent);
+                this.requirePkceToggle.setValue(data.requirePkce);
+
+                this.loader.hide();
+            }
+
+            showErrors(error) {
+                if (error[''] !== null && error[''] !== undefined) {
+                    this.statusAlert.showErrors(error['']);
+                }
+
+                this.nameInput.showError(error.Name);
+                this.redirectUrlsListView.showError(error.RedirectUrls);
+                this.postLogoutRedirectUrlsListView.showError(error.PostLogoutUrls);
+                this.endpointsListView.showError(error.Endpoints);
+                this.grantTypesListView.showError(error.GrantTypes);
+                this.responseTypesListView.showError(error.ResponseTypes);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+                this.nameInput.hideError();
+                this.redirectUrlsListView.hideError();
+                this.postLogoutRedirectUrlsListView.hideError();
+                this.endpointsListView.hideError();
+                this.grantTypesListView.hideError();
+                this.responseTypesListView.hideError();
+            }
+
+            get() {
+                this.loader.show();
+
+                Api.get(`/api/IdentityAdmin/Client/Get/${this.id}`)
+                    .done((data) => {
+                        this.showClient(data);
+                    })
+                    .fail((response) => {
+                        this.loader.hide();
+                        this.showErrors(response.responseJSON);
+                    })
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    redirectUrls: this.redirectUrlsListView.getValue(),
+                    postLogoutUrls: this.postLogoutRedirectUrlsListView.getValue(),
+                    endpoints: this.endpointsListView.getValue(),
+                    grantTypes: this.grantTypesListView.getValue(),
+                    responseTypes: this.responseTypesListView.getValue(),
+                    requireConsent: this.requireConsentToggle.getValue(),
+                    requirePkce: this.requirePkceToggle.getValue()
+                }
+            }
+
+            remove() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.delete(`/api/IdentityAdmin/Client/Delete/${this.id}`)
+                    .done(() => {
+                        window.location.href = '/IdentityAdmin/Client';
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+
+            update() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/Update/${this.id}`, this.getData())
+                    .done((data) => {
+                        this.showClient(data);
+                        this.statusAlert.showSuccess('Client was updated');
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+        }
+    </script>
+}

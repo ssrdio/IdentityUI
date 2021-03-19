@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.User
 {
-    public class UserAttributeEntity : IBaseEntity
+    public class UserAttributeEntity : IIdentityUIEntity, ITimestampEntity
     {
         public long Id { get; set; }
 

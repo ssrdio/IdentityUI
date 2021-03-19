@@ -12,13 +12,19 @@ namespace SSRD.Audit.Models
         /// </summary>
         public string UserIdClaimType { get; set; } = ClaimTypes.NameIdentifier;
 
+
+        /// <summary>
+        /// Claim type where group identifier is stored
+        /// </summary>
+        public string GroupIdClaimType { get; set; }
+
         /// <summary>
         /// If the value for RemoteIp should be set from the header specified in <see cref="XForwardedForHeaderKey"/>
         /// </summary>
         public bool UseXForwardedFor { get; set; } = false; //TODO: change this to true
 
         /// <summary>
-        /// If <see cref="UserIdClaimType"/> is set to true then the value for the RemoteIp will be set to the value in the HTTP header with this key.
+        /// If <see cref="UseXForwardedFor"/> is set to true then the value for the RemoteIp will be set to the value in the HTTP header with this key.
         /// If header value is null than RemoteIp is set to the value from request
         /// </summary>
         public string XForwardedForHeaderKey { get; set; } = "X-Forwarded-For";

@@ -3,10 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SSRD.IdentityUI.Core.DependencyInjection;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
 using SSRD.IdentityUI.Core.Infrastructure.Data.ReleaseManagment;
-using SSRD.IdentityUI.Core.Models.Options;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.EntityFrameworkCore.Postgre.DependencyInjection
 {
@@ -14,16 +10,16 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.Postgre.DependencyInjection
     {
         public static IdentityUIServicesBuilder UsePostgre(this IdentityUIServicesBuilder builder)
         {
-            builder.UsePostgre(builder.DatabaseOptions.ConnectionString);
+            builder.UsePostgre(builder.DatabaseOptions.ConnectionString, builder.DatabaseOptions.OpenIddictConnectionString);
 
             return builder;
         }
 
-        public static IdentityUIServicesBuilder UsePostgre(this IdentityUIServicesBuilder builder, string connectionString)
+        public static IdentityUIServicesBuilder UsePostgre(this IdentityUIServicesBuilder builder, string identityUIConnectionString, string openIddictConnectionString)
         {
             builder.Services.AddDbContext<IdentityDbContext>(options =>
             {
-                options.UseNpgsql(connectionString, b =>
+                options.UseNpgsql(identityUIConnectionString, b =>
                 {
                     b.MigrationsAssembly(typeof(IdentityUIPostgreExtensions).Assembly.FullName);
                 });

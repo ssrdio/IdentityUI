@@ -1,0 +1,718 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.Client;
+}
+
+@{
+    ViewData["Title"] = "Add Client";
+}
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                New Client
+            </h5>
+        </div>
+        <div id="add-client-form">
+            <div id="dot-loader">
+                @await Component.InvokeAsync("AdminUIDotLoader")
+            </div>
+
+            <!--#region button-->
+            <div id="client-buttons">
+                <div class="row">
+                    <div class="col-4">
+                        <button type="button" class="client-type-button sap-client">
+                            <div>
+                                <i class="fab fa-js client-type-button-icon"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span>Single Page Application</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="client-type-button web-app-client">
+                            <div>
+                                <i class="fas fa-file-code client-type-button-icon"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span>Web Application</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="client-type-button client-credentials-client">
+                            <div>
+                                <i class="fas fa-server client-type-button-icon"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span>Machine to Machine</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <button type="button" class="client-type-button mobile-app-client">
+                            <div>
+                                <i class="fas fa-mobile-alt client-type-button-icon"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span>Mobile Application</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="client-type-button custom-client">
+                            <div>
+                                <i class="fas fa-wrench client-type-button-icon"></i>
+                            </div>
+                            <div class="mt-3">
+                                <span>Custom</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--#endregion-->
+            <!--#region spa form-->
+            <div id="spa-client-form" class="custom-form" hidden>
+                <div class="form-group name-input">
+                    <label class="control-label">Name</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group client-id-input">
+                    <label class="control-label">Client Id</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group redirect-urls-list-view">
+                    <label class="control-label">Redirect Urls</label>
+                    <div class="list-view"></div>
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group post-logout-redirect-uris-list-view">
+                    <label class="control-label">Post logout Urls</label>
+                    <div class="list-view"></div>
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="button-holder">
+                    <button type="button" class="btn btn-primary custom-submit add">Add</button>
+                </div>
+            </div>
+            <!--#endregion-->
+            <!--#region web application form-->
+            <div id="web-app-client-form" class="custom-form" hidden>
+                <div class="form-group name-input">
+                    <label class="control-label">Name</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+                <div class="form-group client-id-input">
+                    <label class="control-label">Client Id</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group redirect-urls-list-view">
+                    <label class="control-label">Redirect Urls</label>
+                    <div class="list-view"></div>
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group post-logout-urls-list-view">
+                    <label class="control-label">Post Logout Urls</label>
+                    <div class="list-view"></div>
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="button-holder">
+                    <button type="button" class="btn btn-primary custom-submit add">Add</button>
+                </div>
+            </div>
+            <!--#endregion-->
+            <!--#region client credentials form-->
+            <div id="client-credentials-form" class="custom-form" hidden>
+                <div class="form-group name-input">
+                    <label class="control-label">Name</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+                <div class="form-group client-id-input">
+                    <label class="control-label">Client Id</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+                <div class="form-group client-secret-input">
+                    <label class="control-label">Client Secret</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="button-holder">
+                    <button type="button" class="btn btn-primary custom-submit add">Add</button>
+                </div>
+            </div>
+            <!--#endregion-->
+            <!--#region mobile client form-->
+            <div id="mobile-app-client-form" class="custom-form" hidden>
+                <div class="form-group name-input">
+                    <label class="control-label">Name</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group client-id-input">
+                    <label class="control-label">Client Id</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group redirect-urls-list-view">
+                    <label class="control-label">Redirect Urls</label>
+                    <div class="list-view"></div>
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="form-group post-logout-redirect-uris-list-view">
+                    <label class="control-label">Post logout Urls</label>
+                    <div class="list-view"></div>
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="button-holder">
+                    <button type="button" class="btn btn-primary custom-submit add">Add</button>
+                </div>
+            </div>
+            <!--#endregion-->
+            <!--#region custom-->
+            <div id="custom-client-form" class="custom-form" hidden>
+                <div class="form-group name-input">
+                    <label class="control-label">Name</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+                <div class="form-group client-id-input">
+                    <label class="control-label">Client Id</label>
+                    <input class="form-control" />
+                    <span class="error text-danger"></span>
+                </div>
+
+                <div class="button-holder">
+                    <button type="button" class="btn btn-primary custom-submit add">Add</button>
+                </div>
+            </div>
+            <!--#endregion-->
+        </div>
+    </div>
+</div>
+
+@section style {
+    <style>
+        .client-type-button {
+            background-color: transparent;
+            margin: 10px 0px;
+            padding: 10px;
+            width: 100%;
+            border-style: solid;
+            border-width: 2px;
+        }
+
+            .client-type-button:hover {
+                border-color: #008fef;
+            }
+
+        .client-type-button-icon {
+            font-size: 5em;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+}
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/list-view.js" asp-append-version="true"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            new AddClientForm();
+        });
+
+        class AddClientForm {
+            constructor() {
+                const $form = $('#add-client-form');
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                new ClientTypeForm($form, this.statusAlert);
+            }
+        }
+
+        class ClientTypeForm {
+            constructor($container, statusAlert) {
+                this.$clientButtons = $container.find('#client-buttons');
+
+                this.$clientButtons.on('click', 'button.sap-client', () => {
+                    this.hide();
+                    let spaClientForm = new SpaClientForm($container, statusAlert);
+                    spaClientForm.show();
+                });
+
+                this.$clientButtons.on('click', 'button.web-app-client', () => {
+                    this.hide();
+                    let webAppClientForm = new WebAppClientForm($container, statusAlert);
+                    webAppClientForm.show();
+                });
+
+                this.$clientButtons.on('click', 'button.client-credentials-client', () => {
+                    this.hide();
+                    let clientCredentialsForm = new ClientCredentialsForm($container, statusAlert);
+                    clientCredentialsForm.show();
+                });
+
+                this.$clientButtons.on('click', 'button.mobile-app-client', () => {
+                    this.hide();
+                    let mobileAppForm = new MobileAppClientForm($container, statusAlert);
+                    mobileAppForm.show();
+                });
+
+                this.$clientButtons.on('click', 'button.custom-client', () => {
+                    this.hide();
+                    let customClientForm = new CustomClientForm($container, statusAlert);
+                    customClientForm.show();
+                });
+            }
+
+            show() {
+                this.$clientButtons.prop('hidden', false);
+            }
+
+            hide() {
+                this.$clientButtons.prop('hidden', true);
+            }
+        }
+
+        class SpaClientForm {
+            constructor($container, statusAlert) {
+                this.statusAlert = statusAlert;
+
+                this.$form = $container.find('#spa-client-form');
+
+                this.loader = new DotLoader($container.find('#dot-loader'), this.$form);
+
+                this.nameInput = new InputComponent(this.$form, '.name-input');
+                this.clientIdInput = new InputComponent(this.$form, '.client-id-input');
+
+                this.redirectUrlsListView = new ListView({
+                    $container: this.$form.find('.redirect-urls-list-view'),
+                    newItemPlaceholder: 'New Redirect Uri',
+                });
+                this.postLogoutRedirectUrisListView = new ListView({
+                    $container: this.$form.find('.post-logout-redirect-uris-list-view'),
+                    newItemPlaceholder: 'New post logout redirect uri'
+                });
+
+                this.$form.on('click', 'button.add', () => {
+                    this.add();
+                });
+
+                this.init();
+            }
+
+            init() {
+                this.nameInput.value(null);
+                this.clientIdInput.value(null);
+                this.redirectUrlsListView.init();
+                this.postLogoutRedirectUrisListView.init();
+
+                this.hideErrors();
+            }
+
+            show() {
+                this.$form.prop('hidden', false);
+            }
+
+            hide() {
+                this.$form.prop('hidden', true);
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+                this.clientIdInput.showError(errors.Name);
+                this.redirectUrlsListView.showError(errors.RedirectUrls);
+                this.postLogoutRedirectUrisListView.showError(errors.PostLogoutUrls);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.nameInput.hideError();
+                this.clientIdInput.hideError();
+                this.redirectUrlsListView.hideError();
+                this.postLogoutRedirectUrisListView.hideError();
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    clientId: this.clientIdInput.value(),
+                    redirectUrls: this.redirectUrlsListView.getValue(),
+                    postLogoutUrls: this.postLogoutRedirectUrisListView.getValue()
+                };
+            }
+
+            add() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/AddSinglePageClient`, this.getData())
+                    .done((data) => {
+                        window.location.href = `/IdentityAdmin/Client/Details/${data.id}`;
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+        }
+
+        class WebAppClientForm {
+            constructor($container, statusAlert) {
+                this.statusAlert = statusAlert;
+
+                this.$form = $container.find('#web-app-client-form');
+
+                this.loader = new DotLoader($container.find('#dot-loader'), this.$form);
+
+                this.nameInput = new InputComponent(this.$form, '.name-input');
+                this.clientIdInput = new InputComponent(this.$form, '.client-id-input');
+
+                this.redirectUrlsListView = new ListView({
+                    $container: this.$form.find('.redirect-urls-list-view'),
+                    newItemPlaceholder: 'New Redirect Uri',
+                });
+
+                this.postLogoutRedirectUrisListView = new ListView({
+                    $container: this.$form.find('.post-logout-urls-list-view'),
+                    newItemPlaceholder: 'Post Logout Uri',
+                });
+
+                this.$form.on('click', 'button.add', () => {
+                    this.add();
+                });
+
+                this.init();
+            }
+
+            init() {
+                this.nameInput.value(null);
+                this.clientIdInput.value(null);
+                this.redirectUrlsListView.init();
+                this.postLogoutRedirectUrisListView.init();
+
+                this.hideErrors();
+            }
+
+            show() {
+                this.$form.prop('hidden', false);
+            }
+
+            hide() {
+                this.$form.prop('hidden', true);
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+                this.clientIdInput.showError(errors.Name);
+                this.redirectUrlsListView.showError(errors.RedirectUrls);
+                this.postLogoutRedirectUrisListView.showError(errors.PostLogoutUrls);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.nameInput.hideError();
+                this.clientIdInput.hideError();
+                this.redirectUrlsListView.hideError();
+                this.postLogoutRedirectUrisListView.hideError();
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    clientId: this.clientIdInput.value(),
+                    redirectUrls: this.redirectUrlsListView.getValue(),
+                    postLogoutUrls: this.postLogoutRedirectUrisListView.getValue()
+                };
+            }
+
+            add() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/AddWebAppClient`, this.getData())
+                    .done((data) => {
+                        window.location.href = `/IdentityAdmin/Client/Details/${data.id}`;
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+        }
+
+        class ClientCredentialsForm {
+            constructor($container, statusAlert) {
+                this.statusAlert = statusAlert;
+
+                this.$form = $container.find('#client-credentials-form');
+                this.loader = new DotLoader($container.find('#dot-loader'), this.$form);
+
+                this.nameInput = new InputComponent(this.$form, '.name-input');
+                this.clientIdInput = new InputComponent(this.$form, '.client-id-input');
+                this.clientSecretInput = new InputComponent(this.$form, '.client-secret-input');
+
+                this.$form.on('click', 'button.add', () => {
+                    this.add();
+                });
+
+                this.init();
+            }
+
+            init() {
+                this.nameInput.value(null);
+                this.clientIdInput.value(null);
+                this.clientSecretInput.value(null);
+
+                this.hideErrors();
+            }
+
+            show() {
+                this.$form.prop('hidden', false);
+            }
+
+            hide() {
+                this.$form.prop('hidden', true);
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+                this.clientIdInput.showError(errors.CleintId);
+                this.clientSecretInput.showError(errors.CleintSecret);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.nameInput.hideError();
+                this.clientIdInput.hideError();
+                this.clientSecretInput.hideError();
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    clientId: this.clientIdInput.value(),
+                    clientSecret: this.clientSecretInput.value()
+                };
+            }
+
+            add() {
+                this.loader.show();
+
+                Api.post(`/api/IdentityAdmin/Client/AddClientCredentialsClient`, this.getData())
+                    .done((data) => {
+                        window.location.href = `/IdentityAdmin/Client/Details/${data.id}`;
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+        }
+
+        class MobileAppClientForm {
+            constructor($container, statusAlert) {
+                this.statusAlert = statusAlert;
+
+                this.$form = $container.find('#mobile-app-client-form');
+
+                this.loader = new DotLoader($container.find('#dot-loader'), this.$form);
+
+                this.nameInput = new InputComponent(this.$form, '.name-input');
+                this.clientIdInput = new InputComponent(this.$form, '.client-id-input');
+
+                this.redirectUrlsListView = new ListView({
+                    $container: this.$form.find('.redirect-urls-list-view'),
+                    newItemPlaceholder: 'New Redirect Uri',
+                });
+                this.postLogoutRedirectUrisListView = new ListView({
+                    $container: this.$form.find('.post-logout-redirect-uris-list-view'),
+                    newItemPlaceholder: 'New post logout redirect uri'
+                });
+
+                this.$form.on('click', 'button.add', () => {
+                    this.add();
+                });
+
+                this.init();
+            }
+
+            init() {
+                this.nameInput.value(null);
+                this.clientIdInput.value(null);
+                this.redirectUrlsListView.init();
+                this.postLogoutRedirectUrisListView.init();
+
+                this.hideErrors();
+            }
+
+            show() {
+                this.$form.prop('hidden', false);
+            }
+
+            hide() {
+                this.$form.prop('hidden', true);
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+                this.clientIdInput.showError(errors.Name);
+                this.redirectUrlsListView.showError(errors.RedirectUrls);
+                this.postLogoutRedirectUrisListView.showError(errors.PostLogoutUrls);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.nameInput.hideError();
+                this.clientIdInput.hideError();
+                this.redirectUrlsListView.hideError();
+                this.postLogoutRedirectUrisListView.hideError();
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    clientId: this.clientIdInput.value(),
+                    redirectUrls: this.redirectUrlsListView.getValue(),
+                    postLogoutUrls: this.postLogoutRedirectUrisListView.getValue()
+                };
+            }
+
+            add() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/AddMobileAppClient`, this.getData())
+                    .done((data) => {
+                        window.location.href = `/IdentityAdmin/Client/Details/${data.id}`;
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+        }
+
+        class CustomClientForm {
+            constructor($container, statusAlert) {
+                this.statusAlert = statusAlert;
+
+                this.$form = $container.find('#custom-client-form');
+                this.loader = new DotLoader($container.find('#dot-loader'), this.$form);
+
+                this.nameInput = new InputComponent(this.$form, '.name-input');
+                this.clientIdInput = new InputComponent(this.$form, '.client-id-input');
+
+                this.$form.on('click', 'button.add', () => {
+                    this.add();
+                });
+
+                this.init();
+            }
+
+            init() {
+                this.nameInput.value(null);
+                this.clientIdInput.value(null);
+
+                this.hideErrors();
+            }
+
+            show() {
+                this.$form.prop('hidden', false);
+            }
+
+            hide() {
+                this.$form.prop('hidden', true);
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+                this.clientIdInput.showError(errors.CleintId);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.nameInput.hideError();
+                this.clientIdInput.hideError();
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    clientId: this.clientIdInput.value(),
+                };
+            }
+
+            add() {
+                this.loader.show();
+
+                Api.post(`/api/IdentityAdmin/Client/AddCustomClient`, this.getData())
+                    .done((data) => {
+                        window.location.href = `/IdentityAdmin/Client/Details/${data.id}`;
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+        }
+
+    </script>
+}

@@ -14,14 +14,23 @@ namespace SSRD.Audit.Data
     public class AuditDbContext : DbContext, IAuditDbContext
     {
         public DbSet<AuditEntity> Audit { get; set; }
+        public DbSet<AuditCommentEntity> AuditComment { get; set; }
 
         private readonly IAuditSubjectDataService _auditSubjectDataService;
         private readonly AuditOptions _auditOptions;
 
-        public AuditDbContext(DbContextOptions<AuditDbContext> options, IAuditSubjectDataService auditSubjectDataService, IOptions<AuditOptions> auditOptions) : base(options)
+        public AuditDbContext(
+            DbContextOptions<AuditDbContext> options,
+            IAuditSubjectDataService auditSubjectDataService,
+            IOptions<AuditOptions> auditOptions) : base(options)
         {
             _auditSubjectDataService = auditSubjectDataService;
             _auditOptions = auditOptions.Value;
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ConfigureAudit();
         }
 
         public override int SaveChanges()

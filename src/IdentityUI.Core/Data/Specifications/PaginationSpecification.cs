@@ -7,7 +7,7 @@ using System.Text;
 namespace SSRD.IdentityUI.Core.Data.Specifications
 {
     [Obsolete("Use SSRD.CommonUtils.Specifications.BaseSpecification")]
-    public class PaginationSpecification<TEntity, TData> : SelectSpecification<TEntity, TData>, IPaginationSpecification<TEntity, TData> where TEntity : class, IBaseEntity
+    public class PaginationSpecification<TEntity, TData> : SelectSpecification<TEntity, TData>, IPaginationSpecification<TEntity, TData> where TEntity : class, ITimestampEntity
     {
         public int Take { get; private set; }
 

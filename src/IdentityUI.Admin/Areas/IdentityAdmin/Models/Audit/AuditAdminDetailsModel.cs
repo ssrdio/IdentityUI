@@ -1,4 +1,7 @@
-﻿namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
+﻿using SSRD.IdentityUI.Core.Helper;
+using System.Text.Json.Serialization;
+
+namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit
 {
     public class AuditAdminDetailsModel
     {
@@ -20,7 +23,7 @@
         public string ResourceName { get; set; }
         public string UserAgent { get; set; }
         public string TraceIdentifier { get; set; }
-        public string AppVersion { get; set; }
+        public string AppVersion { get; set; }       
         public string Metadata { get; set; }
 
         public string Created { get; set; }

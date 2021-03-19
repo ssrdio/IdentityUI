@@ -48,6 +48,11 @@ namespace SSRD.Audit.Services
 
         public virtual string GetGroupIdentifier()
         {
+            if(!string.IsNullOrEmpty(_auditOptions.GroupIdClaimType))
+            {
+                return _httpContextAccessor.HttpContext?.User.FindFirst(_auditOptions.GroupIdClaimType)?.Value;
+            }
+
             return null;
         }
 

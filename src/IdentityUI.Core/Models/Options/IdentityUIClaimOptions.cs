@@ -1,4 +1,5 @@
-﻿using SSRD.IdentityUI.Core.Data.Models.Constants;
+﻿using OpenIddict.Abstractions;
+using SSRD.IdentityUI.Core.Data.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -8,10 +9,19 @@ namespace SSRD.IdentityUI.Core.Models.Options
 {
     public class IdentityUIClaimOptions
     {
-        public string UserId { get; set; } = ClaimTypes.NameIdentifier;
-        public string Username { get; set; } = ClaimTypes.Name;
-        public string Email { get; set; } = ClaimTypes.Email;
-        public string Role { get; set; } = ClaimTypes.Role;
+        public string UserId { get; set; } = OpenIddictConstants.Claims.Subject;
+        //public string UserId { get; set; } = ClaimTypes.NameIdentifier;
+        public string Username { get; set; } = OpenIddictConstants.Claims.PreferredUsername;
+        public string Email { get; set; } = OpenIddictConstants.Claims.Email;
+        public string PhoneNumber { get; set; } = OpenIddictConstants.Claims.PhoneNumber;
+
+        public string Name { get; set; } = OpenIddictConstants.Claims.Name;
+        public string FirstName { get; set; } = OpenIddictConstants.Claims.GivenName;
+        public string LastName { get; set; } = OpenIddictConstants.Claims.FamilyName;
+        public string Profile { get; set; } = OpenIddictConstants.Claims.Profile;
+        public string Picture { get; set; } = OpenIddictConstants.Claims.Picture;
+
+        public string Role { get; set; } = OpenIddictConstants.Claims.Role;
         public string Permission { get; set; } = IdentityUIClaims.PERMISSION;
 
         public string GroupId { get; set; } = IdentityUIClaims.GROUP_ID;

@@ -1,0 +1,12 @@
+<Project>
+    <!-- This is required to workaround overlap between System.Collections.Generic.IAsyncEnumerable in System.Runtime and System.Interactive.Async. -->
+    <Target Name="AddAssemblyAliasToReactiveAsync"
+            AfterTargets="ResolveAssemblyReferences"
+            Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+        <ItemGroup>
+        <ReferencePath Condition=" '%(FileName)' == 'System.Interactive.Async' ">
+            <Aliases>reactive</Aliases>
+        </ReferencePath>
+        </ItemGroup>
+    </Target>
+</Project>

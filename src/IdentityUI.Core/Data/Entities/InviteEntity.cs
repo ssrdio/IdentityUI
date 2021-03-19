@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SSRD.IdentityUI.Core.Data.Entities
 {
-    public class InviteEntity : IBaseEntity
+    public class InviteEntity : IIdentityUIEntity, ITimestampEntity
     {
         public string Id { get; private set; }
 

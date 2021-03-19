@@ -9,8 +9,10 @@ using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.Audit;
+using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Data.Specifications;
 using SSRD.IdentityUI.Core.Helper;
+using SSRD.IdentityUI.Core.Interfaces.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +23,7 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
     internal class AuditDataService : IAuditDataService
     {
         private readonly IBaseDAO<AuditEntity> _auditDAO;
+        private readonly IAuditCommentDAO _auditCommentDAO;
 
         private readonly IValidator<DataTableRequest> _dataTableRequestValidator;
         private readonly IValidator<AuditTableRequest> _auditTableRequestValidator;
@@ -30,12 +33,14 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
 
         public AuditDataService(
             IBaseDAO<AuditEntity> auditDAO,
+            IAuditCommentDAO auditCommentDAO,
             IValidator<DataTableRequest> dataTableRequestValidator,
             IValidator<AuditTableRequest> auditTableRequestValidator,
             IValidator<Select2Request> select2RequestValidator,
             ILogger<AuditDataService> logger)
         {
             _auditDAO = auditDAO;
+            _auditCommentDAO = auditCommentDAO;
             _dataTableRequestValidator = dataTableRequestValidator;
             _auditTableRequestValidator = auditTableRequestValidator;
             _select2RequestValidator = select2RequestValidator;
@@ -102,7 +107,6 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
 
         public async Task<Result<AuditAdminDetailsModel>> Get(long id)
         {
-
             IBaseSpecification<AuditEntity, AuditAdminDetailsModel> selectSpecification = SpecificationBuilder
                 .Create<AuditEntity>()
                 .Where(x => x.Id == id)
@@ -264,6 +268,55 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services
                 pagination: select2Request.IsMore(count));
 
             return Result.Ok(select2Result);
+        }
+
+        public async Task<Result<List<AuditCommentModel>>> GetComments(long auditId)
+        {
+            List<AuditCommentData> auditComments = await _auditCommentDAO.GetComments(auditId);
+
+            List<AuditCommentModel> comments = auditComments
+                .Select(x => new AuditCommentModel(
+                    comment: x.Comment,
+                    user: x.Username,
+                    created: x.Created))
+                .ToList();
+
+            return Result.Ok(comments);
+        }
+
+        public async Task<Result<List<AuditExportModel>>> GetExportData(AuditTableRequest auditTableRequest)
+        {
+            IBaseSpecification<AuditEntity, AuditExportModel> specification = SpecificationBuilder
+                .Create<AuditEntity>()
+                .WithActionType(auditTableRequest.ActionType)
+                .WithObjectType(auditTableRequest.ObjectType)
+                .WithObjectIdentifier(auditTableRequest.ObjectIdentifier)
+                .WithSubjectType(auditTableRequest.SubjectType)
+                .WithSubjectIdentifier(auditTableRequest.SubjectIdentifier)
+                .WithResourceName(auditTableRequest.ResourceName)
+                .InRange(auditTableRequest.From, auditTableRequest.To)
+                .Select(x => new AuditExportModel(
+                    x.ActionType.GetDescription(),
+                    x.ObjectType,
+                    x.ObjectIdentifier,
+                    x.ObjectMetadata,
+                    x.SubjectType.GetDescription(),
+                    x.SubjectIdentifier,
+                    x.SubjectMetadata,
+                    x.GroupIdentifier,
+                    x.Host,
+                    x.RemoteIp,
+                    x.ResourceName,
+                    x.UserAgent,
+                    x.TraceIdentifier,
+                    x.AppVersion,
+                    x.Metadata,
+                    x.Created.ToString("o")))
+                .Build();
+
+            List<AuditExportModel> auditExportData = await _auditDAO.Get(specification);
+
+            return Result.Ok(auditExportData);
         }
     }
 }

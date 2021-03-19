@@ -33,7 +33,7 @@ namespace SSRD.IdentityUI.Admin.Areas.GroupAdmin
                 areaName: "GroupAdmin",
                 template: "GroupAdmin/{controller=Home}/{action=Index}/{id?}");
         }
-#elif NET_CORE3
+#else
         public static void MapGroupAdmin(this IEndpointRouteBuilder endpoints)
         {
             endpoints.MapAreaControllerRoute(

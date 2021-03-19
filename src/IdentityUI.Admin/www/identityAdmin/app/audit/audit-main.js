@@ -1,4 +1,71 @@
-﻿class AuditDetailsModal {
+﻿class AuditMain {
+    constructor(actionTypes, subjectTypes) {
+        this.statusAlert = new StatusAlertComponent('#status-alert-container');
+
+        this.auditTable = new AuditTable(actionTypes, subjectTypes, this.statusAlert);
+
+        const $actionsDropdown = $('#actions-dropdown');
+
+        $actionsDropdown.on('click', 'button.reset-filters', () => {
+            this.auditTable.resetFilters();
+        })
+
+        $actionsDropdown.on('click', 'button.export', () => {
+            this.export();
+        });
+    }
+
+    export() {
+        this.statusAlert.hide();
+
+        const validParams = Object.fromEntries(Object.entries(this.auditTable.getFilters()).filter(([_, v]) => v != null));
+
+        fetch(`/IdentityAdmin/Audit/Export?${new URLSearchParams(validParams).toString()}`)
+            .then((resp) => {
+                if (!resp.ok) {
+                    this.statusAlert.showError('Failed to export audit');
+                    return;
+                }
+
+                let header = resp.headers.get("content-disposition");
+                let filename = 'audit.json';
+
+                if (header && header.indexOf('attachment') !== -1) {
+                    let utfFilenameRegex = /filename[^;\n]*=UTF-\d['"]*((['"]).*?[.]$\2|[^;\n]*)?/;
+
+                    let utfMatches = utfFilenameRegex.exec(header);
+
+                    if (utfMatches !== null && utfMatches[1] !== undefined) {
+                        filename = utfMatches[1].replace(/['"]/g, '');
+                        filename = decodeURIComponent(filename);
+                    }
+                    else {
+                        let asciiFilenameReged = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+
+                        let asciiMatches = asciiFilenameReged.exec(header);
+                        if (asciiMatches !== null && asciiMatches[1] !== undefined) {
+                            filename = asciiMatches[1].replace(/['"]/g, '');
+                        }
+                    }
+                }
+
+                resp.blob()
+                    .then((blob) => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = filename;
+
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    });
+            })
+    }
+}
+
+class AuditDetailsModal {
     constructor(actionTypes) {
         this.$modal = $('#audit-details-modal');
         this.$modal.on('hidden.bs.modal', () => {
@@ -109,23 +176,20 @@
 }
 
 class AuditTable {
-    constructor(actionTypes, subjectTypes) {
+    constructor(actionTypes, subjectTypes, statusAlert) {
         this.$auditTable = $('#audit-table');
         this.actionTypes = actionTypes;
 
-        this.statusAlert = new StatusAlertComponent('#status-alert-container');
+        this.statusAlert = statusAlert;
 
         this.auditDetailsModal = new AuditDetailsModal();
         this.auditTableFilters = new AuditTableFilters(subjectTypes, actionTypes, this.statusAlert, () => {
             this.reloadTable();
         });
 
-        this.init();
+        this.auditCommentModal = new AuditCommentModal();
 
-        $('#audit-table tbody').on('click', 'tr', (event) => {
-            const data = this.$auditTable.DataTable().row(event.target).data();
-            this.auditDetailsModal.showModal(data.id);
-        });
+        this.init();
     }
 
     init() {
@@ -148,7 +212,6 @@ class AuditTable {
                     let customParams = {
                         draw: params.draw,
                         start: params.start,
-                        length: params.length,
                     }
 
                     switch (params.order.find(x => x.column === 6).dir) {
@@ -168,17 +231,14 @@ class AuditTable {
 
                     const filters = this.auditTableFilters.getFilters();
 
+                    this.$auditTable.DataTable().page.len(filters.length);
+
                     const finalParams = { ...customParams, ...filters };
 
                     return finalParams;
                 }
             },
             columns: [
-                {
-                    data: 'id',
-                    orderable: false,
-                    visible: false,
-                },
                 {
                     title: "Type",
                     orderable: false,
@@ -218,11 +278,49 @@ class AuditTable {
                     data: null,
                     title: "Created",
                     render: (data) => {
-                        return `<span>${moment.utc(data.created).format("D.M.YYYY HH:mm:ssZ")}</span>`;
+                        return `<span>${DateTimeUtils.toDisplayDateTime(data.created)}</span>`;
+                    }
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    render: (data) => {
+                        let dropDown = `
+                            <div class="dropdown">
+                              <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+                                Action
+                              </button>
+                              <div class="dropdown-menu">
+                                <button class="dropdown-item audit-details" data-id="${data.id}">Details</button>
+                                <button class="dropdown-item audit-comments" data-id="${data.id}">Comments</button>
+                              </div>
+                            </div>`
+
+                        return dropDown;
                     }
                 }
             ]
         });
+
+        this.$auditTable.on('click', 'button.audit-details', (event) => {
+            const id = $(event.target).data('id');
+
+            this.auditDetailsModal.showModal(id);
+        });
+
+        this.$auditTable.on('click', 'button.audit-comments', (event) => {
+            const id = $(event.target).data('id');
+
+            this.auditCommentModal.show(id);
+        });
+    }
+
+    resetFilters() {
+        this.auditTableFilters.reset();
+    }
+
+    getFilters() {
+        return this.auditTableFilters.getFilters();
     }
 
     reloadTable() {
@@ -285,13 +383,12 @@ class AuditTableFilters {
             this.change();
         });
 
+        this.$pageLenghtContainer = $('#page-lenght-select');
+        this.$pageLenghtSelect = this.$pageLenghtContainer.find('select');
+
         $dateTimeRangePicker.on('click', 'button.reset-button', () => {
             this.daterangePicker.reset();
         });
-
-        $('#reset-all-button').on('click', () => {
-            this.reset();
-        })
 
         this.initObjectTypeSelect();
         this.initObjectIdentifierSelect();
@@ -302,6 +399,7 @@ class AuditTableFilters {
         this.initActionTypeSelect(actionTypes);
 
         this.initResourceNameSelect();
+        this.initPageLenghtSelect();
     }
 
     showError(error) {
@@ -330,6 +428,7 @@ class AuditTableFilters {
             resourceName: this.$resourceNameSelect.val(),
             from: this.daterangePicker.getFrom(),
             to: this.daterangePicker.getTo(),
+            length: this.$pageLenghtSelect.val()
         }
     }
 
@@ -447,6 +546,38 @@ class AuditTableFilters {
         })
     }
 
+    initPageLenghtSelect() {
+        var data = [
+            {
+                id: 10,
+                text: '10',
+                selected: true
+            },
+            {
+                id: 20,
+                text: '20'
+            },
+            {
+                id: 50,
+                text: '50'
+            },
+            {
+                id: 100,
+                text: '100'
+            }]
+
+        this.$pageLenghtSelect.select2({
+            data: data,
+            minimumResultsForSearch: Infinity
+        });
+
+        this.$pageLenghtSelect.on('change', () => {
+            this.pageLength = this.$pageLenghtSelect.val();
+
+            this.onChange();
+        });
+    }
+
     reset() {
         const onChange = this.onChange;
 
@@ -503,5 +634,133 @@ class AuditTableFilters {
     resetResourceName() {
         this.$resourceNameSelect.val(null).trigger('change');
         //TODO: remove options
+    }
+}
+
+class AuditCommentModal {
+    constructor() {
+        this.$modal = $('#audit-comments-modal');
+
+        this.$auditCommentsContainer = this.$modal.find('#audit-comment-container');
+        this.loader = new DotLoader(this.$modal.find('#audit-comment-loader'), this.$auditCommentsContainer);
+
+        const $auditCommentForm = this.$modal.find('#add-audit-comment-form');
+        this.commentArea = new TextAreaComponent($auditCommentForm, '.comment-text-area');
+
+        this.statusMessage = new StatusMessage(this.$modal.find('.audit-comment-modal-body'));
+
+        $auditCommentForm.on('click', 'button.submit-button', () => {
+            this.addComment();
+        });
+
+        this.$modal.on('hidden.bs.modal', () => {
+            this.reset();
+        });
+    }
+
+    show(id) {
+        this.id = id;
+        this.init();
+
+        this.$modal.modal('show');
+    }
+
+    hide() {
+        this.$modal.modal('hide');
+    }
+
+    init() {
+        this.getComments();
+    }
+
+    reset() {
+        this.$auditCommentsContainer.empty();
+        this.commentArea.value(null);
+    }
+
+    showComments(data) {
+        this.$auditCommentsContainer.empty();
+
+        if (data.length === 0) {
+            const noCommentsTemplate = `
+                <div class="no-comments">
+                    <h3>No Comments</h3>
+                </div>`
+
+            this.$auditCommentsContainer.append($(noCommentsTemplate));
+            this.loader.hide();
+            return;
+        }
+
+        const commentTemplate = `
+            <div class="comment-body">
+                <div class="d-flex">
+                    <h4>{{user}}</h4>
+                    <span class="d-flex ml-auto comment-created">{{created}}</span>
+                </div>
+                <p>{{comment}}</p>
+            </div>`;
+
+        data.forEach((element, index) => {
+            const obj = {
+                user: element.user,
+                created: DateTimeUtils.toDisplayDateTime(element.created),
+                comment: element.comment,
+            };
+
+            let newComment = Mustache.render(commentTemplate, obj);
+            this.$auditCommentsContainer.append($(newComment));
+        });
+
+        this.loader.hide();
+    }
+
+    showErrors(errors) {
+        if (errors[''] !== undefined && errors[''] !== null) {
+            this.statusMessage.showError('Error', errors['']);
+        }
+
+        this.commentArea.showError(errors.comment);
+    }
+
+    hideErrors() {
+        this.statusMessage.hide();
+
+        this.commentArea.hideError();
+    }
+
+    getData() {
+        return {
+            comment: this.commentArea.value()
+        };
+    }
+
+    addComment() {
+        this.hideErrors();
+        this.loader.show();
+
+        Api.post(`/IdentityAdmin/Audit/AddComment/${this.id}`, this.getData())
+            .done(() => {
+                this.commentArea.value(null);
+                this.getComments();
+            })
+            .fail((response) => {
+                this.showErrors(response.responseJSON);
+                this.loader.hide();
+            });
+    }
+
+    getComments() {
+        this.hideErrors();
+        this.loader.show();
+
+        Api.get(`/IdentityAdmin/Audit/GetComments/${this.id}`)
+            .done((data) => {
+                this.showComments(data);
+            })
+            .fail((response) => {
+                this.showErrors(response.responseJSON);
+                this.loader.hide();
+            });
     }
 }

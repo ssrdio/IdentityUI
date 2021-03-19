@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using Newtonsoft.Json;
 using SSRD.IdentityUI.Core.Services.Identity;
+using SSRD.IdentityUI.Core.Models.Options;
+using Microsoft.Extensions.Options;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,13 +25,13 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         [DebuggerStepThrough]
         protected string GetUserId()
         {
-            return User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return HttpContext.GetUserId();
         }
 
         [DebuggerStepThrough]
         protected string GetSessionCode()
         {
-            return User.FindFirstValue(IdentityUIClaims.SESSION_CODE);
+            return HttpContext.GetSessionCode();
         }
 
         [DebuggerStepThrough]

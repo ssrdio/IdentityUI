@@ -107,7 +107,7 @@ namespace SSRD.CommonUtils.Specifications.DAO
             throw new System.NotImplementedException();
         }
 
-        public Task<TData> SingleOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification)
+        public Task<TData> SingleOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification, bool withTracking = false)
         {
             TData result = _entities
                 .AsQueryable()

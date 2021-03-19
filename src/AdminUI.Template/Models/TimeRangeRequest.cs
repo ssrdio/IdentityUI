@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SSRD.CommonUtils.Validation;
 using System;
 
 namespace SSRD.AdminUI.Template.Models

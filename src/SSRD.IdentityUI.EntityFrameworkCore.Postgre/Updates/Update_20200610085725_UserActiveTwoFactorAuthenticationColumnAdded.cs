@@ -3,6 +3,7 @@ using SSRD.IdentityUI.Core.Data.Entities.Identity;
 using SSRD.IdentityUI.Core.Infrastructure.Data;
 using SSRD.IdentityUI.Core.Services.Auth.TwoFactorAuth.Models;
 using SSRD.IdentityUI.EntityFrameworkCore.Postgre;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,12 +15,19 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.Postgre.Updates
 
         public override void AfterSchemaChange(IdentityDbContext context)
         {
-            RawSqlString updateScript = $@"
+            FormattableString updateScript = $@"
                 UPDATE ""Users""
                 SET ""TwoFactor""={(int)TwoFactorAuthenticationType.Authenticator}
                 WHERE ""TwoFactorEnabled""=true";
 
-            context.Database.ExecuteSqlCommand(updateScript);
+#if NET_CORE2
+
+            RawSqlString rawSqlString = updateScript;
+
+            context.Database.ExecuteSqlCommand(rawSqlString);
+#else
+            context.Database.ExecuteSqlInterpolated(updateScript);
+#endif
         }
     }
 }

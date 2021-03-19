@@ -7,13 +7,13 @@ namespace SSRD.IdentityUI.Core.Services.User.Models
     {
 #if NET_CORE2
         [Newtonsoft.Json.JsonIgnore]
-#elif NET_CORE3
+#else
         [System.Text.Json.Serialization.JsonIgnore]
 #endif
         public new string Password { get; set; }
 #if NET_CORE2
         [Newtonsoft.Json.JsonIgnore]
-#elif NET_CORE3
+#else
         [System.Text.Json.Serialization.JsonIgnore]
 #endif
         public new string ConfirmPassword { get; set; }

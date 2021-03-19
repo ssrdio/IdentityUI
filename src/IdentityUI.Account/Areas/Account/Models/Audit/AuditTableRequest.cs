@@ -1,10 +1,8 @@
 ﻿using FluentValidation;
 using SSRD.Audit.Data;
 using SSRD.CommonUtils.Specifications;
-using SSRD.IdentityUI.Core.Helper;
+using SSRD.CommonUtils.Validation;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Models.Audit
 {

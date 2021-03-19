@@ -48,6 +48,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models
 
         public const string AUDIT = IDENTITY_ADMIN_AREA + "/Audit";
 
+        public const string CLIENT = IDENTITY_ADMIN_AREA + "/Client";
+        public const string CLIENT_ADD = CLIENT + "/Add";
+        public const string CLINET_DETAILS = CLIENT + "/Details/{0}";
+        public const string CLINET_CREDENTIALS = CLIENT + "/Credentials/{0}";
+        public const string CLIENT_SCOPES = CLIENT + "/Scopes/{0}";
+        public const string CLIENT_CONSENTS = CLIENT + "/Consents/{0}";
+        public const string CLIENT_TOKENS = CLIENT + "/Tokens/{0}";
+
+        public const string CLIENT_SCOPE = IDENTITY_ADMIN_AREA + "/ClientScope";
+
         [Obsolete("Use IdentityUIEndpoints.ProfileImage")]
         public const string PROFILE_IMAGE = "/Account/Manage/GetProfileImage";
 

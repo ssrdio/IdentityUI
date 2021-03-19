@@ -1,0 +1,160 @@
+﻿@model ClientMenuViewModel
+
+@await Component.InvokeAsync("ClientMenu", Model.ToMenuViewModel(ClientMenuViewComponent.TabSelected.Scopes))
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="tab-content">
+    <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Scopes
+                </h5>
+            </div>
+
+            <div id="scopes-loader">
+                @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
+            </div>
+
+            <div id="client-scopes-form" class="custom-form row" style="display:none;">
+                <div id="available-scopes" class="col-md-6">
+                    <div>
+                        <label class="roles-label">Available Scopes</label>
+                        <select multiple="" class="form-control"></select>
+                    </div>
+                    <div class="button-holder">
+                        <button class="btn btn-primary submit pull-right mt-3 add">Add Scopes</button>
+                    </div>
+                </div>
+                <div id="assigned-scopes" class="col-md-6">
+                    <div>
+                        <label class="roles-label">Assigned Scopes</label>
+                        <select multiple="" class="form-control"></select>
+                    </div>
+                    <div class="button-holder">
+                        <button class="btn btn-primary submit pull-right mt-3 remove">Remove Scopes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script>
+
+        $(document).ready(function () {
+            new CleintScopes('@Model.Id');
+        });
+
+        class CleintScopes {
+            constructor(id) {
+                this.id = id;
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                const $form = $('#client-scopes-form');
+                this.loader = new DotLoader($('#scopes-loader'), $form);
+
+                this.availableScopesSelect = new SelectComponent($form, '#available-scopes');
+                this.assignedScopesSelect = new SelectComponent($form, '#assigned-scopes');
+
+                $form.on('click', 'button.add', () => {
+                    this.addScopes();
+                })
+
+                $form.on('click', 'button.remove', () => {
+                    this.removeScopes();
+                })
+
+                this.get();
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.availableScopesSelect.showError(errors.AvaibleScopes);
+                this.assignedScopesSelect.showError(errors.AssignedScopes);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.availableScopesSelect.hideError();
+                this.assignedScopesSelect.hideError();
+            }
+
+            showScopes(data) {
+                this.availableScopesSelect.empty();
+                this.assignedScopesSelect.empty();
+
+                this.availableScopesSelect.addOptions(data.available.map((item) => { return { id: item, text: item } }));
+                this.assignedScopesSelect.addOptions(data.assigned.map((item) => { return { id: item, text: item } }));
+
+                this.loader.hide();
+            }
+
+            get() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.get(`/api/IdentityAdmin/Client/GetScopes/${this.id}`)
+                    .done((data) => {
+                        this.showScopes(data);
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    });
+            }
+
+            getAddData() {
+                return {
+                    scopes: this.availableScopesSelect.value()
+                };
+            }
+
+            addScopes() {
+                this.loader.show();
+                this.hideErrors();
+
+                console.log(this.getAddData());
+
+                Api.post(`/api/IdentityAdmin/Client/AddScopes/${this.id}`, this.getAddData())
+                    .done(() => {
+                        this.get();
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    });
+            }
+
+            getRemoveData() {
+                return {
+                    scopes: this.assignedScopesSelect.value()
+                };
+            }
+
+            removeScopes() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/Client/RemoveScopes/${this.id}`, this.getRemoveData())
+                    .done(() => {
+                        this.get();
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    });
+            }
+        }
+    </script>
+}

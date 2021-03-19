@@ -1,0 +1,33 @@
+﻿<div id="add-client-scope-modal" class="modal fade" role="dialog" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Client Scope</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+
+            <div id="add-client-scope-loader">
+                @await Component.InvokeAsync("AdminUIDotLoader")
+            </div>
+            <div id="add-client-scope-form">
+                <div class="modal-body">
+                    <div id="add-client-scope-form">
+                        @await Component.InvokeAsync("AdminUIStatusMessage")
+
+                        <div class="form-group name-input">
+                            <label class="control-label">Name</label>
+                            <input class="form-control" type="text" />
+                            <span class="error text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer custom-modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary add">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

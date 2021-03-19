@@ -20,9 +20,7 @@ namespace SSRD.IdentityUI.Admin.DependencyInjection
         {
             _environment = hostingEnvironment;
         }
-#endif
-
-#if NET_CORE3
+#else
         private readonly IWebHostEnvironment _environment;
 
         public UIConfigureOptions(IWebHostEnvironment environment)

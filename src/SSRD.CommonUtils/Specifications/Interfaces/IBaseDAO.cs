@@ -8,7 +8,7 @@ namespace SSRD.CommonUtils.Specifications.Interfaces
     {
         Task<bool> Exist<TData>(IBaseSpecification<TEntity, TData> baseSpecification);
 
-        Task<TData> SingleOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification);
+        Task<TData> SingleOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification, bool withTracking = false);
         Task<TData> FirstOrDefault<TData>(IBaseSpecification<TEntity, TData> baseSpecification);
         Task<List<TData>> Get<TData>(IBaseSpecification<TEntity, TData> baseSpecification);
 

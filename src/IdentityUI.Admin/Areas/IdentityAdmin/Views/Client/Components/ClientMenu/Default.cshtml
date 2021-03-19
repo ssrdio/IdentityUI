@@ -1,0 +1,40 @@
+﻿@using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Client.Components.ClientMenu
+
+@model SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Views.Client.Components.ClientMenu.ClientMenuViewComponent.ViewModel
+
+<div class="custom-header">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div>
+                @Model.Name
+            </div>
+        </div>
+    </div>
+    <ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == ClientMenuViewComponent.TabSelected.Details ? "active" : "") show" href="@string.Format(PagePath.CLINET_DETAILS, Model.Id)">
+                <span>Details</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == ClientMenuViewComponent.TabSelected.Credentials ? "active" : "") show" href="@string.Format(PagePath.CLINET_CREDENTIALS, Model.Id)">
+                <span>Credentials</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == ClientMenuViewComponent.TabSelected.Scopes ? "active" : "") show" href="@string.Format(PagePath.CLIENT_SCOPES, Model.Id)">
+                <span>Scopes</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == ClientMenuViewComponent.TabSelected.Consents ? "active" : "") show" href="@string.Format(PagePath.CLIENT_CONSENTS, Model.Id)">
+                <span>Consents</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a role="tab" class="nav-link @(Model.TabSelected == ClientMenuViewComponent.TabSelected.Tokens ? "active" : "") show" href="@string.Format(PagePath.CLIENT_TOKENS, Model.Id)">
+                <span>Tokens</span>
+            </a>
+        </li>
+    </ul>
+</div>

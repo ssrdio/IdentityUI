@@ -1,0 +1,163 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.ClientScope;
+}
+
+@{
+    ViewData["Title"] = "Client Scopes";
+}
+
+@section modal {
+    @await Component.InvokeAsync("AddClientScope")
+}
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Client Scopes
+            </h5>
+            <button id="add-client-scope-button" class="header-button">Add Client Scope</button>
+        </div>
+        <div class="custom_container custom_table">
+            <table id="client-scope-table" class="dataTableClass display "></table>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            new ClientScopeIndex();
+        });
+
+        class ClientScopeIndex {
+            constructor() {
+                this.$clientScopeTable = $('#client-scope-table');
+
+                const addClientScopeModal = new AddClientScopeModal(() => {
+                    this.reloadTable();
+                });
+
+                $('#add-client-scope-button').on('click', () => {
+                    addClientScopeModal.show();
+                })
+
+                this.initTable();
+            }
+
+            initTable() {
+                this.$clientScopeTable.DataTable({
+                    serverSide: true,
+                    processing: true,
+                    targets: 'no-sort',
+                    bSort: false,
+                    order: [],
+                    ajax: {
+                        url: `/api/IdentityAdmin/ClientScope/Get`,
+                        type: 'GET'
+                    },
+                    columns: [
+                        {
+                            data: 'name',
+                            title: 'Name',
+                            render: $.fn.dataTable.render.text()
+                        },
+                        {
+                            data: null,
+                            mRender: (data) => {
+                                return `<a class="btn btn-primary table-button" href="/IdentityAdmin/ClientScope/Details/${data.id}">Details</a>`;
+                            }
+                        }
+                    ]
+                });
+            }
+
+            reloadTable() {
+                this.$clientScopeTable
+                    .DataTable()
+                    .clear()
+                    .draw();
+            }
+        }
+
+        class AddClientScopeModal {
+            constructor(onAdd) {
+                this.$modal = $('#add-client-scope-modal');
+                this.onAdd = onAdd;
+
+                const $form = this.$modal.find('#add-client-scope-form');
+
+                this.loader = new DotLoader(this.$modal.find('#add-client-scope-loader'), $form);
+                this.statusMessage = new StatusMessage($form);
+
+                this.nameInput = new InputComponent($form, '.name-input');
+
+                $form.on('click', 'button.add', () => {
+                    this.add();
+                });
+
+                this.$modal.on('hidden.bs.modal', () => {
+                    this.init();
+                })
+            }
+
+            init() {
+                this.hideErrors();
+                this.loader.hide();
+
+                this.nameInput.value(null);
+            }
+
+            show() {
+                this.$modal.modal('show');
+            }
+
+            hide() {
+                this.$modal.modal('hide');
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusMessage.showError('Error', errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+            }
+
+            hideErrors() {
+                this.statusMessage.hide();
+
+                this.nameInput.hideError();
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value()
+                }
+            }
+
+            add() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/ClientScope/Add`, this.getData())
+                    .done(() => {
+                        if (this.onAdd !== null && this.onAdd !== undefined) {
+                            this.onAdd();
+                        }
+
+                        this.hide();
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                    })
+                    .always(() => {
+                        this.loader.hide();
+                    });
+            }
+        }
+
+    </script>
+}

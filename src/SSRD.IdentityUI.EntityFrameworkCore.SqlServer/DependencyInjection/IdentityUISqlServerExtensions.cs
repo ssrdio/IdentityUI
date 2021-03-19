@@ -27,6 +27,8 @@ namespace SSRD.IdentityUI.EntityFrameworkCore.SqlServer.DependencyInjection
                 {
                     b.MigrationsAssembly(typeof(IdentityUISqlServerExtensions).Assembly.FullName);
                 });
+
+                options.UseOpenIddict();
             });
 
             builder.Services.AddSingleton<IUpdateList, SqlServerUpdateList>();

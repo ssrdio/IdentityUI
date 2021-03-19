@@ -120,8 +120,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 
 #if NET_CORE2
             string normalizeEmail = _userManager.NormalizeKey(editUserRequest.Email);
-#endif
-#if NET_CORE3
+#else
             string normalizeEmail = _userManager.NormalizeEmail(editUserRequest.Email);
 #endif
             if (normalizeEmail != appUser.NormalizedEmail)
@@ -564,7 +563,7 @@ namespace SSRD.IdentityUI.Core.Services.User
 #if NET_CORE2
             appUser.NormalizedEmail = _userManager.NormalizeKey(appUser.Email);
             appUser.NormalizedEmail = _userManager.NormalizeKey(appUser.UserName);
-#elif NET_CORE3
+#else
             appUser.NormalizedEmail = _userManager.NormalizeEmail(appUser.Email);
             appUser.NormalizedUserName = _userManager.NormalizeName(appUser.UserName);
 #endif

@@ -1,4 +1,5 @@
-﻿using SSRD.IdentityUI.Core.Helper;
+﻿using SSRD.CommonUtils.Validation;
+using SSRD.IdentityUI.Core.Helper;
 
 namespace SSRD.IdentityUI.Core.Services.User.Models
 {

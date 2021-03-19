@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Group
 {
-    public class GroupEntity : IBaseEntity, ISoftDelete
+    public class GroupEntity : IIdentityUIEntity, ITimestampEntity, ISoftDelete
     {
         public string Id { get; set; }
         public string Name { get; set; }

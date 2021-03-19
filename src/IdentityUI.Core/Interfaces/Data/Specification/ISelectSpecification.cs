@@ -7,7 +7,7 @@ using System.Text;
 namespace SSRD.IdentityUI.Core.Interfaces.Data.Specification
 {
     [Obsolete("Use SSRD.CommonUtils.Specifications.Interfaces.IBaseSpecification")]
-    public interface ISelectSpecification<TEntity, TData> : IBaseSpecification<TEntity> where TEntity : class, IBaseEntity
+    public interface ISelectSpecification<TEntity, TData> : IBaseSpecification<TEntity> where TEntity : class, ITimestampEntity
     {
         Expression<Func<TEntity, TData>> Select { get; }
     }

@@ -360,7 +360,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
 
             SystemEntitySeeder systemEntitySeeder = serviceProvider.GetRequiredService<SystemEntitySeeder>();
 
-            Task.WaitAll(systemEntitySeeder.SeedMissing(permissionSeedModels, roleSeedModels));
+            Task.WaitAll(systemEntitySeeder.Seed(permissionSeedModels, roleSeedModels));
         }
     }
 }

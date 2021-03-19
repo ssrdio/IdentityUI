@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
+using SSRD.CommonUtils.Validation;
 
 namespace SSRD.AdminUI.Template.Models.DataTables
 {
@@ -21,9 +22,21 @@ namespace SSRD.AdminUI.Template.Models.DataTables
             RuleFor(x => x.Start)
                 .GreaterThanOrEqualTo(0);
 
-            //TODO: how to handle select all
             RuleFor(x => x.Length)
                 .GreaterThan(0);
+
+            RuleSet("allowAll", () =>
+            {
+                RuleFor(x => x.Draw)
+                    .GreaterThanOrEqualTo(0);
+
+                RuleFor(x => x.Start)
+                    .GreaterThanOrEqualTo(0);
+
+                RuleFor(x => x.Length)
+                    .GreaterThanOrEqualTo(-1)
+                    .NotEqual(0);
+            });
         }
     }
 }

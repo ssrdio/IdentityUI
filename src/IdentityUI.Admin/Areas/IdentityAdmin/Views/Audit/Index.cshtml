@@ -4,8 +4,27 @@
 
 @{ ViewData["Title"] = "Audit"; }
 
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<!--#region table filters-->
 <div class="row">
     <div class="main-card mb-3 card fullWidthCard">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Audit
+            </h5>
+            <div id="actions-dropdown" class="dropdown">
+                <button type="button" class="btn btn-primary btn-sm dropdown-toggle header-button" data-toggle="dropdown">
+                    Action
+                </button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item reset-filters">Reset all filters</button>
+                    <button class="dropdown-item export">Export</button>
+                </div>
+            </div>
+        </div>
         <div class="custom_container pb-0">
             <div class="row">
                 <div class="col-3">
@@ -72,8 +91,11 @@
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="d-flex h-100 justify-content-end">
-                                <button id="reset-all-button" type="button" class="btn btn-primary btn-sm align-self-end">Reset all</button>
+                            <div id="page-lenght-select" class="form-group">
+                                <div class="d-flex">
+                                    <label for="object-type-select" class="control-label">Show entries</label>
+                                </div>
+                                <select class="form-control select2-container"></select>
                             </div>
                         </div>
                     </div>
@@ -82,6 +104,8 @@
         </div>
     </div>
 </div>
+<!--#endregion-->
+<!--#region table-->
 <div class="row">
     <div class="main-card mb-3 card fullWidthCard">
         <div class="custom_container custom_table">
@@ -89,7 +113,8 @@
         </div>
     </div>
 </div>
-
+<!--#endregion-->
+<!--#region details modal-->
 <div id="audit-details-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="audit-details-modal" style="display: none;" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -107,7 +132,7 @@
                     <div id="audit-details-loader">
                         @await Component.InvokeAsync("AdminUIDotLoader")
                     </div>
-                    
+
                     <div id="audit-data-container">
                         <div class="row">
                             <label class="col-3 font-weight-bold">Action Type: </label>
@@ -185,6 +210,43 @@
         </div>
     </div>
 </div>
+<!--#endregion-->
+<!--#region comment modal-->
+<div id="audit-comments-modal" class="modal fade bd-example-modal-lg" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body audit-comment-modal-body">
+
+                @await Component.InvokeAsync("AdminUIStatusMessage")
+
+                <div id="add-audit-comment-form">
+                    <div class="d-flex">
+                        <label for="object-identifier-select" class="control-label">New Comment</label>
+                        <button type="button" class="btn btn-primary p-2 d-flex ml-auto submit-button comment-submit-button">Submit</button>
+                    </div>
+                    <div class="form-group comment-text-area">
+                        <textarea class="form-control vertical-textarea" rows="5" placeholder="Your message"></textarea>
+                        <span class="text-danger error"></span>
+                    </div>
+                </div>
+
+                <div id="audit-comment-loader">
+                    @await Component.InvokeAsync("AdminUIDotLoader")
+                </div>
+
+                <div id="audit-comment-container" class="comment-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--#endregion-->
+
 
 <div id="status-alert-container">
     @await Component.InvokeAsync("IdentityStatusAlertJs")
@@ -255,6 +317,39 @@
             table.dataTable thead th.sorting_desc:after {
                 content: "\f0dd";
             }
+
+        .comment-container {
+            overflow: auto;
+            max-height: 50vh;
+            margin-bottom: 30px;
+            padding-right: 10px;
+        }
+
+        .comment-body {
+                border-top: 1px dashed #DDDDDD;
+                padding: 20px 0;
+                margin: 0;
+            }
+
+            .comment-body p {
+                margin-bottom: 15px;
+                text-align: justify;
+            }
+
+        .comment-created {
+            color: #666666;
+            font-size: 10px;
+            margin-right: 10px;
+        }
+
+        .comment-submit-button {
+            margin-bottom: 0.5em;
+        }
+
+        .no-comments {
+            text-align: center;
+            padding-top: 20px;
+        }
     </style>
 }
 
@@ -269,11 +364,13 @@
     <script type="text/javascript" src="~/adminUI/app/js/components/range-picker.js" asp-append-version="true"></script>
     <script type="text/javascript" src="~/identityAdmin/app/audit/audit-main.js" asp-append-version="true"></script>
     <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/text-area-component.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/status-message.js" asp-append-version="true"></script>
 
     <script>
 
         $(document).ready(function () {
-            new AuditTable(@Json.Serialize(Model.ActionTypes), @Json.Serialize(Model.SubjectTypes));
+            new AuditMain(@Json.Serialize(Model.ActionTypes), @Json.Serialize(Model.SubjectTypes));
         });
 
     </script>

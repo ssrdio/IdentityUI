@@ -77,7 +77,7 @@
     }
 
     showModalErrors(errors) {
-        if (errors[''] !== null && errors[''] != undefined) {
+        if (errors[''] !== null && errors[''] !== undefined) {
             this.modalErrorAlert.showErrors(errors['']);
         }
 

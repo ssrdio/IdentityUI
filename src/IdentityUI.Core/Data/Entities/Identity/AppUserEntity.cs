@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace SSRD.IdentityUI.Core.Data.Entities.Identity
 {
-    public class AppUserEntity : IdentityUser, IBaseEntity, ISoftDelete
+    public class AppUserEntity : IdentityUser, IIdentityUIEntity, ITimestampEntity, ISoftDelete
     {
         public DateTimeOffset? _CreatedDate { get; set; }
         public DateTimeOffset? _ModifiedDate { get; set; }

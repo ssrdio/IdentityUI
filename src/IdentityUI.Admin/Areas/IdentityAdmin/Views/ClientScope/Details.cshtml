@@ -1,0 +1,181 @@
+﻿@{
+    SidebarSelection.SelectedOption = SidebarOptions.ClientScope;
+}
+
+@{
+    ViewData["Title"] = "Client Scopes";
+}
+
+@section modal {
+    <div id="modalContainer">
+        @await Component.InvokeAsync("IdentityConfirmationModal")
+    </div>
+}
+
+<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+    <div class="card-body">
+        <div class="card-title-space">
+            <h5 class="card-title">
+                Client Scope
+            </h5>
+        </div>
+
+        <div id="details-loader">
+            @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
+        </div>
+
+        <div id="client-scope-form" class="custom-form" style="display:none;">
+            <div id="name-input" class="form-group">
+                <label class="control-label">Name</label>
+                <input class="form-control" />
+                <span class="text-danger error"></span>
+            </div>
+
+            <div id="display-name-input" class="form-group">
+                <label class="control-label">Display Name</label>
+                <input class="form-control" />
+                <span class="text-danger error"></span>
+            </div>
+
+            <div id="description-area" class="form-group">
+                <label class="control-label">Description</label>
+                <textarea class="form-control vertical-textarea" rows="10"></textarea>
+                <span class="text-danger error"></span>
+            </div>
+
+            <div class="button-holder">
+                <button type="button" class="btn btn-primary custom-submit update">Update</button>
+                <button type="button" class="btn btn-danger remove-button delete">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/text-area-component.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            new ClientScopeDetails('@ViewBag.Id');
+        });
+
+        class ClientScopeDetails {
+            constructor(id) {
+                this.id = id;
+
+                this.confirmationModal = new conformationModal(
+                    $(`#modalContainer`),
+                    onYesClick => {
+                        if (onYesClick === null || onYesClick === undefined) {
+                            return;
+                        }
+
+                        if (onYesClick.key === 'removeClientScope') {
+                            this.remove();
+                        }
+                    }
+                );
+
+                this.statusAlert = new StatusAlertComponent('#status-alert');
+
+                const $form = $('#client-scope-form');
+                this.loader = new DotLoader($('#details-loader'), $form);
+
+                this.nameInput = new InputComponent($form, '#name-input');
+                this.displayNameInput = new InputComponent($form, '#display-name-input');
+                this.descriptionArea = new TextAreaComponent($form, '#description-area');
+
+                $form.on('click', 'button.update', () => {
+                    this.update();
+                });
+
+                $form.on('click', 'button.delete', () => {
+                    this.confirmationModal.show({ key: 'removeClientScope' }, 'Are you sure you want to remove client scope?');
+                });
+
+                this.get();
+            }
+
+            showErrors(errors) {
+                if (errors[''] !== null && errors[''] !== undefined) {
+                    this.statusAlert.showErrors(errors['']);
+                }
+
+                this.nameInput.showError(errors.Name);
+                this.displayNameInput.showError(errors.DisplayName);
+                this.descriptionArea.showError(errors.Description);
+            }
+
+            hideErrors() {
+                this.statusAlert.hide();
+
+                this.nameInput.hideError();
+                this.displayNameInput.hideError();
+                this.descriptionArea.hideError();
+            }
+
+            showScope(data) {
+                this.nameInput.value(data.name);
+                this.displayNameInput.value(data.displayName);
+                this.descriptionArea.value(data.description);
+
+                this.loader.hide();
+            }
+
+            get() {
+                this.loader.show();
+
+                Api.get(`/api/IdentityAdmin/ClientScope/Get/${this.id}`)
+                    .done((data) => {
+                        this.showScope(data);
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    });
+            }
+
+            getData() {
+                return {
+                    name: this.nameInput.value(),
+                    displayName: this.displayNameInput.value(),
+                    description: this.descriptionArea.value()
+                };
+            }
+
+            update() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.post(`/api/IdentityAdmin/ClientScope/Update/${this.id}`, this.getData())
+                    .done((data) => {
+                        this.showScope(data);
+                        this.statusAlert.showSuccess('Scope was updated');
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    })
+            }
+
+            remove() {
+                this.loader.show();
+                this.hideErrors();
+
+                Api.delete(`/api/IdentityAdmin/ClientScope/Delete/${this.id}`)
+                    .done(() => {
+                        window.location.href = '/IdentityAdmin/ClientScope'
+                    })
+                    .fail((response) => {
+                        this.showErrors(response.responseJSON);
+                        this.loader.hide();
+                    });
+            }
+        }
+    </script>
+}

@@ -17,10 +17,7 @@ using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
-using System.Net.Http;
-using System;
-using System.Collections.Generic;
-using SSRD.AdminUI.Template.Atttributes;
+using SSRD.AdminUI.Template.Attributes;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
