@@ -6,7 +6,7 @@
     @await Component.InvokeAsync("IdentityStatusAlertJs")
 </div>
 
-<div class="tab-content">
+<div class="tab-content table-card">
     <div class="main-card mb-3 card fullWidthCard">
         <div class="card-body">
             <div class="card-title-space">
@@ -14,8 +14,9 @@
                     Tokens
                 </h5>
                 <div id="actions-dropdown" class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle header-button" type="button" data-toggle="dropdown" disabled>
+                    <button class="btn btn-secondary header-button header-button-dropdown" type="button" data-toggle="dropdown" disabled>
                         Actions
+                        <i class="fas fa-sort-down"></i>
                     </button>
                     <div class="dropdown-menu">
                         <button class="dropdown-item revoke">Revoke</button>
@@ -23,46 +24,46 @@
                 </div>
             </div>
             <!--#region tablefilters-->
-            <div id="token-table-filters" class="row custom_container pb-0">
+            <div id="token-table-filters" class="row custom_container pb-0 custom-filters">
                 <div class="col-1">
                     <div id="page-lenght-select" class="form-group">
                         <div class="d-flex">
                             <label class="control-label">Show entries</label>
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div class="col-2">
                     <div id="status-select" class="form-group">
                         <div class="d-flex">
                             <label class="control-label">Status</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div class="col-2">
                     <div id="type-select" class="form-group">
                         <div class="d-flex">
                             <label class="control-label">Type</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div class="col-3">
                     <div id="subject-select" class="form-group">
                         <div class="d-flex">
                             <label class="control-label">Subject</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div id="date-time-range-container" class="col-4">
                     <div class="d-flex">
-                        <label class="control-label">Range(Created)</label>
-                        <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        <label class="control-label">Range (Created)</label>
+                        @*<button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>*@
                     </div>
                     <div class="input-group height-1">
                         <div class="input-group-prepend">
@@ -74,7 +75,7 @@
                 </div>
             </div>
             <!--#endregion-->
-            <div class="custom_container custom_table">
+            <div class="custom_container custom_table pt-0">
                 <table id="client-token-table" class="dataTableClass display "></table>
             </div>
         </div>
@@ -191,6 +192,8 @@
                 const $select = this.$statusSelectContainer.find('select');
 
                 $select.select2({
+                    placeholder: "Select a status",
+                    allowClear: true,
                     data: statuses,
                     minimumResultsForSearch: Infinity
                 });
@@ -212,6 +215,8 @@
                 const $select = this.$typeSelectContainer.find('select');
 
                 $select.select2({
+                    placeholder: "Select a type",
+                    allowClear: true,
                     data: types,
                     minimumResultsForSearch: Infinity
                 });
@@ -233,6 +238,8 @@
                 const $select = this.$subjectSelectContainer.find('select');
 
                 $select.select2({
+                    placeholder: "Select a subject",
+                    allowClear: true,
                     ajax: {
                         url: `/api/IdentityAdmin/Client/GetTokenSubjects/${this.id}`,
                         delay: 100,

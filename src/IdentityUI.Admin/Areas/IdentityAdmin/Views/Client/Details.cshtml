@@ -16,12 +16,13 @@
 
 @await Component.InvokeAsync("ClientMenu", Model.ClientMenu.ToMenuViewModel(ClientMenuViewComponent.TabSelected.Details))
 
+
 <div>
     <div id="status-alert">
         @await Component.InvokeAsync("IdentityStatusAlertJs")
     </div>
 
-    <div class="tab-content">
+    <div class="tab-content form-card">
         <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
             <div class="card-body">
                 <div class="card-title-space">
@@ -87,8 +88,8 @@
                     </div>
 
                     <div class="button-holder">
-                        <button type="button" class="btn btn-primary custom-submit update">Update</button>
                         <button type="button" class="btn btn-danger remove-button delete">Remove</button>
+                        <button type="button" class="btn btn-primary custom-submit update">Update</button>
                     </div>
                 </div>
             </div>

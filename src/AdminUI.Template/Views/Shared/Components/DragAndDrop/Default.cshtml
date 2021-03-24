@@ -1,0 +1,24 @@
+﻿<div id="status-alert">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+<div>
+    <div id="drag-and-drop-loader">
+        @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
+    </div>
+    <div class="custom-form row" id="drag-and-drop-holder" style="display:none">
+        <div class="exchange-holder">
+            <i class="fas fa-exchange-alt"></i>
+        </div>
+        <div class="col-md-6 pr-5">
+            <label id="available-items-label" class="scopes-label"></label>
+            <div id="availableItems" class="drop-zone" data-id="1">
+            </div>
+        </div>
+        <div class="col-md-6 pl-5">
+            <label id="assigned-items-label" class="scopes-label"></label>
+            <div id="assignedItems" class="drop-zone" data-id="1">
+            </div>
+        </div>
+    </div>
+</div>
+

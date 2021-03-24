@@ -1,19 +1,13 @@
 ﻿class UserRoles {
-  constructor(userId) {
-    this.$availableRolesSelect = $('#availableRolesForm select');
-    this.$assignedRolesSelect = $('#assignedRolesForm select');
-
-    this.statusAlert = new StatusAlertComponent('#statusAlert');
-
-    this.getRoles(userId);
-
-    $('#availableRolesForm button.submit').click(() => {
-      this.addRoles(userId);
-    });
-
-    $('#assignedRolesForm button.submit').click(() => {
-      this.removeRoles(userId);
-    });
+    constructor(userId) {
+        this.userId = userId;
+        this.dragAndDropComponent = new DragAndDropComponent(
+            (itemId) => { this.removeRoles(itemId) },
+            (itemId) => { this.addRoles(itemId) },
+            "Available Roles",
+            "Assigned Roles"
+        );
+        this.getRoles(this.userId);
   }
 
   getRoles(userId) {
@@ -21,76 +15,48 @@
 
     Api.get(url)
       .done(resp => {
-        this.setAssignedRoles(resp.assignedRoles);
-        this.setAvailableRoles(resp.availableRoles);
+        this.dragAndDropComponent.initAvailableItems(resp.availableRoles);
+          this.dragAndDropComponent.initAssignedItems(resp.assignedRoles);
+          this.dragAndDropComponent.hideLoader();
       })
       .fail(resp => {
+        this.dragAndDropComponent.showError('Error getting user roles');
         console.log('Error getting user roles');
       });
   }
 
-  setAvailableRoles(availableRoles) {
-    this.$availableRolesSelect.empty();
+  addRoles(itemId) {
+      const data = { Roles: [itemId] };
+      const url = `/IdentityAdmin/User/AddRoles/${this.userId}`;
 
-    availableRoles.forEach(element => {
-      this.$availableRolesSelect.append(
-        $('<option />')
-          .val(element.name)
-          .text(element.name)
-      );
-    });
-  }
-
-  setAssignedRoles(assignedRoles) {
-    this.$assignedRolesSelect.empty();
-
-    assignedRoles.forEach(element => {
-      this.$assignedRolesSelect.append(
-        $('<option />')
-          .val(element.name)
-          .text(element.name)
-      );
-    });
-  }
-
-  addRoles(userId) {
-    const data = { Roles: this.$availableRolesSelect.val() };
-    const url = `/IdentityAdmin/User/AddRoles/${userId}`;
-
-    this.statusAlert.hide();
-
+      this.dragAndDropComponent.hideErrors();
     if (data.Roles.length > 0) {
       Api.post(url, data)
         .done(() => {
-          this.statusAlert.showSuccess('Roles added');
-
-          this.getRoles(userId);
         })
-        .fail(resp => {
-          this.statusAlert.showError('Faild to add roles');
+          .fail(resp => {
+              this.dragAndDropComponent.showError('Failed to add roles');
         });
     } else {
-      this.statusAlert.showError('No role selected');
+        this.dragAndDropComponent.showError('No role selected');
     }
   }
 
-  removeRoles(userId) {
-    const data = { Roles: this.$assignedRolesSelect.val() };
-    const url = `/IdentityAdmin/User/RemoveRoles/${userId}`;
+  removeRoles(itemId) {
+    const data = { Roles: [itemId] };
+    const url = `/IdentityAdmin/User/RemoveRoles/${this.userId}`;
 
-    this.statusAlert.hide();
+
+      this.dragAndDropComponent.hideErrors();
     if (data.Roles.length > 0) {
       Api.post(url, data)
         .done(() => {
-          this.statusAlert.showSuccess('Roles removed');
-
-          this.getRoles(userId);
         })
         .fail(() => {
-          this.statusAlert.showError('Faild to remove roles');
+            this.dragAndDropComponent.showError('Failed to remove roles');
         });
     } else {
-      this.statusAlert.showError('No role selected');
+        this.dragAndDropComponent.showError('No role selected');
     }
   }
 }

@@ -71,7 +71,7 @@
                 },
                 {
                     data: null,
-                    className: "attributes-center",
+                    className: "attribute-table-buttons",
 
                     mRender: function (data) {
                         return `<div>

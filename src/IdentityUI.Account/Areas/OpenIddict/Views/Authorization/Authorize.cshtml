@@ -17,13 +17,23 @@
                                 </h4>
                             </div>
 
-                            <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scopes)</p>
+                            <div class="consent-text">
+                                <p class="consent-question">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data?</p>
+                                <p class="requested-scopes-text">Requested data:</p>
+                                <ul class="requested-scopes-list">
+                                    @foreach (var item in Model.Scopes)
+                                    {
+                                        <li>@item</li>
+                                    }
+                                </ul>
+                            </div>
 
-                            <div class="modal-footer clearfix">
+
+                            <div class="authorize-button-holder">
                                 <form asp-area="OpenIddict" asp-controller="Authorization" asp-action="Authorize" method="post">
 
                                     @foreach (var parameter in Context.Request.HasFormContentType ?
-                                        (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
+                                (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
                                     {
                                         <input type="hidden" name="@parameter.Key" value="@parameter.Value" />
                                     }

@@ -10,6 +10,9 @@
 }
 
 @section script {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/dragAndDrop/dragAndDrop.js" asp-append-version="true"></script>
     <script src="~/identityAdmin/app/user/roles/UserRoles.js" asp-append-version="true"></script>
     <script>
         $('document').ready(function () {
@@ -21,10 +24,6 @@
 <div>
     @(await Component.InvokeAsync("UserMenu", new { userId = Model.UserId, tabSelected = UserMenuViewComponent.TabSelected.Roles, userName = Model.UserName }))
 
-    <div id="statusAlert">
-        @await Component.InvokeAsync("IdentityStatusAlertJs")
-    </div>
-
     <div class="tab-content">
         <div class="main-card mb-3 card">
             <div class="card-body">
@@ -33,26 +32,7 @@
                         Roles
                     </h5>
                 </div>
-                <div class="row custom-form">
-                    <div id="availableRolesForm" class="col-md-6">
-                        <div>
-                            <label class="roles-label">Available Roles</label>
-                            <select multiple="" class="form-control"></select>
-                        </div>
-                        <div class="button-holder">
-                            <button class="btn btn-primary submit pull-right mt-3">Add Role</button>
-                        </div>
-                    </div>
-                    <div id="assignedRolesForm" class="col-md-6">
-                        <div>
-                            <label class="roles-label">Assigned Roles</label>
-                            <select multiple="" class="form-control"></select>
-                        </div>
-                        <div class="button-holder">
-                            <button class="btn btn-primary submit pull-right mt-3">Remove Role</button>
-                        </div>
-                    </div>
-                </div>
+                @await Component.InvokeAsync("DragAndDrop")
             </div>
         </div>
     </div>

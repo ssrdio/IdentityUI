@@ -14,8 +14,6 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
-
-
 .modal-header-custom div {
     color: var(--blue);
     font-size: 1.5em;
@@ -50,7 +48,7 @@ body {
 
 .menu-color {
     background-color: var(--dark-navbar-color) !important;
-    box-shadow: -5px 8px 15px -5px black;
+    box-shadow: 0px 25px 0px 0px #495057;
 }
 
 .brand-logo {
@@ -213,29 +211,40 @@ body {
     font-weight: bold;
     color: white;
     font-size: 14px;
+    border-radius: 0.1875rem;
 }
 
-    .header-button:hover,
-    .header-button:active {
-        background-color: #005cbc !important;
-        color: white !important;
-        -webkit-transition: background-color 300ms linear;
-        -ms-transition: background-color 300ms linear;
-        transition: background-color 300ms linear;
-        text-decoration: none;
-    }
+.header-button:hover:enabled,
+.header-button:active:enabled {
+    background-color: #005cbc !important;
+    color: white !important;
+    -webkit-transition: background-color 300ms linear;
+    -ms-transition: background-color 300ms linear;
+    transition: background-color 300ms linear;
+    text-decoration: none;
+}
 
-    .month-back button:hover,
-    .month-forward button:hover,
-    .month-back button:active,
-    .month-forward button:active,
-    .header-button:active,
-    .header-button:hover {
-        background-color: #b3b6ba;
-        -webkit-transition: background-color 300ms linear;
-        -ms-transition: background-color 300ms linear;
-        transition: background-color 300ms linear;
-    }
+a.header-button:hover,
+a.header-button:active {
+    background-color: #005cbc !important;
+    color: white !important;
+    -webkit-transition: background-color 300ms linear;
+    -ms-transition: background-color 300ms linear;
+    transition: background-color 300ms linear;
+    text-decoration: none;
+}
+
+.month-back button:hover:enabled,
+.month-forward button:hover:enabled,
+.month-back button:active:enabled,
+.month-forward button:active:enabled,
+.header-button:active:enabled,
+.header-button:hover:enabled {
+    background-color: #b3b6ba;
+    -webkit-transition: background-color 300ms linear;
+    -ms-transition: background-color 300ms linear;
+    transition: background-color 300ms linear;
+}
 
 .graph-buttons-row p {
     color: var(--dark-navbar-color);
@@ -369,6 +378,22 @@ body {
     text-align: right;
 }
 
+.button-holder .btn{
+    margin: 0px 10px;
+}
+
+.available-scopes {
+    width: 85%;
+    min-height: 400px;
+    outline: 1px solid #e6e8ee;
+    margin-bottom: 25px;
+}
+
+.available-scopes-item {
+    padding: 15px;
+    outline: 1px solid #e6e8ee;
+}
+
 .custom-submit {
     min-width: 25%;
     font-weight: bold;
@@ -379,9 +404,9 @@ body {
     margin: -1.5rem -2.5rem;
     padding: 0px 30px;
     padding-bottom: 0px;
-    -webkit-box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.25);
-    -moz-box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.25);
-    box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.25);
+    -webkit-box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.15);
+    box-shadow: -2px 7px 30px 5px rgba(0, 0, 0, 0.15);
     margin-bottom: 3rem;
 }
 
@@ -398,9 +423,10 @@ body {
 
 .body-tabs .nav-item a.active {
     font-weight: bold;
-    background-color: #f9f9f9;
     color: var(--blue);
     border-bottom: solid 3px var(--blue);
+    background: rgb(255,255,255);
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(249,249,249,1) 100%);
 }
 
 .body-tabs .nav-item a {
@@ -408,6 +434,7 @@ body {
     padding: 10px 70px;
     font-weight: bold;
 }
+
 
 .verify-email {
     display: flex;
@@ -546,6 +573,12 @@ body {
         -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
         animation: fadein 0.5s, fadeout 0.5s 2.5s;
         animation-fill-mode: forwards;
+    }
+
+    #snackbar.showWarning {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s;
+        animation: fadein 0.5s;
     }
 
     #snackbar.showError {
@@ -772,11 +805,12 @@ body {
 
 
 table.dataTableClass > tbody > tr > td {
-  border: none;
-  border-right: 1px solid #dee2e6;
-  border-bottom: 1px solid #dee2e6 !important;
-  background: white !important;
-  padding-left: 10px;
+    border: none;
+    border-right: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6 !important;
+    background: white !important;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 table.dataTable.no-footer {
@@ -906,6 +940,53 @@ a.navbar-brand {
     font-weight: bold;
 }
 
+.remove .fa-trash-alt,
+.remove .fa-times {
+    color: #ff3333;
+}
+
+.edit  .fa-edit{
+    color: #ff8300
+}
+
+.confirm .fa-check {
+    color: #0270ec
+}
+
+.custom-select-drodown-icon {
+    position: absolute;
+    height: 100%;
+    right: 0px;
+    pointer-events: none;
+}
+
+.error-row{
+    background-color: #ffefef
+}
+
+.error-placeholder::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: #ff3333;
+}
+
+.error-placeholder::-moz-placeholder { /* Firefox 19+ */
+    color: #ff3333;
+}
+
+.error-placeholder:-ms-input-placeholder { /* IE 10+ */
+    color: #ff3333;
+}
+
+.error-placeholder:-moz-placeholder { /* Firefox 18- */
+    color: #ff3333;
+}
+
+.form-group .error.text-danger {
+    font-size: 12px !important;
+    margin-top: 8px;
+    display: block;
+    font-weight: bold;
+}
+
 .dropdown-item.active, .dropdown-item:active {
     color: black !important;
 }
@@ -929,7 +1010,7 @@ a.navbar-brand {
 .header-button {
     border: 0 !important;
     height: 35px !important;
-    margin-top: 12px !important;
+    margin: 11px 1.437rem !important;
 }
 
 .dt-head-center {
@@ -981,8 +1062,8 @@ select.form-control {
 
 .page-title-heading {
     font-size: 2.5rem;
-    margin-bottom: 10px;
-    padding-top: 10px;
+    margin-bottom: 15px;
+    padding-top: 15px;
 }
 
 .custom-header {
@@ -993,17 +1074,14 @@ select.form-control {
     padding: 0px;
 }
 
-.custom-submit {
+
+
+.custom-submit, .remove-button {
     min-width: 20%;
 }
 
 .dataTableClass thead tr th {
     padding: 5px 15px;
-}
-
-table.dataTableClass > tbody > tr > td.checkbox-holder {
-    padding: 5px 0px !important;
-    background: transparent !important;
 }
 
 .btn-google:hover {
@@ -1113,4 +1191,42 @@ table.dataTableClass > tbody > tr > td.checkbox-holder {
     padding-bottom: 15px;
     text-align: center;
     font-weight: bold;
+}
+
+/*  testing drag drop    */
+
+.drop-zone {
+    min-height: 250px;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.drop-item {
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    cursor: pointer;
+}
+
+.drop-item-container{
+    display: flex;
+    justify-content: space-between;
+    align-items:center
+}
+
+.drop-item-container .fa-grip-vertical {
+    color: #b0b0b0;
+}
+
+.sortable-chosen {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+    color: black !important;
+}
+
+.sortable-chosen .fa-grip-vertical {
+    color: black !important;
+}
+
+.scopes-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #8b8b8b;
 }

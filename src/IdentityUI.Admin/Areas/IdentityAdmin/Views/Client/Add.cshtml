@@ -10,7 +10,7 @@
     @await Component.InvokeAsync("IdentityStatusAlertJs")
 </div>
 
-<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12 form-card">
     <div class="card-body">
         <div class="card-title-space">
             <h5 class="card-title">
@@ -153,12 +153,6 @@
                     <input class="form-control" />
                     <span class="error text-danger"></span>
                 </div>
-                <div class="form-group client-secret-input">
-                    <label class="control-label">Client Secret</label>
-                    <input class="form-control" />
-                    <span class="error text-danger"></span>
-                </div>
-
                 <div class="button-holder">
                     <button type="button" class="btn btn-primary custom-submit add">Add</button>
                 </div>
@@ -492,7 +486,6 @@
 
                 this.nameInput = new InputComponent(this.$form, '.name-input');
                 this.clientIdInput = new InputComponent(this.$form, '.client-id-input');
-                this.clientSecretInput = new InputComponent(this.$form, '.client-secret-input');
 
                 this.$form.on('click', 'button.add', () => {
                     this.add();
@@ -504,7 +497,6 @@
             init() {
                 this.nameInput.value(null);
                 this.clientIdInput.value(null);
-                this.clientSecretInput.value(null);
 
                 this.hideErrors();
             }
@@ -524,7 +516,6 @@
 
                 this.nameInput.showError(errors.Name);
                 this.clientIdInput.showError(errors.CleintId);
-                this.clientSecretInput.showError(errors.CleintSecret);
             }
 
             hideErrors() {
@@ -532,14 +523,12 @@
 
                 this.nameInput.hideError();
                 this.clientIdInput.hideError();
-                this.clientSecretInput.hideError();
             }
 
             getData() {
                 return {
                     name: this.nameInput.value(),
                     clientId: this.clientIdInput.value(),
-                    clientSecret: this.clientSecretInput.value()
                 };
             }
 

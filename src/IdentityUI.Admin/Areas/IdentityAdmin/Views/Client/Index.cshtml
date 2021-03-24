@@ -6,7 +6,7 @@
     ViewData["Title"] = "Clients";
 }
 
-<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+<div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12 table-card">
     <div class="card-body">
         <div class="card-title-space">
             <h5 class="card-title">
@@ -58,6 +58,8 @@
                         },
                         {
                             data: null,
+                            className: "dt-head-center",
+                            width: "160px",
                             mRender: (data) => {
                                 return `<a class="btn btn-primary table-button" href="/IdentityAdmin/Client/Details/${data.id}">Details</a>`;
                             }

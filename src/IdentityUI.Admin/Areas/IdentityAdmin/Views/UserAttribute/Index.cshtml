@@ -25,7 +25,7 @@
     @(await Component.InvokeAsync("UserMenu", Model.ToViewComponentModel(UserMenuViewComponent.TabSelected.Attributes)))
 
     <div class="tab-content">
-        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12 table-card">
             <div class="card-body">
                 <div class="card-title-space">
                     <h5 class="card-title">
@@ -110,8 +110,7 @@
                         },
                         {
                             data: null,
-                            className: "table-two-buttons",
-
+                            className: "attribute-table-buttons",
                             mRender: function (data) {
                                 return `<div>
                                     <button class='btn btn-primary table-button edit' data-id='${data.id}'">Edit</button>

@@ -8,112 +8,119 @@
     @await Component.InvokeAsync("IdentityStatusAlertJs")
 </div>
 
-<!--#region table filters-->
-<div class="row">
+<div class="tab-content table-card">
     <div class="main-card mb-3 card fullWidthCard">
-        <div class="card-title-space">
-            <h5 class="card-title">
-                Audit
-            </h5>
-            <div id="actions-dropdown" class="dropdown">
-                <button type="button" class="btn btn-primary btn-sm dropdown-toggle header-button" data-toggle="dropdown">
-                    Action
-                </button>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item reset-filters">Reset all filters</button>
-                    <button class="dropdown-item export">Export</button>
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Audit
+                </h5>
+                <div id="actions-dropdown" class="dropdown">
+                    <button type="button" class="btn btn-secondary header-button header-button-dropdown" data-toggle="dropdown">
+                        Action
+                        <i class="fas fa-sort-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item reset-filters">Reset all filters</button>
+                        <button class="dropdown-item export">Export</button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="custom_container pb-0">
-            <div class="row">
+            <!--#region tablefilters-->
+            <div id="audit-table-filters" class="row custom_container pb-0 custom-filters">
+                <div class="col-2">
+                    <div id="page-lenght-select" class="form-group">
+                        <div class="d-flex">
+                            <label class="control-label">Show entries</label>
+                        </div>
+                        <select class="form-control select2-container custom-select"></select>
+                    </div>
+                </div>
+
                 <div class="col-3">
                     <div id="object-type" class="form-group">
                         <div class="d-flex">
-                            <label for="object-type-select" class="control-label">Object Type</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            <label class="control-label">Object Type</label>
+
                         </div>
-                        <select id="object-type-select" class="form-control select2-container"></select>
-                    </div>
-                    <div id="object-identifier" class="form-group">
-                        <div class="d-flex">
-                            <label for="object-identifier-select" class="control-label">Object Identifier</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                        </div>
-                        <select id="object-identifier-select" class="form-control select2-container" disabled></select>
+                        <select id="object-type-select" class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
+
                 <div class="col-3">
                     <div id="subject-type" class="form-group">
                         <div class="d-flex">
-                            <label for="subject-type-select" class="control-label">Subject Type</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            <label class="control-label">Subject Type</label>
+
                         </div>
-                        <select id="subject-type-select" class="form-control select2-container"></select>
+                        <select id="subject-type-select" class="form-control select2-container custom-select"></select>
                     </div>
+                </div>
+
+                <div class="col-4">
+                    <div id="resource-name" class="form-group">
+                        <div class="d-flex">
+                            <label class="control-label">Resource Name</label>
+
+                        </div>
+                        <select id="resource-name-select" class="form-control select2-container custom-select"></select>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div id="action-type" class="form-group">
+                        <div class="d-flex">
+                            <label class="control-label">Action Type</label>
+
+                        </div>
+                        <select id="action-type-select" class="form-control select2-container custom-select"></select>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div id="object-identifier" class="form-group">
+                        <div class="d-flex">
+                            <label class="control-label">Object Identifier</label>
+
+                        </div>
+                        <select id="object-identifier-select" class="form-control select2-container custom-select" disabled></select>
+                    </div>
+                </div>
+
+                <div class="col-3">
                     <div id="subject-identifier" class="form-group">
                         <div class="d-flex">
-                            <label for="subject-identifier-select" class="control-label">Subject Identifier</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                            <label class="control-label">Subject Identifier</label>
+
                         </div>
-                        <select id="subject-identifier-select" class="form-control select2-container"></select>
+                        <select id="subject-identifier-select" class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="row">
-                        <div id="action-type" class="form-group col-6">
-                            <div class="d-flex">
-                                <label for="action-type-select" class="control-label">Action Type</label>
-                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                            </div>
-                            <select id="action-type-select" class="form-control select2-container"></select>
-                        </div>
-                        <div id="resource-name" class="form-group col-6">
-                            <div class="d-flex">
-                                <label for="resource-name-select" class="control-label">Resource Name</label>
-                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                            </div>
-                            <select id="resource-name-select" class="form-control select2-container"></select>
-                        </div>
+
+
+                <div id="date-time-range-container" class="col-4">
+                    <div class="d-flex">
+                        <label class="control-label">Range</label>
                     </div>
-                    <div class="row">
-                        <div id="date-time-range-container" class="col-6">
-                            <div class="d-flex">
-                                <label for="resource-name-select" class="control-label">Range</label>
-                                <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
-                            </div>
-                            <div class="input-group height-1">
-                                <div class="input-group-prepend">
-                                    <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
-                                </div>
-                                <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
-                                <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
-                            </div>
+                    <div class="input-group height-1">
+                        <div class="input-group-prepend">
+                            <i class="input-group-text fa fa-calendar height-1 line-height-02 date-time-range-picker"></i>
                         </div>
-                        <div class="col-6">
-                            <div id="page-lenght-select" class="form-group">
-                                <div class="d-flex">
-                                    <label for="object-type-select" class="control-label">Show entries</label>
-                                </div>
-                                <select class="form-control select2-container"></select>
-                            </div>
-                        </div>
+                        <input type="text" onkeydown="return false" class="form-control height-1 date-time-from-picker" autocomplete="off" />
+                        <input type="text" onkeydown="return false" class="form-control height-1 date-time-to-picker" autocomplete="off" />
                     </div>
                 </div>
+
+            </div>
+            <!--#endregion-->
+            <div class="custom_container custom_table pt-0">
+                <table id="audit-table" class="dataTableClass display "></table>
             </div>
         </div>
     </div>
 </div>
-<!--#endregion-->
-<!--#region table-->
-<div class="row">
-    <div class="main-card mb-3 card fullWidthCard">
-        <div class="custom_container custom_table">
-            <table id="audit-table" class="dataTableClass display "></table>
-        </div>
-    </div>
-</div>
-<!--#endregion-->
+
+
 <!--#region details modal-->
 <div id="audit-details-modal" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="audit-details-modal" style="display: none;" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -136,73 +143,67 @@
                     <div id="audit-data-container">
                         <div class="row">
                             <label class="col-3 font-weight-bold">Action Type: </label>
-                            <span id="action-type-container"></span>
+                            <span class="col-9" id="action-type-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Object Type: </label>
-                            <span id="object-type-container"></span>
+                            <span class="col-9" id="object-type-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Object Identifier: </label>
-                            <span id="object-identifier-container"></span>
+                            <span class="col-9" id="object-identifier-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Subject Type: </label>
-                            <span id="subject-type-container"></span>
+                            <span class="col-9" id="subject-type-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Subject Identifier: </label>
-                            <span id="subject-identifier-container"></span>
+                            <span class="col-9" id="subject-identifier-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Group Identifier: </label>
-                            <span id="group-identifier-container"></span>
+                            <span class="col-9" id="group-identifier-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Resource Name: </label>
-                            <span id="resource-name-container"></span>
+                            <span class="col-9" id="resource-name-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Host: </label>
-                            <span id="host-container"></span>
+                            <span class="col-9" id="host-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Remote Ip: </label>
-                            <span id="remote-ip-container"></span>
+                            <span class="col-9" id="remote-ip-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">User Agent: </label>
-                            <span id="user-agent-container"></span>
+                            <span class="col-9" id="user-agent-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Trace Identifier: </label>
-                            <span id="trace-identifier-container"></span>
+                            <span class="col-9" id="trace-identifier-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">App Version: </label>
-                            <span id="app-version-container"></span>
+                            <span class="col-9" id="app-version-container"></span>
                         </div>
                         <div class="row">
                             <label class="col-3 font-weight-bold">Created: </label>
-                            <span id="created-container"></span>
+                            <span class="col-9" id="created-container"></span>
                         </div>
-                        <div>
-                            <div class="row">
-                                <label class="col-3 font-weight-bold">Object Metadata: </label>
-                            </div>
-                            <span id="object-metadata-container"></span>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Object Metadata: </label>
+                            <span class="col-9" id="object-metadata-container"></span>
                         </div>
-                        <div>
-                            <div class="row">
-                                <label class="col-3 font-weight-bold">Subject Metadata: </label>
-                            </div>
-                            <span id="subject-metadata-container"></span>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Subject Metadata: </label>
+                            <span class="col-9" id="subject-metadata-container"></span>
                         </div>
-                        <div>
-                            <div class="row">
-                                <label class="col-3 font-weight-bold">Metadata: </label>
-                            </div>
-                            <span id="metadata-container"></span>
+                        <div class="row">
+                            <label class="col-3 font-weight-bold">Metadata: </label>
+                            <span class="col-9" id="metadata-container"></span>
                         </div>
                     </div>
                 </div>
@@ -227,20 +228,22 @@
 
                 <div id="add-audit-comment-form">
                     <div class="d-flex">
-                        <label for="object-identifier-select" class="control-label">New Comment</label>
-                        <button type="button" class="btn btn-primary p-2 d-flex ml-auto submit-button comment-submit-button">Submit</button>
+                        <label for="object-identifier-select" class="control-label">Add a comment</label>
                     </div>
                     <div class="form-group comment-text-area">
                         <textarea class="form-control vertical-textarea" rows="5" placeholder="Your message"></textarea>
                         <span class="text-danger error"></span>
+                        <button type="button" class="btn btn-primary p-2 d-flex ml-auto submit-button comment-submit-button">Submit comment</button>
                     </div>
                 </div>
 
+                <label class="comments-label">Comments</label>
                 <div id="audit-comment-loader">
                     @await Component.InvokeAsync("AdminUIDotLoader")
                 </div>
+                <div id="audit-comment-container" class="comment-container">
 
-                <div id="audit-comment-container" class="comment-container"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -259,6 +262,73 @@
     <link rel="stylesheet" href="~/adminUI/app/lib/select2-4.0.13/dist/css/select2.min.css" asp-append-version="true" />
 
     <style>
+        .audit-modal-body {
+            padding: 0px;
+            max-height: 70vh;
+            overflow: auto;
+            margin-bottom: 30px;
+        }
+
+        #audit-details-modal .modal-header,
+        #audit-comments-modal .modal-header{
+            padding-left: 35px;
+        }
+
+            #audit-details-modal .modal-header .modal-title,
+            #audit-comments-modal .modal-header .modal-title {
+                font-size: 18px;
+                font-weight: bold;
+                text-transform: uppercase;
+                color: #008fef;
+            }
+
+        .comment-body h4 {
+            color: #008fef;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #audit-comments-modal .audit-comment-modal-body {
+            padding: 25px 35px;
+        }
+
+        .comment-submit-button {
+            margin-top: 1em;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        #add-audit-comment-form label{
+            font-weight: bold;
+        }
+
+        #audit-data-container .row {
+            margin: 0px;
+            padding: 15px 20px;
+            border-top: solid 1px #e7e7e7;
+            align-items: flex-start;
+        }
+
+        .comments-label {
+            font-weight: bold;
+            padding-bottom: 10px;
+        }
+
+        .jjson-container, .jjson-container ul {
+            word-break: break-word;
+            list-style-type: none !important;
+            padding: 0px;
+            margin: 0px;
+        }
+
+            .jjson-container .expanded{
+                display: none;
+            }
+
+            #audit-data-container .row label {
+                margin: 0px;
+            }
+        /* my style end*/
         .height-1 {
             height: 1em;
         }
@@ -272,11 +342,14 @@
             border: 1px solid #c9c8c8;
         }
 
-        .audit-modal-body {
-            max-height: 70vh;
+        .comment-container {
             overflow: auto;
+            max-height: 50vh;
             margin-bottom: 30px;
+            padding-right: 10px;
         }
+
+
 
         table.dataTable thead .sorting,
         table.dataTable thead .sorting_asc,
@@ -326,13 +399,13 @@
         }
 
         .comment-body {
-                border-top: 1px dashed #DDDDDD;
-                padding: 20px 0;
-                margin: 0;
-            }
+            border-top: 1px solid #f2f2f2;
+            padding: 25px 0;
+            margin: 0;
+        }
 
             .comment-body p {
-                margin-bottom: 15px;
+                margin-bottom: 0px;
                 text-align: justify;
             }
 
@@ -342,13 +415,12 @@
             margin-right: 10px;
         }
 
-        .comment-submit-button {
-            margin-bottom: 0.5em;
-        }
+
 
         .no-comments {
-            text-align: center;
-            padding-top: 20px;
+            text-align: left;
+            padding-top: 5px;
+            color: #8f8f8f;
         }
     </style>
 }

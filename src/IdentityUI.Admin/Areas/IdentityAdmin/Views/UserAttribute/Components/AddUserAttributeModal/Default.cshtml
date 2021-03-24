@@ -9,7 +9,7 @@
             </div>
 
             <div class="loader-holder loader-hidden">
-                <div class="loader">Loading...</div>
+                @await Component.InvokeAsync("AdminUIDotLoader", new { showLoader = true })
             </div>
 
             <div class="custom-modal-contnet">

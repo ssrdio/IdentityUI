@@ -27,7 +27,7 @@
     @(await Component.InvokeAsync("UserMenu", new { userId = Model.UserId, tabSelected = UserMenuViewComponent.TabSelected.Sessions, userName = Model.UserName }))
 
     <div class="tab-content">
-        <div class="main-card mb-3 card">
+        <div class="main-card mb-3 card table-card">
             <div class="card-title-space">
                 <h5 class="card-title">
                     Sessions

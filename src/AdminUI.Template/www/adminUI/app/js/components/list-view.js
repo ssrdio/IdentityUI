@@ -14,6 +14,8 @@
 
         this.items = options.items;
 
+        this.statusAlert = new StatusAlertComponent('#status-alert');
+
         this.init();
     }
 
@@ -34,7 +36,7 @@
                     <div class="col-11 p-0">
                     <input type="text" class="list-view-input" placeholder="{{placeholder}}" />
                     </div>
-                    <div class="col-1 p-0">
+                    <div class="col-1 ">
                         <button type="button" class="list-view-button" tabindex="-1">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -47,11 +49,18 @@
 
         $addNewitem.on('click', 'button', () => {
             let $input = $addNewitem.find('input');
+            let $row = $addNewitem.find('.row');
 
-            let $newItem = this.getDefaultItem($input.val());
+            if ($input.val() != "") {
+                $row.removeClass('error-row');
+                let $newItem = this.getDefaultItem($input.val());
 
-            $addNewitem.before($newItem);
-            $input.val(null);
+                $addNewitem.before($newItem);
+                $input.val(null);
+                this.statusAlert.showWarning('You have some unsaved changes on this page');
+            } else {
+                $row.addClass('error-row');
+            }
         });
 
         $addNewitem.on('keypress', 'input', (event) => {
@@ -75,14 +84,14 @@
             <div class="list-group-item list-group-item-action p-0">
                 <div class="row">
                     <span class="col-10 list-view-item">{{value}}</span>
-                    <div class="col-1 p-0">
+                    <div class="col-1">
                         {{#edit}}
                         <button type="button" class="list-view-button edit" tabindex="-1">
                             <i class="fas fa-edit"></i>
                         </button>
                         {{/edit}}
                     </div>
-                    <div class="col-1 p-0">
+                    <div class="col-1">
                         <button type="button" class="list-view-button remove" tabindex="-1">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -95,6 +104,7 @@
 
         $defaultItem.on('click', 'button.remove', () => {
             $defaultItem.remove();
+            this.statusAlert.showWarning('You have some unsaved changes on this page');
         });
 
         if (this.allowEdit) {
@@ -109,6 +119,7 @@
     }
 
     getEditItem(value) {
+        let currentValue = value;
         let confirmTemplate = `
             <div class="list-group-item list-group-item-action p-0">
                 <div class="row">
@@ -131,14 +142,16 @@
 
         $editItem.find('input').focus();
 
-        $editItem.on('click', 'button.remove', () => {
-            $editItem.remove();
+        $editItem.on('click', 'button.remove', (event) => {
+            let $item = $(event.delegateTarget);
+            $item.replaceWith(this.getDefaultItem(currentValue));
         });
 
         $editItem.on('click', 'button.confirm', (event) => {
             let $item = $(event.delegateTarget);
 
             $item.replaceWith(this.getDefaultItem($item.find('input').val()));
+            this.statusAlert.showWarning('You have some unsaved changes on this page');
         });
 
         $editItem.on('keypress', 'input', (event) => {
@@ -190,6 +203,8 @@ class PredefinedListView {
         $container.find('div.list-view').append(this.$listViewContainer);
         this.$errorSpan = $container.find('span.error');
 
+        this.statusAlert = new StatusAlertComponent('#status-alert');
+
         this.items = options.items;
 
         this.init();
@@ -205,7 +220,7 @@ class PredefinedListView {
         let template = `
             <div class="list-group-item list-group-item-action p-0">
                 <div class="row p-0">
-                    <div class="col-11 p-0">
+                    <div class="col-12 p-0">
                     <select class="list-view-select">
                         <option value="__placeholder__" disabled selected hidden class="placeholder-option">{{placeholder}}</option>
                         {{#selectOptions}}
@@ -218,9 +233,9 @@ class PredefinedListView {
                         {{/selectOptions}}
                     <select>
                     </div>
-                    <div class="col-1 p-0">
+                    <div class="col-1 custom-select-drodown-icon">
                         <button type="button" class="list-view-button">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-angle-down"></i>
                         </button>
                     </div>
                 </div>
@@ -249,9 +264,6 @@ class PredefinedListView {
             this.$listViewContainer.append($item);
         });
 
-        $addNewitem.on('click', 'button', () => {
-        });
-
         $addNewitem.on('change', 'select', (event) => {
             let selected = $select.val();
 
@@ -262,6 +274,8 @@ class PredefinedListView {
             $addNewitem.before($newItem);
 
             $select.val('__placeholder__');
+
+            this.statusAlert.showWarning('You have some unsaved changes on this page');
         });
 
         this.$listViewContainer.append($addNewitem);
@@ -274,7 +288,7 @@ class PredefinedListView {
                     <span class="col-10 list-view-item">{{value}}</span>
                     <div class="col-1 p-0">
                     </div>
-                    <div class="col-1 p-0">
+                    <div class="col-1">
                         <button type="button" class="list-view-button remove">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -286,6 +300,7 @@ class PredefinedListView {
         let $defaultItem = $(defaultItem);
 
         $defaultItem.on('click', 'button.remove', () => {
+            this.statusAlert.showWarning('You have some unsaved changes on this page');
             $defaultItem.remove();
             $select.find(`option[value="${value}"]`).attr('hidden', false);
         });

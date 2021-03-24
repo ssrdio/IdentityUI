@@ -196,7 +196,7 @@ class AuditTable {
         this.$auditTable.DataTable({
             serverSide: true,
             processing: true,
-            order: [[6, 'desc']],
+            order: [[5, 'desc']],
             lengthChange: false,
             pageLength: 20,
             searching: false,
@@ -214,7 +214,7 @@ class AuditTable {
                         start: params.start,
                     }
 
-                    switch (params.order.find(x => x.column === 6).dir) {
+                    switch (params.order.find(x => x.column === 5).dir) {
                         case "desc": {
                             customParams.orderBy = orderByTypes.Dessending;
                             break;
@@ -242,7 +242,7 @@ class AuditTable {
                 {
                     title: "Type",
                     orderable: false,
-
+                    class: "audit-action-type",
                     data: "actionType",
                     render: $.fn.dataTable.render.text()
                 },
@@ -256,39 +256,42 @@ class AuditTable {
                 {
                     title: "Object Type",
                     orderable: false,
-
+                    className: "audit-object-type",
                     data: "objectType",
                     render: $.fn.dataTable.render.text()
                 },
                 {
                     title: "Subject Type",
                     orderable: false,
-
+                    className: "audit-subject-type",
                     data: "subjectType",
                     render: $.fn.dataTable.render.text()
                 },
                 {
                     title: "Subject Identifier",
                     orderable: false,
-
+                    className: "audit-subject-id",
                     data: "subjectIdentifier",
                     render: $.fn.dataTable.render.text()
                 },
                 {
                     data: null,
+                    className: "audit-created",
                     title: "Created",
                     render: (data) => {
                         return `<span>${DateTimeUtils.toDisplayDateTime(data.created)}</span>`;
                     }
                 },
                 {
-                    data: null,
                     orderable: false,
+                    data: null,
+                    className: "audit-action-buttons",
                     render: (data) => {
                         let dropDown = `
                             <div class="dropdown">
-                              <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+                              <button type="button" class="btn btn-primary table-button action-table-button" data-toggle="dropdown">
                                 Action
+                                <i class="fas fa-sort-down"></i>
                               </button>
                               <div class="dropdown-menu">
                                 <button class="dropdown-item audit-details" data-id="${data.id}">Details</button>
@@ -434,6 +437,8 @@ class AuditTableFilters {
 
     initObjectTypeSelect() {
         this.$objectTypeSelect.select2({
+            placeholder: "Select object type",
+            allowClear: true,
             ajax: {
                 url: `/IdentityAdmin/Audit/GetObjectTypes`,
                 delay: 100,
@@ -454,10 +459,19 @@ class AuditTableFilters {
 
             this.change();
         });
+
+        this.$objectTypeSelect.on('select2:clear', () => {
+            this.$objectIdentifierSelect.val(null).trigger('change');
+            setTimeout(() => {
+                this.$objectIdentifierSelect.prop('disabled', true);
+            }, 400);
+        });
     }
 
     initObjectIdentifierSelect() {
         this.$objectIdentifierSelect.select2({
+            placeholder: "Select object identifier",
+            allowClear: true,
             ajax: {
                 url: `/IdentityAdmin/Audit/GetObjectIdentifiers`,
                 delay: 100,
@@ -480,6 +494,8 @@ class AuditTableFilters {
 
     initSubjectTypeSelect(subjectTypes) {
         this.$subjectTypeSelect.select2({
+            placeholder: "Select subject type",
+            allowClear: true,
             data: subjectTypes
         });
 
@@ -494,6 +510,8 @@ class AuditTableFilters {
 
     initSubjectIdentifierSelect() {
         this.$subjectIdentifierSelect.select2({
+            placeholder: "Select subject identifier",
+            allowClear: true,
             ajax: {
                 url: `/IdentityAdmin/Audit/GetSubjectIdentifiers`,
                 delay: 100,
@@ -514,6 +532,8 @@ class AuditTableFilters {
 
     initActionTypeSelect(actionTypes) {
         this.$actionTypeSelect.select2({
+            placeholder: "Select action type",
+            allowClear: true,
             data: actionTypes,
         });
 
@@ -528,6 +548,8 @@ class AuditTableFilters {
 
     initResourceNameSelect() {
         this.$resourceNameSelect.select2({
+            placeholder: "Select resource name",
+            allowClear: true,
             ajax: {
                 url: `/IdentityAdmin/Audit/GetResourceNames`,
                 delay: 100,
@@ -684,7 +706,7 @@ class AuditCommentModal {
         if (data.length === 0) {
             const noCommentsTemplate = `
                 <div class="no-comments">
-                    <h3>No Comments</h3>
+                    <p>No comments have been added for this audit</p>
                 </div>`
 
             this.$auditCommentsContainer.append($(noCommentsTemplate));

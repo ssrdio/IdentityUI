@@ -178,16 +178,13 @@
     }
 
     <div class="tab-content">
-        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12 form-card">
             <div class="card-body">
                 <div class="card-title-space">
                     <h5 class="card-title">
                         Details
                     </h5>
-                    @if (Model.UseEmailSender)
-                    {
-                        <button id="send-test-email" class="header-button">Send Test Email</button>
-                    }
+
                 </div>
                 <form asp-controller="Email" asp-action="Edit" asp-route-id="@Model.Id" method="post" class="custom-form">
                     <div class="form-group">
@@ -201,7 +198,7 @@
                         <span asp-validation-for="Subject" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <div class="d-flex">
+                        <div class="d-flex preview-holder">
                             <label asp-for="Body" class="control-label"></label>
                             <button id="preview-button" type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Preview</button>
                         </div>
@@ -209,7 +206,16 @@
                         <span asp-validation-for="Body" class="text-danger"></span>
                     </div>
                     <div class="button-holder">
-                        <input type="submit" value="Edit" class="btn btn-primary custom-submit" />
+
+
+
+                    </div>
+                    <div class="button-holder">
+                        @if (Model.UseEmailSender)
+                        {
+                            <button id="send-test-email" class="btn btn-secondary custom-submit">Send Test Email</button>
+                        }
+                        <button type="submit" class="btn btn-primary custom-submit">Save changes</button>
                     </div>
                 </form>
             </div>

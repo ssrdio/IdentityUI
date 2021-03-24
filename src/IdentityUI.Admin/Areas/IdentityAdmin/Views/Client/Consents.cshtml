@@ -6,7 +6,7 @@
     @await Component.InvokeAsync("IdentityStatusAlertJs")
 </div>
 
-<div class="tab-content">
+<div class="tab-content table-card">
     <div class="main-card mb-3 card fullWidthCard">
         <div class="card-body">
             <div class="card-title-space">
@@ -14,8 +14,9 @@
                     Consents
                 </h5>
                 <div id="actions-dropdown" class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle header-button" type="button" data-toggle="dropdown" disabled>
+                    <button class="btn btn-secondary header-button header-button-dropdown" type="button" data-toggle="dropdown" disabled>
                         Actions
+                        <i class="fas fa-sort-down"></i>
                     </button>
                     <div class="dropdown-menu">
                         <button class="dropdown-item validate">Validate</button>
@@ -24,46 +25,43 @@
                 </div>
             </div>
             <!--#region table filters-->
-            <div id="consent-table-filters" class="row custom_container pb-0">
+            <div id="consent-table-filters" class="row custom_container custom-filters pb-0">
                 <div class="col-1">
                     <div id="page-lenght-select" class="form-group">
                         <div class="d-flex">
                             <label for="object-type-select" class="control-label">Show entries</label>
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div class="col-2">
                     <div id="status-select" class="form-group">
                         <div class="d-flex">
                             <label for="object-type-select" class="control-label">Status</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div class="col-3">
                     <div id="subject-select" class="form-group">
                         <div class="d-flex">
                             <label for="object-type-select" class="control-label">Subject</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div class="col-3">
                     <div id="scope-select" class="form-group">
                         <div class="d-flex">
                             <label for="object-type-select" class="control-label">Scope</label>
-                            <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
                         </div>
-                        <select class="form-control select2-container"></select>
+                        <select class="form-control select2-container custom-select"></select>
                     </div>
                 </div>
                 <div id="date-time-range-container" class="col-3">
                     <div class="d-flex">
                         <label for="resource-name-select" class="control-label">Range</label>
-                        <button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>
+                        @*<button type="button" class="btn btn-link p-2 d-flex ml-auto reset-button">Reset</button>*@
                     </div>
                     <div class="input-group height-1">
                         <div class="input-group-prepend">
@@ -193,6 +191,8 @@
                 const $select = this.$statusSelectContainer.find('select');
 
                 $select.select2({
+                    placeholder: "Select a status",
+                    allowClear: true,
                     data: consentStatuses,
                     minimumResultsForSearch: Infinity
                 });
@@ -214,6 +214,8 @@
                 const $select = this.$subjectSelectContainer.find('select');
 
                 $select.select2({
+                    placeholder: "Select a subject",
+                    allowClear: true,
                     ajax: {
                         url: `/api/IdentityAdmin/Client/GetConsentSubjects/${this.id}`,
                         delay: 100,
@@ -240,6 +242,8 @@
                 const $select = this.$scopeSelectContainer.find('select');
 
                 $select.select2({
+                    placeholder: "Select a scope",
+                    allowClear: true,
                     ajax: {
                         url: `/api/IdentityAdmin/ClientScope/GetSelect`,
                         delay: 100,
