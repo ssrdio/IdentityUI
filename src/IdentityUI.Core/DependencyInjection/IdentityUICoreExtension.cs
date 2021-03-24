@@ -171,7 +171,12 @@ namespace SSRD.IdentityUI.Core
                 options.AllowImpersonation = identityManagementEndpoints.AllowImpersonation;
             });
 
-            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(services, identityManagementEndpoints, databaseOptions, configuration);
+            IdentityUIServicesBuilder builder = new IdentityUIServicesBuilder(
+                services,
+                identityManagementEndpoints,
+                databaseOptions,
+                identityUIOptions,
+                configuration);
 
             builder.Services.AddScoped<IEmailSender, NullEmailSender>();
             builder.Services.AddScoped<ISmsSender, NullSmsSender>();
@@ -343,17 +348,20 @@ namespace SSRD.IdentityUI.Core
                 })
                 .AddOpenIdConnect(options =>
                 {
-                    //TODO: change this
-
-                    options.Authority = "http://localhost:5000";
-                    options.ClientId = "new_mvc";
+                    options.Authority = builder.IdentityUIOptions.BasePath;
+                    options.ClientId = OpenIdConnectConstants.IDENTITY_UI_CLIENT_ID;
                     options.ResponseType = OpenIdConnectResponseType.Code;
 
+                    //TODO: change this
                     options.RequireHttpsMetadata = false;
                     options.SaveTokens = true;
 
                     options.Scope.Clear();
-                    options.Scope.Add("openid");
+                    options.Scope.Add(OpenIddictConstants.Scopes.OpenId);
+                    options.Scope.Add(OpenIddictConstants.Scopes.Email);
+                    options.Scope.Add(OpenIddictConstants.Scopes.Profile);
+                    options.Scope.Add(OpenIddictConstants.Scopes.Roles);
+                    options.Scope.Add(OpenIdConnectConstants.Scopes.Permissions);
                 });
 
             if (!string.IsNullOrEmpty(builder.Configuration["IdentityUI:Microsoft:ClientId"]) && !string.IsNullOrEmpty(builder.Configuration["IdentityUI:Microsoft:ClientSecret"]))

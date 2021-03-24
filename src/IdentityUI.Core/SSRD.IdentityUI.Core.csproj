@@ -86,6 +86,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Flurl" Version="3.0.1" />
     <PackageReference Include="Stubble.Core" Version="1.7.2" />
     <PackageReference Include="OpenIddict" Version="3.0.0" />
     <PackageReference Include="OpenIddict.AspNetCore" Version="3.0.0" />

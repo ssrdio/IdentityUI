@@ -13,14 +13,21 @@ namespace SSRD.IdentityUI.Core.DependencyInjection
 
         public IdentityUIEndpoints IdentityManagementEndpoints {get; }
         public DatabaseOptions DatabaseOptions { get; set; }
+        public IdentityUIOptions IdentityUIOptions { get; set; }
 
         public IConfiguration Configuration { get; set; }
 
-        public IdentityUIServicesBuilder(IServiceCollection services, IdentityUIEndpoints identityManagementEndpoints, DatabaseOptions databaseOptions, IConfiguration configuration)
+        public IdentityUIServicesBuilder(
+            IServiceCollection services,
+            IdentityUIEndpoints identityManagementEndpoints,
+            DatabaseOptions databaseOptions,
+            IdentityUIOptions identityUIOptions,
+            IConfiguration configuration)
         {
             Services = services;
             IdentityManagementEndpoints = identityManagementEndpoints;
             DatabaseOptions = databaseOptions;
+            IdentityUIOptions = identityUIOptions;
             Configuration = configuration;
         }
     }

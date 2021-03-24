@@ -7,16 +7,23 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
 {
     public static class OpenIdConnectConstants
     {
-        //this list does not contain 'openid' and 'offline_access' because they are enabled by default
+        public const string IDENTITY_UI_CLIENT_ID = "identity-ui-admin";
+
+        public static class Scopes
+        {
+            public const string Permissions = "permissions";
+        }
+
         public static readonly List<string> SCOPES = new List<string>
         {
             OpenIddictConstants.Scopes.Address,
             OpenIddictConstants.Scopes.Email,
-            //OpenIddictConstants.Scopes.OfflineAccess,
-            //OpenIddictConstants.Scopes.OpenId,
+            OpenIddictConstants.Scopes.OfflineAccess,
+            OpenIddictConstants.Scopes.OpenId,
             OpenIddictConstants.Scopes.Phone,
             OpenIddictConstants.Scopes.Profile,
             OpenIddictConstants.Scopes.Roles,
+            Scopes.Permissions,
         };
 
         public static readonly List<string> ENDPOINTS = new List<string>

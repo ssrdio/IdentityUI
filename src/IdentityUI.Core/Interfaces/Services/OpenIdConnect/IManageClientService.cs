@@ -11,8 +11,8 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.OpenIdConnect
         Task<Result> Remove(string id);
 
         Task<Result> UpdateClientId(string id, UpdateClientIdModel updateClientIdModel);
-        Task<Result> AddClientSecret(string id, AddClientSecretModel addClientSecretModel);
-        Task<Result> UpdateClientSecret(string id, UpdateClientSecretModel updateClientSecret);
+        
+        Task<Result<GenerateNewClientSecretModel>> GenerateNewClientSecret(string id, string secret = null);
         Task<Result> RemoveClientSecret(string id);
 
         Task<Result> AddScopes(string id, ManageClientScopesModel clientScopes);

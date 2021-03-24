@@ -1,15 +1,14 @@
-﻿using System;
+﻿using SSRD.AdminUI.Template.Models;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.OpenIdConnect.Models
 {
     public class ClientScopesModel
     {
-        public IList<string> Available { get; set; }
-        public IList<string> Assigned { get; set; }
+        public List<DragAndDropItem> Available { get; set; }
+        public List<DragAndDropItem> Assigned { get; set; }
 
-        public ClientScopesModel(IList<string> available, IList<string> assigned)
+        public ClientScopesModel(List<DragAndDropItem> available, List<DragAndDropItem> assigned)
         {
             Available = available;
             Assigned = assigned;

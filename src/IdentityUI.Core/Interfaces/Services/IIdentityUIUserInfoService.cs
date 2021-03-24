@@ -17,6 +17,8 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services
 
         bool HasRole(string role);
 
+        bool HasScope(string scope);
+
         string GetUsername();
     }
 }

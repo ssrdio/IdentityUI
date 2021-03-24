@@ -111,7 +111,7 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
                 },
             };
 
-            return AddClient(applicationDescriptor, addClientCredentialsClientModel.ClientSecret);
+            return AddClient(applicationDescriptor, null);
         }
 
         public Task<Result<IdStringModel>> AddMobileClient(AddMobileClientModel addMobileClient)

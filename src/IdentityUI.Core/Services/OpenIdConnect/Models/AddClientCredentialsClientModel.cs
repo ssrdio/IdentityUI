@@ -10,7 +10,6 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect.Models
     {
         public string Name { get; set; }
         public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
     }
 
     public class AddClientCredentialsClientModelValidator : AbstractValidatorWithNullCheck<AddClientCredentialsClientModel>
@@ -21,9 +20,6 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect.Models
                 .NotEmpty();
 
             RuleFor(x => x.ClientId)
-                .NotEmpty();
-
-            RuleFor(x => x.ClientSecret)
                 .NotEmpty();
         }
     }

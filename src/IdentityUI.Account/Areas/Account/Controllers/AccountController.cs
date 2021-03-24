@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Authentication;
 using SSRD.IdentityUI.Core.Services.Group.Models;
 using SSRD.IdentityUI.Core.Interfaces.Services.Group;
 using SSRD.AdminUI.Template.Attributes;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
@@ -201,7 +203,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
         {
             Result result = await _loginService.Logout(GetUserId(), GetSessionCode());
 
-            return Redirect("/");
+            return SignOut(OpenIdConnectDefaults.AuthenticationScheme);
         }
 
         [AllowAnonymous]

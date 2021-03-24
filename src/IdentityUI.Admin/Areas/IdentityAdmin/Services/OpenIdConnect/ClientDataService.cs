@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
+using SSRD.AdminUI.Template.Models;
 using SSRD.AdminUI.Template.Models.DataTables;
 using SSRD.AdminUI.Template.Models.Select2;
 using SSRD.CommonUtils.Result;
@@ -13,6 +14,7 @@ using SSRD.IdentityUI.Core.Services.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -290,6 +292,12 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.OpenIdConnect
                 }
             }
 
+            //This scope is enabled by default by OpenIddict
+            if(!assignedScopes.Contains(OpenIddictConstants.Scopes.OpenId))
+            {
+                assignedScopes.Add(OpenIddictConstants.Scopes.OpenId);
+            }
+
             var getAvaibleScopesSpecification = SpecificationBuilder
                 .Create<ClientScopeEntity>()
                 .Where(x => !assignedScopes.Contains(x.Name))
@@ -299,8 +307,17 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.OpenIdConnect
             List<string> avaibleScopes = await _clientScopeDAO.Get(getAvaibleScopesSpecification);
 
             ClientScopesModel clientScopesModel = new ClientScopesModel(
-                assigned: assignedScopes,
-                available: avaibleScopes);
+                assigned: assignedScopes
+                    .Select(x => new DragAndDropItem(
+                        text: x,
+                        disabled: x == OpenIddictConstants.Scopes.OpenId))
+                    .OrderBy(x => x.Text)
+                    .ToList(),
+                available: avaibleScopes
+                    .Select(x => new DragAndDropItem(
+                        text: x))
+                    .OrderBy(x => x.Text)
+                    .ToList());
 
             return Result.Ok(clientScopesModel);
         }

@@ -10,6 +10,17 @@ using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using SSRD.CommonUtils.Result;
+using SSRD.IdentityUI.Core.Services.OpenIdConnect.Models;
+using SSRD.IdentityUI.Core.Data.Models.Seed;
+using SSRD.IdentityUI.Core.Data.Entities.OpenIdConnect;
+using SSRD.IdentityUI.Core.Interfaces.Services.OpenIdConnect;
+using SSRD.IdentityUI.Core.Models;
+using OpenIddict.Abstractions;
+using SSRD.IdentityUI.Core.Services.OpenIdConnect;
+using SSRD.IdentityUI.Core.Models.Options;
+using Microsoft.Extensions.Options;
+using Flurl;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
 {
@@ -18,83 +29,103 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
         private readonly IdentityDbContext _context;
         private readonly RoleManager<RoleEntity> _roleManager;
 
+        private readonly IAddClientService _addClientService;
+        private readonly IManageClientService _manageClientService;
+        private readonly IClientScopeService _clientScopeService;
+
+        private readonly IdentityUIOptions _identityUIOptions;
+
         private readonly ILogger<SystemEntitySeeder> _logger;
 
-        private readonly List<EmailEntity> _allEmails;
-
-        public SystemEntitySeeder(IdentityDbContext context, RoleManager<RoleEntity> roleManager, ILogger<SystemEntitySeeder> logger)
+        public SystemEntitySeeder(
+            IdentityDbContext context,
+            RoleManager<RoleEntity> roleManager,
+            IAddClientService addClientService,
+            IManageClientService manageClientService,
+            IClientScopeService clientScopeService,
+            IOptions<IdentityUIOptions> identityUIOptions,
+            ILogger<SystemEntitySeeder> logger)
         {
             _context = context;
+
             _roleManager = roleManager;
+            
+            _addClientService = addClientService;
+            _manageClientService = manageClientService;
+            _clientScopeService = clientScopeService;
+
+            _identityUIOptions = identityUIOptions.Value;
+
             _logger = logger;
-
-            _allEmails = new List<EmailEntity>();
-
-            EmailEntity inviteEmail = new EmailEntity(
-                subject: "Invitation",
-                body: "You have been invited. If you wish to register <a href='{{token}}'>click here</a>",
-                type: EmailTypes.Invite);
-            _allEmails.Add(inviteEmail);
-
-            EmailEntity confirmationEmail = new EmailEntity(
-                subject: "Confirm your email",
-                body: "Please confirm your account by <a href='{{token}}'>clicking here</a>.",
-                type: EmailTypes.EmailConfirmation);
-            _allEmails.Add(confirmationEmail);
-
-            EmailEntity passwordRecovery = new EmailEntity(
-                subject: "Reset Password",
-                body: "Please reset your password by <a href='{{token}}'>clicking here</a>",
-                type: EmailTypes.PasswordRecovery);
-            _allEmails.Add(passwordRecovery);
-
-            EmailEntity passwordWasReset = new EmailEntity(
-                subject: "Password was reset",
-                body: "Your password has been reset",
-                type: EmailTypes.PasswordWasReset);
-            _allEmails.Add(passwordWasReset);
-
-            EmailEntity twoFactorToken = new EmailEntity(
-                subject: "Two Factor Authentication",
-                body: "Authentication code: {{token}}",
-                type: EmailTypes.TwoFactorAuthenticationToken);
-            _allEmails.Add(twoFactorToken);
         }
 
         public Task SeedIdentityUI()
         {
-            return Seed(new List<PermissionSeedModel>(), new List<RoleSeedModel>());
+            return Seed(new List<PermissionSeedModel>(), new List<RoleSeedModel>(), new List<ClientSeedModel>());
         }
 
-        public async Task Seed(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels)
+        public async Task Seed(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels, List<ClientSeedModel> clientSeedModels)
         {
             _logger.LogInformation($"Seeding system entities");
 
             permissionSeedModels.AddRange(IdentityUIPermissions.ALL_DATA);
             roleSeedModels.AddRange(IdentityUIRoles.ALL_DATA);
 
-            SeedMissingEmails();
-
             await SeedRoles(roleSeedModels);
             SeedPermissions(permissionSeedModels);
             SeedRolePermissions(roleSeedModels);
             SeedRoleAssigments(roleSeedModels);
-        }
 
-        [Obsolete("Use Seed")]
-        public async Task SeedMissing(List<PermissionSeedModel> permissionSeedModels, List<RoleSeedModel> roleSeedModels)
-        {
-            _logger.LogInformation($"Seeding missing system entities");
+            ClientSeedModel clientSeedModel = new ClientSeedModel
+            {
+                Name = "IdentityUI Admin",
+                ClientId = OpenIdConnectConstants.IDENTITY_UI_CLIENT_ID,
+                Description = "Client for IdentityUI Admin",
+                Endpoints = new List<string>
+                {
+                    OpenIddictConstants.Permissions.Endpoints.Authorization.Replace(OpenIddictConstants.Permissions.Prefixes.Endpoint, ""),
+                    OpenIddictConstants.Permissions.Endpoints.Token.Replace(OpenIddictConstants.Permissions.Prefixes.Endpoint, ""),
+                    OpenIddictConstants.Permissions.Endpoints.Logout.Replace(OpenIddictConstants.Permissions.Prefixes.Endpoint, ""),
+                },
+                GrantTypes = new List<string>
+                {
+                    OpenIddictConstants.GrantTypes.AuthorizationCode,
+                },
+                PostLogoutUrls = new List<string>
+                {
+                    _identityUIOptions.BasePath.AppendPathSegment("signout-callback-oidc"),
+                },
+                RedirectUrls = new List<string>
+                {
+                    _identityUIOptions.BasePath.AppendPathSegment("signin-oidc"),
+                },
+                RequireConsent = false,
+                RequirePkce = true,
+                ResponseTypes = new List<string>
+                {
+                    OpenIddictConstants.ResponseTypes.Code
+                },
+                Scopes = new List<string>
+                {
+                    OpenIddictConstants.Scopes.OpenId,
+                    OpenIddictConstants.Scopes.Profile,
+                    OpenIddictConstants.Scopes.Email,
+                    OpenIddictConstants.Scopes.Phone,
+                    OpenIddictConstants.Scopes.Roles,
+                    OpenIdConnectConstants.Scopes.Permissions,
+                },
+                Secret = null,
+            };
 
-            permissionSeedModels.AddRange(IdentityUIPermissions.ALL_DATA);
-            roleSeedModels.AddRange(IdentityUIRoles.ALL_DATA);
+            clientSeedModels.Add(clientSeedModel);
 
-            SeedMissingEmails();
+            List<string> requiredScopes = clientSeedModels
+                .SelectMany(x => x.Scopes)
+                .Distinct()
+                .ToList();
 
-            await SeedRoles(roleSeedModels);
-            SeedPermissions(permissionSeedModels);
-            SeedRolePermissions(roleSeedModels);
-            SeedRoleAssigments(roleSeedModels);
+            await SeedClientScopes(requiredScopes);
+            await SeedClients(clientSeedModels);
         }
 
         private void SeedPermissions(List<PermissionSeedModel> permissionSeedModels)
@@ -106,12 +137,6 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
                 .Select(x => x.ToEntity());
 
             _context.Permissions.AddRange(missingPermissions);
-            int addPermissionChanges = _context.SaveChanges();
-            if(addPermissionChanges != missingPermissions.Count())
-            {
-                _logger.LogCritical($"Failed to seed Permission.");
-                throw new Exception("Failed to seed Permission");
-            }
 
             existingPermissions = _context.Permissions.ToList();
             foreach (PermissionSeedModel permission in permissionSeedModels)
@@ -127,7 +152,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
             }
         }
 
-        public async Task SeedRoles(List<RoleSeedModel> roleSeedModels)
+        private async Task SeedRoles(List<RoleSeedModel> roleSeedModels)
         {
             List<RoleEntity> existingRoles = _context.Roles.ToList();
 
@@ -146,7 +171,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
             }
         }
 
-        public void SeedRolePermissions(List<RoleSeedModel> roleSeedModels)
+        private void SeedRolePermissions(List<RoleSeedModel> roleSeedModels)
         {
             List<RoleEntity> roles = _context.Roles
                 .Include(x => x.Permissions)
@@ -205,7 +230,7 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
             }
         }
 
-        public void SeedRoleAssigments(List<RoleSeedModel> roleSeedModels)
+        private void SeedRoleAssigments(List<RoleSeedModel> roleSeedModels)
         {
             List<RoleEntity> roles = _context.Roles
                 .Include(x => x.CanAssigne)
@@ -280,21 +305,195 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data.Seeders
             }
         }
 
-        private void SeedMissingEmails()
+        private async Task SeedClientScopes(List<string> scopes)
         {
-            List<EmailTypes> emailTypes = _context.Emails
-                .Select(x => x.Type)
-                .ToList();
+            List<ClientScopeEntity> scopeEntities = await _context.ClientScopes.ToListAsync();
 
-            IEnumerable<EmailEntity> missingEmails = _allEmails
-                .Where(x => !emailTypes.Contains(x.Type));
-
-            _context.Emails.AddRange(missingEmails);
-            int changes = _context.SaveChanges();
-            if (changes != missingEmails.Count())
+            if(!scopeEntities.Where(x => x.Name == OpenIddictConstants.Scopes.OpenId).Any())
             {
-                _logger.LogCritical($"Failed to seed emails");
-                throw new Exception("Failed to seed emails");
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: OpenIddictConstants.Scopes.OpenId,
+                    displayName: "openid",
+                    description: "Indicates that client application intends to use Openid connect to verify user identity");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if(result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope openid");
+                }
+            }
+
+            if(!scopeEntities.Where(x => x.Name == OpenIddictConstants.Scopes.OfflineAccess).Any())
+            {
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: OpenIddictConstants.Scopes.OfflineAccess,
+                    displayName: "offline_access",
+                    description: "This scope is only allowed if the client supports Refresh token grant");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if (result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope offline_access");
+                }
+            }
+
+            if(!scopeEntities.Where(x => x.Name == OpenIddictConstants.Scopes.Profile).Any())
+            {
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: OpenIddictConstants.Scopes.Profile,
+                    displayName: "profile",
+                    description: "Request access to user default claims");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if (result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope profile");
+                }
+            }
+
+            if (!scopeEntities.Where(x => x.Name == OpenIddictConstants.Scopes.Email).Any())
+            {
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: OpenIddictConstants.Scopes.Email,
+                    displayName: "email",
+                    description: "Request access user email");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if (result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope profile");
+                }
+            }
+
+            if (!scopeEntities.Where(x => x.Name == OpenIddictConstants.Scopes.Email).Any())
+            {
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: OpenIddictConstants.Scopes.Phone,
+                    displayName: "phone",
+                    description: "Request access user phone number");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if (result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope phone");
+                }
+            }
+
+            if (!scopeEntities.Where(x => x.Name == OpenIddictConstants.Scopes.Roles).Any())
+            {
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: "roles",
+                    displayName: "roles",
+                    description: "Request access user roles");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if (result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope roles");
+                }
+            }
+
+            if (!scopeEntities.Where(x => x.Name == OpenIdConnectConstants.Scopes.Permissions).Any())
+            {
+                AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                    name: "permissions",
+                    displayName: "permissions",
+                    description: "Request access user permissions");
+
+                Result result = await _clientScopeService.Add(addClientScopeModel);
+                if (result.Failure)
+                {
+                    _logger.LogError($"Failed to add system client scope permissions");
+                }
+            }
+
+            scopeEntities = await _context.ClientScopes.ToListAsync();
+
+            foreach (string scope in scopes)
+            {
+                if (!scopeEntities.Where(x => x.Name == scope).Any())
+                {
+                    AddClientScopeModel addClientScopeModel = new AddClientScopeModel(
+                        name: scope,
+                        displayName: scope,
+                        description: null);
+
+                    Result result = await _clientScopeService.Add(addClientScopeModel);
+                    if (result.Failure)
+                    {
+                        _logger.LogError($"Failed to add system client scope {scope}");
+                    }
+                }
+            }
+        }
+
+        private async Task SeedClients(List<ClientSeedModel> clientSeedModels)
+        {
+            foreach (ClientSeedModel client in clientSeedModels)
+            {
+                ClientEntity clientEntity = await _context.Clients
+                    .Where(x => x.ClientId == client.ClientId)
+                    .SingleOrDefaultAsync();
+
+                if (clientEntity != null)
+                {
+                    continue;
+                }
+
+                AddCustomClientModel addCustomClientModel = new AddCustomClientModel
+                {
+                    ClientId = client.ClientId,
+                    Name = client.Name
+                };
+
+                Result<IdStringModel> addClientResult = await _addClientService.AddCustomClient(addCustomClientModel);
+                if (addClientResult.Failure)
+                {
+                    _logger.LogError($"Failed to seed client. Client {client.ClientId}");
+                    continue;
+                }
+
+                UpdateClientModel updateClientModel = new UpdateClientModel
+                {
+                    Endpoints = client.Endpoints,
+                    GrantTypes = client.GrantTypes,
+                    Name = client.Name,
+                    RedirectUrls = client.RedirectUrls,
+                    PostLogoutUrls = client.PostLogoutUrls,
+                    RequirePkce = client.RequirePkce,
+                    RequireConsent = client.RequireConsent,
+                    ResponseTypes = client.ResponseTypes,
+                };
+
+                Result updateResult = await _manageClientService.Update(addClientResult.Value.Id, updateClientModel);
+                if (updateResult.Failure)
+                {
+                    _logger.LogError($"Failed to update seed Client. Client {client.ClientId}");
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(client.Secret))
+                {
+                    Result setSecretResult = await _manageClientService.GenerateNewClientSecret(addClientResult.Value.Id, client.Secret);
+                    if (setSecretResult.Failure)
+                    {
+                        _logger.LogError($"Failed to set client secret. Client {client.ClientId}");
+                    }
+                }
+
+                if(client.Scopes != null)
+                {
+                    ManageClientScopesModel manageClientScopesModel = new ManageClientScopesModel
+                    {
+                        Scopes = client.Scopes,
+                    };
+
+                    Result addScopesResult = await _manageClientService.AddScopes(addClientResult.Value.Id, manageClientScopesModel);
+                    if(addScopesResult.Failure)
+                    {
+                        _logger.LogError($"Failed to add scopes to seed");
+                    }
+                }
             }
         }
     }

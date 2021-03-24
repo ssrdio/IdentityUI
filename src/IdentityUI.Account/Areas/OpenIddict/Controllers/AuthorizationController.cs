@@ -238,7 +238,7 @@ namespace SSRD.IdentityUI.Account.Areas.OpenIddict
                     return View(new AuthorizeViewModel
                     {
                         ApplicationName = await _applicationManager.GetLocalizedDisplayNameAsync(application),
-                        Scope = request.Scope
+                        Scopes = request.Scope.Split(' ').ToList(),
                     });
             }
         }

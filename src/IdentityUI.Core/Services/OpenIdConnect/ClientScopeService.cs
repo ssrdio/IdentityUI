@@ -37,13 +37,8 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
             _logger = logger;
         }
 
-        public async Task<Result> Add(AddClientScopeModel addClientScopeModel)
+        private async Task<Result> Add(OpenIddictScopeDescriptor openIddictScopeDescriptor)
         {
-            OpenIddictScopeDescriptor openIddictScopeDescriptor = new OpenIddictScopeDescriptor
-            {
-                Name = addClientScopeModel.Name
-            };
-
             ClientScopeEntity clientScope = new ClientScopeEntity();
 
             await _openIddictScopeManager.PopulateAsync(clientScope, openIddictScopeDescriptor);
@@ -64,6 +59,18 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
             }
 
             return Result.Ok();
+        }
+
+        public Task<Result> Add(AddClientScopeModel addClientScopeModel)
+        {
+            OpenIddictScopeDescriptor openIddictScopeDescriptor = new OpenIddictScopeDescriptor
+            {
+                Name = addClientScopeModel.Name,
+                DisplayName = addClientScopeModel.DisplayName,
+                Description = addClientScopeModel.Description
+            };
+
+            return Add(openIddictScopeDescriptor);
         }
 
         public async Task<Result> Remove(string id)

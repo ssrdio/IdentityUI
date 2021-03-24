@@ -9,6 +9,19 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect.Models
     public class AddClientScopeModel
     {
         public string Name { get; set; }
+        public string DisplayName { get; set; }
+        public string Description { get; set; }
+
+        public AddClientScopeModel()
+        {
+        }
+
+        public AddClientScopeModel(string name, string displayName, string description)
+        {
+            Name = name;
+            DisplayName = displayName;
+            Description = description;
+        }
     }
 
     public class AddClientScopeModelValidator : AbstractValidatorWithNullCheck<AddClientScopeModel>
@@ -17,6 +30,10 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect.Models
         {
             RuleFor(x => x.Name)
                 .NotEmpty();
+
+            RuleFor(x => x.DisplayName);
+
+            RuleFor(x => x.Description);
         }
     }
 }

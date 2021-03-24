@@ -162,5 +162,10 @@ namespace SSRD.IdentityUI.Core.Services
 
             return _httpContextAccessor.HttpContext.User.HasRole(role, _identityUIClaimOptions);
         }
+
+        public bool HasScope(string scope)
+        {
+            return _httpContextAccessor.HttpContext.User.HasScope(scope, _identityUIClaimOptions);
+        }
     }
 }

@@ -17,7 +17,7 @@
                                 </h4>
                             </div>
 
-                            <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
+                            <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scopes)</p>
 
                             <div class="modal-footer clearfix">
                                 <form asp-area="OpenIddict" asp-controller="Authorization" asp-action="Authorize" method="post">

@@ -21,6 +21,7 @@ using SSRD.IdentityUI.Core.Models;
 using SSRD.IdentityUI.Core.Models.Options;
 using Microsoft.Extensions.Options;
 using SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Interfaces.User;
+using SSRD.AdminUI.Template.Models;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
 {
@@ -190,12 +191,16 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
 
             RoleViewModel roleViewModel = new RoleViewModel(
                 assignedRoles: assignedRoles
-                    .Select(x => new RoleViewModel.RoleModel(x.Id, x.Name))
-                    .OrderBy(x => x.Name)
+                    .Select(x => new DragAndDropItem(
+                        id: x.Id,
+                        text: x.Name))
+                    .OrderBy(x => x.Text)
                     .ToList(),
                 availableRoles: avaibleRoles
-                    .Select(x => new RoleViewModel.RoleModel(x.Id, x.Name))
-                    .OrderBy(x => x.Name)
+                    .Select(x => new DragAndDropItem(
+                        id: x.Id,
+                        text: x.Name))
+                    .OrderBy(x => x.Text)
                     .ToList());
 
             return Result.Ok(roleViewModel);

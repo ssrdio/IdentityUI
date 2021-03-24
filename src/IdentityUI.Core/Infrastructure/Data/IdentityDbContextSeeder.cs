@@ -1,24 +1,13 @@
-﻿using SSRD.IdentityUI.Core.Data.Entities.Identity;
-using SSRD.IdentityUI.Core.Models;
-using SSRD.IdentityUI.Core.Models.Options;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using SSRD.IdentityUI.Core.Data.Enums.Entity;
-using SSRD.IdentityUI.Core.Interfaces.Data.Repository;
-using SSRD.IdentityUI.Core.Data.Entities;
-using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Data.Models;
 using SSRD.IdentityUI.Core.Infrastructure.Data.Seeders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
+using SSRD.IdentityUI.Core.Data.Models.Seed;
 
 namespace SSRD.IdentityUI.Core.Infrastructure.Data
 {
@@ -231,12 +220,16 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         /// <param name="app"></param>
         /// <param name="permissionSeedModels">Permissions required for your application</param>
         /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedSystemEntities(this IApplicationBuilder app, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
+        /// <param name="clientSeedModels">Clients required fro your application</param>
+        public static void SeedSystemEntities(
+            this IApplicationBuilder app,
+            List<PermissionSeedModel> permissionSeedModels = null,
+            List<RoleSeedModel> roleSeedModels = null,
+            List<ClientSeedModel> clientSeedModels = null)
         {
             using (IServiceScope scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                scope.ServiceProvider.SeedSystemEntities(permissionSeedModels, roleSeedModels);
+                scope.ServiceProvider.SeedSystemEntities(permissionSeedModels, roleSeedModels, clientSeedModels);
             }
         }
 
@@ -246,12 +239,16 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         /// <param name="host"></param>
         /// <param name="permissionSeedModels">Permissions required for your application</param>
         /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedSystemEntities(this IHost host, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
+        /// <param name="clientSeedModels">Clients required fro your application</param>
+        public static void SeedSystemEntities(
+            this IHost host,
+            List<PermissionSeedModel> permissionSeedModels = null,
+            List<RoleSeedModel> roleSeedModels = null,
+            List<ClientSeedModel> clientSeedModels = null)
         {
             using (IServiceScope scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                scope.ServiceProvider.SeedSystemEntities(permissionSeedModels, roleSeedModels);
+                scope.ServiceProvider.SeedSystemEntities(permissionSeedModels, roleSeedModels, clientSeedModels);
             }
         }
 
@@ -261,12 +258,16 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         /// <param name="webHost"></param>
         /// <param name="permissionSeedModels">Permissions required for your application</param>
         /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedSystemEntities(this IWebHost webHost, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
+        /// <param name="clientSeedModels">Clients required fro your application</param>
+        public static void SeedSystemEntities(
+            this IWebHost webHost,
+            List<PermissionSeedModel> permissionSeedModels = null,
+            List<RoleSeedModel> roleSeedModels = null,
+            List<ClientSeedModel> clientSeedModels = null)
         {
             using (IServiceScope scope = webHost.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                scope.ServiceProvider.SeedSystemEntities(permissionSeedModels, roleSeedModels);
+                scope.ServiceProvider.SeedSystemEntities(permissionSeedModels, roleSeedModels, clientSeedModels);
             }
         }
 
@@ -275,9 +276,13 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="permissionSeedModels">Permissions required for your application</param>
-        /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedSystemEntities(this IServiceProvider serviceProvider, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
+        /// <param name="roleSeedModels">Roles required for your application</param>
+        /// <param name="clientSeedModels">Clients required fro your application</param>
+        public static void SeedSystemEntities(
+            this IServiceProvider serviceProvider,
+            List<PermissionSeedModel> permissionSeedModels = null,
+            List<RoleSeedModel> roleSeedModels = null,
+            List<ClientSeedModel> clientSeedModels = null)
         {
             if(permissionSeedModels == null)
             {
@@ -289,78 +294,14 @@ namespace SSRD.IdentityUI.Core.Infrastructure.Data
                 roleSeedModels = new List<RoleSeedModel>();
             }
 
-            SystemEntitySeeder systemEntitySeeder = serviceProvider.GetRequiredService<SystemEntitySeeder>();
-
-            Task.WaitAll(systemEntitySeeder.Seed(permissionSeedModels, roleSeedModels));
-        }
-
-        /// <summary>
-        /// Seed missing system entities 
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="permissionSeedModels">Permissions required for your application</param>
-        /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedMissingSystemEntities(this IApplicationBuilder app, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
-        {
-            using (IServiceScope scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            if(clientSeedModels == null)
             {
-                scope.ServiceProvider.SeedMissingSystemEntities(permissionSeedModels, roleSeedModels);
-            }
-        }
-
-        /// <summary>
-        /// Seed missing system entities 
-        /// </summary>
-        /// <param name="host"></param>
-        /// <param name="permissionSeedModels">Permissions required for your application</param>
-        /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedMissngSystemEntities(this IHost host, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
-        {
-            using (IServiceScope scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                scope.ServiceProvider.SeedMissingSystemEntities(permissionSeedModels, roleSeedModels);
-            }
-        }
-
-        /// <summary>
-        /// Seed missing system entities 
-        /// </summary>
-        /// <param name="webHost"></param>
-        /// <param name="permissionSeedModels">Permissions required for your application</param>
-        /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedMissngSystemEntities(this IWebHost webHost, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
-        {
-            using (IServiceScope scope = webHost.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                scope.ServiceProvider.SeedMissingSystemEntities(permissionSeedModels, roleSeedModels);
-            }
-        }
-
-        /// <summary>
-        /// Seed missing system entities 
-        /// </summary>
-        /// <param name="serviceProvider"></param>
-        /// <param name="permissionSeedModels">Permissions required for your application</param>
-        /// <param name="roleSeedModels">Roles required for your application.</param>
-        public static void SeedMissingSystemEntities(this IServiceProvider serviceProvider, List<PermissionSeedModel> permissionSeedModels = null,
-            List<RoleSeedModel> roleSeedModels = null)
-        {
-            if (permissionSeedModels == null)
-            {
-                permissionSeedModels = new List<PermissionSeedModel>();
-            }
-
-            if (roleSeedModels == null)
-            {
-                roleSeedModels = new List<RoleSeedModel>();
+                clientSeedModels = new List<ClientSeedModel>();
             }
 
             SystemEntitySeeder systemEntitySeeder = serviceProvider.GetRequiredService<SystemEntitySeeder>();
 
-            Task.WaitAll(systemEntitySeeder.Seed(permissionSeedModels, roleSeedModels));
+            Task.WaitAll(systemEntitySeeder.Seed(permissionSeedModels, roleSeedModels, clientSeedModels));
         }
     }
 }

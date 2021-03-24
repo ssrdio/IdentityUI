@@ -20,6 +20,8 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
             builder.Services.AddScoped<IClientConsentService, ClientConsentService>();
             builder.Services.AddScoped<IClientTokenService, ClientTokenService>();
 
+            builder.Services.AddScoped<IIdentityUIOpenIdService, IdentityUIOpenIdService>();
+
             builder.Services.AddTransient<IBaseDAO<ClientEntity>, IdentityUIBaseDAO<ClientEntity>>();
             builder.Services.AddTransient<IBaseDAO<ClientScopeEntity>, IdentityUIBaseDAO<ClientScopeEntity>>();
             builder.Services.AddTransient<IBaseDAO<ClientConsentEntity>, IdentityUIBaseDAO<ClientConsentEntity>>();
@@ -46,7 +48,6 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
 
             builder.Services.AddSingleton<IValidator<Models.UpdateClientIdModel>, Models.UpdateClientIdModelValidator>();
             builder.Services.AddSingleton<IValidator<Models.UpdateClientSecretModel>, Models.UpdateClientSecretModelValidator>();
-            builder.Services.AddSingleton<IValidator<Models.AddClientSecretModel>, Models.AddClientSecretModelValidator>();
 
             builder.Services.AddSingleton<IValidator<Models.AddClientScopeModel>, Models.AddClientScopeModelValidator>();
             builder.Services.AddSingleton<IValidator<Models.UpdateClientScopeModel>, Models.UpdateClientScopeModelValidator>();

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using OpenIddict.Abstractions;
 using SSRD.IdentityUI.Core.Data.Models.Constants;
 using SSRD.IdentityUI.Core.Models.Options;
 using System;
@@ -316,6 +317,31 @@ namespace SSRD.IdentityUI.Core.Services.Identity
             }
 
             return false;
+        }
+
+        public static bool HasScope(this HttpContext context, string scope)
+        {
+            IdentityUIClaimOptions identityUIClaimOptions = context.RequestServices.GetRequiredService<IOptions<IdentityUIClaimOptions>>().Value;
+
+            return context.User.HasScope(scope, identityUIClaimOptions);
+        }
+
+        public static bool HasScope(this ClaimsPrincipal claimsPrincipal, string scope, IdentityUIClaimOptions identityUIClaimOptions)
+        {
+            string scopes = claimsPrincipal.Claims
+                .Where(x => x.Type == OpenIddictConstants.Claims.Scope)
+                .Select(x => x.Value)
+                .FirstOrDefault();
+
+            if(scopes == null)
+            {
+                return false;
+            }
+
+            return scopes
+                .Split(' ')
+                .Where(x => x == scope)
+                .Any();
         }
     }
 }

@@ -354,44 +354,42 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
             return await Update(client);
         }
 
-        public async Task<Result> AddClientSecret(string id, AddClientSecretModel addClientSecretModel)
+        public async Task<Result<GenerateNewClientSecretModel>> GenerateNewClientSecret(string id, string secret = null)
         {
             Result<ClientEntity> getClientResult = await Get(id);
             if (getClientResult.Failure)
             {
-                return Result.Fail(getClientResult);
+                return Result.Fail<GenerateNewClientSecretModel>(getClientResult);
             }
 
             ClientEntity client = getClientResult.Value;
 
             if(client.ClientSecret != null)
             {
-                _logger.LogError($"Client already has set secret. ClientId {id}");
-                return Result.Fail(CLIENT_ALREADY_HAS_SECRET);
+                _logger.LogWarning($"Client already has set secret. Generating new one. ClientId {id}");
             }
 
-            await _openIddictClientStore.SetClientTypeAsync(client, OpenIddictConstants.ClientTypes.Confidential, default);
-
-            return await Update(client, addClientSecretModel.ClientSecret);
-        }
-
-        public async Task<Result> UpdateClientSecret(string id, UpdateClientSecretModel updateClientSecret)
-        {
-            Result<ClientEntity> getClientResult = await Get(id);
-            if (getClientResult.Failure)
+            if (client.Type != OpenIddictConstants.ClientTypes.Confidential)
             {
-                return Result.Fail(getClientResult);
+                await _openIddictClientStore.SetClientTypeAsync(client, OpenIddictConstants.ClientTypes.Confidential, default);
             }
 
-            ClientEntity client = getClientResult.Value;
-
-            if(client.ClientSecret == null)
+            string newSecret = secret;
+            if(string.IsNullOrEmpty(newSecret))
             {
-                _logger.LogError($"Client does not have a secret. ClientId {id}");
-                return Result.Fail(CLIENT_DOES_NOT_HAVE_A_SECRET);
+                newSecret = Guid.NewGuid().ToString();
             }
 
-            return await Update(client, updateClientSecret.ClientSecret);
+            Result<ClientEntity> updateResult = await Update(client, newSecret);
+            if(updateResult.Failure)
+            {
+                return Result.Fail<GenerateNewClientSecretModel>(updateResult);
+            }
+
+            GenerateNewClientSecretModel generateNewClientSecretModel = new GenerateNewClientSecretModel(
+                secret: newSecret);
+
+            return Result.Ok(generateNewClientSecretModel);
         }
 
         public async Task<Result> RemoveClientSecret(string id)

@@ -155,18 +155,9 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Controllers.OpenIdConnect.Ap
 
         [HttpPost("{id}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> AddClientSecret([FromRoute] string id, [FromBody] AddClientSecretModel addClientSecretModel)
+        public async Task<IActionResult> GenerateNewClientSecret([FromRoute] string id)
         {
-            Result result = await _manageClientService.AddClientSecret(id, addClientSecretModel);
-
-            return result.ToApiResult();
-        }
-
-        [HttpPost("{id}")]
-        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateClientSecret([FromRoute] string id, [FromBody] UpdateClientSecretModel updateClientSecretModel)
-        {
-            Result result = await _manageClientService.UpdateClientSecret(id, updateClientSecretModel);
+            Result<GenerateNewClientSecretModel> result = await _manageClientService.GenerateNewClientSecret(id);
 
             return result.ToApiResult();
         }
