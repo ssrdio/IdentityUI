@@ -513,23 +513,31 @@
 
 <div>
     <div class="tab-content">
-        <div class="main-card mb-3 card fullWidthCard">
+        <div class="main-card mb-3 card fullWidthCard table-card">
             <div class="card-body">
                 <div class="card-title-space">
                     <h5 class="card-title">
-                        Users
+                        Users:
                     </h5>
-                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
-                    {
-                        <button id="add-existing-user-button" class="header-button">Add Existing User</button>
-                    }
-
-                    @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)
-                     && _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
-                    {
-                        <button id="invite-user-button" class="header-button">Invite User</button>
-                    }
+                    <div id="actions-dropdown" class="dropdown">
+                        <button class="btn btn-secondary header-button header-button-dropdown" type="button" data-toggle="dropdown">
+                            Actions
+                            <i class="fas fa-sort-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_ADD_EXISTING_USERS))
+                            {
+                                <button id="add-existing-user-button" class="dropdown-item">Add Existing User</button>
+                            }
+                            @if (_identityUIUserInfoService.HasGroupPermission(IdentityUIPermissions.GROUP_CAN_INVITE_USERS)
+&& _identityUIEndpoints.Value.UseEmailSender.HasValue && _identityUIEndpoints.Value.UseEmailSender.Value)
+                            {
+                                <button id="invite-user-button" class="dropdown-item ">Invite User</button>
+                            }
+                        </div>
+                    </div>
                 </div>
+
                 <div class="custom_container custom_table">
                     <table id="user-table" class="dataTableClass display "></table>
                 </div>

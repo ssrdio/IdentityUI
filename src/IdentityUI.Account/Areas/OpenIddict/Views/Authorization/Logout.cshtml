@@ -28,15 +28,16 @@
                             <div class="h5 modal-title text-center">
                                 <h4 class="mt-2 modal-header-custom">
                                     <div>Logout</div>
-                                    <span>Are you sure you want to sign out?</span>
                                 </h4>
                             </div>
-
-                            <div class="modal-footer clearfix">
+                            <div class="consent-text pt-3 text-center">
+                                <span>Are you sure you want to sign out?</span>
+                            </div>
+                            <div class="authorize-button-holder">
                                 <form asp-area="OpenIddict" asp-controller="Authorization" asp-action="Logout" method="post">
 
                                     @foreach (var parameter in Context.Request.HasFormContentType ?
-                                      (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
+                                    (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
                                     {
                                         <input type="hidden" name="@parameter.Key" value="@parameter.Value" />
                                     }
@@ -44,8 +45,8 @@
                                     <input class="btn btn-primary btn-lg" name="Confirm" type="submit" value="Yes" />
                                 </form>
                             </div>
+                            </div>
                         </div>
-                    </div>
                     <div class="text-center text-white opacity-8 mt-3">Copyright © @SSRD.AdminUI.Template.Models.CopyRightModel.NAME @SSRD.AdminUI.Template.Models.CopyRightModel.YEAR </div>
                 </div>
             </div>

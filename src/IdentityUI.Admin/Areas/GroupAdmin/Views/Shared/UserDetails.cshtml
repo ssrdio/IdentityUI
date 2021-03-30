@@ -274,7 +274,7 @@
     </div>
 
     <div class="tab-content">
-        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12 form-card">
             <div class="card-body">
                 <div class="card-title-space">
                     <h5 class="card-title">
@@ -415,16 +415,19 @@
                         }
                     </div>
 
-                    <div class="button-holder">
+                    <div class="button-holder button-holder-remove-margin">
                         @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_IMPERSONATE_USER, _identityUIClaimPermissions.Value)
                            && _identityUIEndpoints.Value.AllowImpersonation)
                         {
-                            <button type="button" id="impersonate-button" class="btn btn-primary custom-submit">Impersonate</button>
+                            <button type="button" id="impersonate-button" class="btn btn-secondary custom-submit">Impersonate</button>
                         }
                         @if (User.HasGroupPermissionOrImpersonatorHasPermission(IdentityUIPermissions.GROUP_CAN_MANAGE_USER_DETAILS, _identityUIClaimPermissions.Value))
                         {
                             <button type="button" id="update-details-button" class="btn btn-primary custom-submit">Save</button>
                         }
+
+
+
                     </div>
                 </div>
             </div>

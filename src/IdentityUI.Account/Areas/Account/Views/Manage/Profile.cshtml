@@ -68,12 +68,12 @@
                     <span asp-validation-for="PhoneNumber" class="text-danger error-alert-custom"></span>
                 </div>
 
-                <div class="button-holder">
-                    <button type="submit" class="btn btn-primary custom-submit">Save</button>
+                <div class="button-holder button-holder-remove-margin">
                     @if (_identityUIEndpoints.Value.CanRemoveUser)
                     {
                         <button type="button" id="remove-button" class="btn btn-danger remove-button">Delete</button>
                     }
+                    <button type="submit" class="btn btn-primary custom-submit">Save</button>
                 </div>
             </form>
         </div>

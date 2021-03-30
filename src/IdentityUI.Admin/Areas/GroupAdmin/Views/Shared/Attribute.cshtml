@@ -88,7 +88,7 @@
                         },
                         {
                             data: null,
-                            className: "table-two-buttons",
+                            className: "attribute-table-buttons",
 
                             mRender: function (data) {
                                 return `<div>
@@ -109,6 +109,7 @@
                     let id = $(event.target).data('id');
                     this.confirmationModal.show({ key: 'removeAttribute', id: id }, 'Are you sure that you want to remove Attribute?');
                 });
+
             }
 
             reloadAttributeTable() {
@@ -207,7 +208,7 @@
 </div>
 <div>
     <div class="tab-content">
-        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12">
+        <div class="main-card mb-3 card col-xl-6 offset-xl-3 col-lg-12 table-card">
             <div class="card-body">
                 <div class="card-title-space">
                     <h5 class="card-title">

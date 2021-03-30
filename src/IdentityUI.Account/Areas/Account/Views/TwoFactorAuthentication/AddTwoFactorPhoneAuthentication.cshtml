@@ -36,7 +36,7 @@
                     <input placeholder="Enter code here" asp-for="@Model.Token" class="form-control" />
                     <span asp-validation-for="@Model.Token" class="text-danger error-alert-custom"></span>
                 </div>
-                <div class="button-holder">
+                <div class="button-holder button-holder-remove-margin">
                     <a class="resend-diffrent-number" href="/Account/Manage/">Resend code to different number?</a>
                     <button type="submit" class="btn btn-primary custom-submit">Finish setup</button>
                 </div>

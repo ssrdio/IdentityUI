@@ -655,3 +655,7 @@ table.dataTableClass > tbody > tr > td {
     padding: 10px 0px;
     color: #ff4747;
 }
+
+.button-holder-remove-margin .custom-submit {
+    margin-right: 0px !important;
+}
