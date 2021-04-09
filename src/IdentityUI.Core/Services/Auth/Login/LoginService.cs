@@ -95,7 +95,7 @@ namespace SSRD.IdentityUI.Core.Services.Auth
 
             appUser.SessionCode = Guid.NewGuid().ToString();
 
-            Result addSessionResult = _sessionService.Add(appUser.SessionCode, appUser.Id, ip);
+            CommonUtils.Result.Result addSessionResult = await _sessionService.Add(appUser.SessionCode, appUser.Id);
             if(addSessionResult.Failure)
             {
                 return SignInResult.Failed;

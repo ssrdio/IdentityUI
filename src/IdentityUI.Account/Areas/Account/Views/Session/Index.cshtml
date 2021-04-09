@@ -1,0 +1,50 @@
+﻿@{ Layout = "/Areas/Account/Views/Shared/_ManageLayout.cshtml"; }
+
+@section script {
+    <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            new AccountSessions().remove(41);
+        });
+
+        class AccountSessions {
+            constructor() {
+
+            }
+
+            showSessions() {
+
+            }
+
+            showError() {
+
+            }
+
+            hideError() {
+
+            }
+
+            get() {
+                Api.get(`/Account/Session/Get`)
+                    .done((data) => {
+                        console.log(data);
+                        //show sessions
+                    })
+                    .fail((response) => {
+                        this.showError(response.responseJSON);
+                    });
+            }
+
+            remove(id) {
+                Api.delete(`/Account/Session/Remove/${id}`)
+                    .done(() => {
+                        //remove session
+                    })
+                    .fail((response) => {
+                        this.showError(response.responseJSON);
+                    })
+            }
+        }
+    </script>
+}

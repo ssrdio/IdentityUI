@@ -15,5 +15,6 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Models.Manage.Menu
         Credentials = 2,
         TwoFactorAuthenticator = 3,
         Audit = 4,
+        Session = 5,
     }
 }

@@ -17,6 +17,7 @@ namespace SSRD.IdentityUI.Core.Data.Entities
         public long Id { get; set; }
         public string Ip { get; set; }
         public string Code { get; set; }
+        public string UserAgent { get; set; }
 
         public DateTimeOffset LastAccess { get; set; }
         public SessionEndTypes? EndType { get; set; }
@@ -29,11 +30,12 @@ namespace SSRD.IdentityUI.Core.Data.Entities
 
         }
 
-        public SessionEntity(string ip, string userId, string code)
+        public SessionEntity(string ip, string userId, string code, string userAgent)
         {
             Ip = ip;
             UserId = userId;
             Code = code;
+            UserAgent = userAgent;
 
             LastAccess = DateTimeOffset.UtcNow;
         }

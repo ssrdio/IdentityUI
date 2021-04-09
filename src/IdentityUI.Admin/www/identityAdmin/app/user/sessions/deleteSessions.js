@@ -5,7 +5,6 @@
     this.table = $('#sessionsTable').DataTable({
       serverSide: true,
       processing: true,
-      columnDefs: [{ width: '120px', targets: [3] }],
       targets: 'no-sort',
       bSort: false,
       order: [],
@@ -27,6 +26,21 @@
         {
             data: 'lastAccess',
             title: 'Last Access',
+            render: $.fn.dataTable.render.text()
+        },
+        {
+            data: 'userAgent',
+            title: 'User Agent',
+            render: $.fn.dataTable.render.text()
+        },
+        {
+            data: 'os',
+            title: 'Os',
+            render: $.fn.dataTable.render.text()
+        },
+        {
+            data: 'device',
+            title: 'Device',
             render: $.fn.dataTable.render.text()
         },
         {

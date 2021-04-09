@@ -1,7 +1,4 @@
-﻿using SSRD.IdentityUI.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User
 {
@@ -10,18 +7,24 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Models.User
         public long Id { get; set; }
         public string Ip { get; set; }
 
-        private DateTimeOffset? CreatedDateTime { get; set; }
-        private DateTimeOffset LastAccessDateTime { get; set; }
+        public DateTimeOffset? Created { get; set; }
+        public DateTimeOffset LastAccess { get; set; }
 
-        public string Created { get { return CreatedDateTime.HasValue ? CreatedDateTime.Value.ToString(DateTimeFormats.DEFAULT_DATE_TIME_FORMAT) : null; } }
-        public string LastAccess { get { return LastAccessDateTime.ToString(DateTimeFormats.DEFAULT_DATE_TIME_FORMAT); } }
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string FullUserAgent { get; set; }
 
-        public SessionViewModel(long id, string ip, DateTimeOffset? created, DateTimeOffset lastAccess)
+        public string UserAgent { get; set; }
+        public string Os { get; set; }
+        public string Device { get; set; }
+
+        public SessionViewModel(long id, string ip, DateTimeOffset? created, DateTimeOffset lastAccess, string fullUserAgent)
         {
             Id = id;
             Ip = ip;
-            CreatedDateTime = created;
-            LastAccessDateTime = lastAccess;
+            Created = created;
+            LastAccess = lastAccess;
+            FullUserAgent = fullUserAgent;
         }
     }
 }

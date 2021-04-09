@@ -15,5 +15,12 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.Auth
         Models.Result.Result Logout(string code, string userId, SessionEndTypes endType);
 
         Task<Models.Result.Result> LogoutUser(LogoutUserSessionsRequest request, string adminId);
+
+        /// <summary>
+        /// Removes users session
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Result> Remove(long id);
     }
 }

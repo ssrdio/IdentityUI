@@ -30,6 +30,7 @@ namespace SSRD.IdentityUI.Account
             builder.Services.AddScoped<IAccountDataService, AccountDataService>();
             builder.Services.AddScoped<ITwoFactorAuthenticationDataService, TwoFactorAuthenticationDataService>();
             builder.Services.AddScoped<ICredentialsDataService, CredentialsDataService>();
+            builder.Services.AddScoped<ISessionDataService, SessionDataService>();
 
             builder.Services.AddScoped<IAuditDataService, AuditDataService>();
 

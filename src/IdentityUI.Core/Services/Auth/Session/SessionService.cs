@@ -14,15 +14,26 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SSRD.CommonUtils.Result;
-using SSRD.IdentityUI.Core.Helper;
+using Microsoft.Net.Http.Headers;
+using Microsoft.Extensions.Primitives;
+using SSRD.CommonUtils.Specifications.Interfaces;
+using SSRD.IdentityUI.Core.Interfaces.Services;
+using SSRD.CommonUtils.Specifications;
 
 namespace SSRD.IdentityUI.Core.Services.Auth.Session
 {
     internal class SessionService : ISessionService
     {
+        private const string FAILED_TO_ADD_SESSION = "failed_to_add_sessions";
+        private const string SESSION_NOT_FOUND = "session_not_found";
+        private const string FAILED_TO_REMOVE_USER_SESSION = "failed_to_remove_user_session";
+
         private readonly UserManager<AppUserEntity> _userManager;
 
         private readonly ISessionRepository _sessionRepository;
+        private readonly IBaseDAO<SessionEntity> _sessionDAO;
+
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -34,6 +45,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
         public SessionService(
             UserManager<AppUserEntity> userManager,
             ISessionRepository sessionRepository,
+            IBaseDAO<SessionEntity> sessionDAO,
+            IIdentityUIUserInfoService identityUIUserInfoService,
             IHttpContextAccessor httpContextAccessor,
             IValidator<LogoutSessionRequest> logoutSessionValidator,
             IValidator<LogoutUserSessionsRequest> logoutUserSessionValidator,
@@ -42,6 +55,9 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
             _userManager = userManager;
 
             _sessionRepository = sessionRepository;
+            _sessionDAO = sessionDAO;
+
+            _identityUIUserInfoService = identityUIUserInfoService;
             _httpContextAccessor = httpContextAccessor;
 
             _logoutSessionValidator = logoutSessionValidator;
@@ -178,7 +194,8 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
             SessionEntity session = new SessionEntity(
                 ip: ip,
                 userId: userId,
-                code: code);
+                code: code,
+                userAgent: null);
 
             bool addResult = _sessionRepository.Add(session);
             if(!addResult)
@@ -190,13 +207,57 @@ namespace SSRD.IdentityUI.Core.Services.Auth.Session
             return Core.Models.Result.Result.Ok();
         }
 
-        public Task<Result> Add(string code, string userId)
+        public async Task<Result> Add(string code, string userId)
         {
             string remoteIp = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
 
-            Core.Models.Result.Result result = Add(code, userId, remoteIp);
+            _httpContextAccessor.HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgent);
 
-            return Task.FromResult(result.ToNewResult());
+            SessionEntity session = new SessionEntity(
+                ip: remoteIp,
+                userId: userId,
+                code: code,
+                userAgent: userAgent);
+
+            bool addResult = await _sessionDAO.Add(session);
+            if (!addResult)
+            {
+                _logger.LogError($"Failed to add session. UserId {userId}");
+                return Result.Fail(FAILED_TO_ADD_SESSION);
+            }
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> Remove(long id)
+        {
+            string userId = _identityUIUserInfoService.GetUserId();
+
+            IBaseSpecification<SessionEntity, SessionEntity> specification = SpecificationBuilder
+                .Create<SessionEntity>()
+                .Where(x => x.Id == id)
+                .Where(x => x.UserId == userId)
+                .Build();
+
+            SessionEntity session = await _sessionDAO.SingleOrDefault(specification);
+            if(session == null)
+            {
+                _logger.LogError($"Session not found. SessionId {id}, UserId {userId}");
+                return Result.Fail(SESSION_NOT_FOUND);
+            }
+
+            _logger.LogInformation($"User is removing session. UserId {userId}, SessionIs {id}");
+
+            session.EndType = SessionEndTypes.Logout;
+
+            bool deleteResult = await _sessionDAO.Remove(session);
+            if(!deleteResult)
+            {
+                _logger.LogError($"Failed to remove session. SessionId {id}");
+                return Result.Fail(FAILED_TO_REMOVE_USER_SESSION);
+            }
+
+            return Result.Ok();
         }
     }
 }

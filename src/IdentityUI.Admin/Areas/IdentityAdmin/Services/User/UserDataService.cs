@@ -258,16 +258,40 @@ namespace SSRD.IdentityUI.Admin.Areas.IdentityAdmin.Services.User
                 x.Id,
                 x.Ip,
                 x._CreatedDate,
-                x.LastAccess));
+                x.LastAccess,
+                x.UserAgent));
 
             PaginatedData<SessionViewModel> paginatedData = _sessionRepository.GetPaginated(specification);
+
+            UAParser.Parser userAgentParser = UAParser.Parser.GetDefault(new UAParser.ParserOptions { MatchTimeOut = TimeSpan.FromSeconds(1) });
 
             DataTableResult<SessionViewModel> dataTableResult = new DataTableResult<SessionViewModel>(
                 draw: request.Draw,
                 recordsTotal: paginatedData.Count,
                 recordsFilterd: paginatedData.Count,
                 error: null,
-                data: paginatedData.Data);
+                data: paginatedData.Data
+                    .Select(x =>
+                    {
+                        if (x.FullUserAgent != null)
+                        {
+                            try
+                            {
+                                UAParser.ClientInfo clientInfo = userAgentParser.Parse(x.FullUserAgent);
+
+                                x.UserAgent = clientInfo.UA.Family;
+                                x.Os = clientInfo.OS.Family;
+                                x.Device = clientInfo.Device.Family;
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, $"Failed to parse UserAgent. SessionId {x.Id}");
+                            }
+                        }
+
+                        return x;
+                    })
+                    .ToList());
 
             return Result.Ok(dataTableResult);
         }

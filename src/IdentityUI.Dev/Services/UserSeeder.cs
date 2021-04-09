@@ -65,6 +65,7 @@ namespace IdentityUI.Dev.Services
                         SessionEntity sessionEntity = new SessionEntity(
                             "",
                             appUserEntity.Id,
+                            "",
                             "");
 
                         sessionEntities.Add(sessionEntity);
