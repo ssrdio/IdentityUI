@@ -10,5 +10,7 @@ namespace SSRD.IdentityUI.Core.Interfaces.Services.OpenIdConnect
     {
         Task<Result> SetValidStatus(List<string> consentIds);
         Task<Result> SetRevokedStatus(List<string> consentIds);
+
+        Task<Result> RevokeConsent(string id);
     }
 }

@@ -4,6 +4,7 @@ using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
 using SSRD.IdentityUI.Core.Data.Entities.OpenIdConnect;
+using SSRD.IdentityUI.Core.Interfaces.Services;
 using SSRD.IdentityUI.Core.Interfaces.Services.OpenIdConnect;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,19 +15,26 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
     {
         private const string FAILED_TO_UPDATE_CONSENT_STATUS = "failed_to_update_consent_status";
 
+        private const string CLIENT_CONSENT_NOT_FOUND = "client_consent_not_found";
+
         private readonly IBaseDAO<ClientConsentEntity> _consentDAO;
+        private readonly IIdentityUIUserInfoService _identityUIUserInfoService;
 
         private readonly ILogger<ClientConsentService> _logger;
 
-        public ClientConsentService(IBaseDAO<ClientConsentEntity> consentDAO, ILogger<ClientConsentService> logger)
+        public ClientConsentService(
+            IBaseDAO<ClientConsentEntity> consentDAO,
+            IIdentityUIUserInfoService identityUIUserInfoService,
+            ILogger<ClientConsentService> logger)
         {
             _consentDAO = consentDAO;
+            _identityUIUserInfoService = identityUIUserInfoService;
             _logger = logger;
         }
 
         private async Task<Result> UpdateStatus(List<string> consentIds, string status)
         {
-            var specification = SpecificationBuilder
+            IBaseSpecification<ClientConsentEntity, ClientConsentEntity> specification = SpecificationBuilder
                 .Create<ClientConsentEntity>()
                 .Where(x => consentIds.Contains(x.Id))
                 .Where(x => x.Status != status)
@@ -63,6 +71,36 @@ namespace SSRD.IdentityUI.Core.Services.OpenIdConnect
         public Task<Result> SetRevokedStatus(List<string> consentIds)
         {
             return UpdateStatus(consentIds, OpenIddictConstants.Statuses.Revoked);
+        }
+
+        public async Task<Result> RevokeConsent(string id)
+        {
+            string userId = _identityUIUserInfoService.GetUserId();
+
+            IBaseSpecification<ClientConsentEntity, ClientConsentEntity> specification = SpecificationBuilder
+                .Create<ClientConsentEntity>()
+                .Where(x => x.Id == id)
+                .Where(x => x.Subject == userId)
+                .Where(x => x.Status == OpenIddictConstants.Statuses.Valid)
+                .Build();
+
+            ClientConsentEntity clientConsent = await _consentDAO.SingleOrDefault(specification);
+            if(clientConsent == null)
+            {
+                _logger.LogError($"Client consent not found. CleintConsentId {id}, UserId {userId}");
+                return Result.Fail(CLIENT_CONSENT_NOT_FOUND);
+            }
+
+            clientConsent.Status = OpenIddictConstants.Statuses.Revoked;
+
+            bool updateResult = await _consentDAO.Update(clientConsent);
+            if(!updateResult)
+            {
+                _logger.LogError($"Failed to update ClientConstent. CleintConsentId {id}, UserId {userId}");
+                return Result.Fail(FAILED_TO_UPDATE_CONSENT_STATUS);
+            }
+
+            return Result.Ok();
         }
     }
 }

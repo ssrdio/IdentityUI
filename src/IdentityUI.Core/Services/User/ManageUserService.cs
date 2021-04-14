@@ -262,10 +262,8 @@ namespace SSRD.IdentityUI.Core.Services.User
                 return Core.Models.Result.Result.Fail("no_user", "No User");
             }
 
-            roles = roles.Select(x => x.ToUpper()).ToList();
-
             SelectSpecification<RoleEntity, RoleEntity> getRoleSpecification = new SelectSpecification<RoleEntity, RoleEntity>();
-            getRoleSpecification.AddFilter(x => roles.Contains(x.NormalizedName));
+            getRoleSpecification.AddFilter(x => roles.Contains(x.Id));
             getRoleSpecification.AddSelect(x => x);
 
             List<RoleEntity> roleEntites = _roleRepository.GetList(getRoleSpecification);

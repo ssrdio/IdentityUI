@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SSRD.AdminUI.Template.Models.DataTables;
 using SSRD.CommonUtils.Result;
 using SSRD.CommonUtils.Specifications;
 using SSRD.CommonUtils.Specifications.Interfaces;
@@ -6,9 +7,9 @@ using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using SSRD.IdentityUI.Account.Areas.Account.Models.Session;
 using SSRD.IdentityUI.Core.Data.Entities;
 using SSRD.IdentityUI.Core.Interfaces.Services;
+using SSRD.IdentityUI.Core.Data.Specifications;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Services
@@ -29,21 +30,22 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
             _logger = logger;
         }
 
-        public async Task<Result<List<SessionModel>>> Get()
+        public async Task<Result<DataTableResult<SessionModel>>> Get(DataTableRequest dataTableRequest)
         {
             string userId = _identityUIUserInfoService.GetUserId();
 
-            IBaseSpecification<SessionEntity, SessionEntity> specification = SpecificationBuilder
+            IBaseSpecificationBuilder<SessionEntity> specification = SpecificationBuilder
                 .Create<SessionEntity>()
                 .Where(x => x.UserId == userId)
-                .Build();
+                .OrderByDessending(x => x.LastAccess);
 
-            List<SessionEntity> sessionEntities = await _sessionDAO.Get(specification);
-            List<SessionModel> sessionModels = new List<SessionModel>();
+            DataTableResult<SessionEntity> sessionEntities = await _sessionDAO.Get(specification, dataTableRequest);
 
             UAParser.Parser userAgentParser = UAParser.Parser.GetDefault(new UAParser.ParserOptions { MatchTimeOut = TimeSpan.FromSeconds(1) });
 
-            foreach (SessionEntity sessionEntity in sessionEntities)
+            List<SessionModel> sessionModels = new List<SessionModel>();
+
+            foreach (SessionEntity sessionEntity in sessionEntities.Data)
             {
                 string userAgent = null;
                 string os = null;
@@ -77,11 +79,13 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Services
                 sessionModels.Add(sessionModel);
             }
 
-            sessionModels = sessionModels
-                .OrderByDescending(x => x.LastAccess)
-                .ToList();
+            DataTableResult<SessionModel> dataTableResult = new DataTableResult<SessionModel>(
+                draw: dataTableRequest.Start,
+                recordsFiltered: sessionEntities.RecordsFiltered,
+                recordsTotal: sessionEntities.RecordsTotal,
+                data: sessionModels);
 
-            return Result.Ok(sessionModels);
+            return Result.Ok(dataTableResult);
         }
 
     }

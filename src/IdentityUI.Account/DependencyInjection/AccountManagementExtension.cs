@@ -34,6 +34,8 @@ namespace SSRD.IdentityUI.Account
 
             builder.Services.AddScoped<IAuditDataService, AuditDataService>();
 
+            builder.Services.AddScoped<IConsentDataService, ConsentDataService>();
+
             builder.Services.AddSingleton<IValidator<AuditTableRequest>, AuditTableRequestValidator>();
 
             builder.Services.ConfigureOptions(typeof(UIConfigureOptions));

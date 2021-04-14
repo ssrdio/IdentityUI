@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SSRD.AdminUI.Template.Models.DataTables;
 using SSRD.CommonUtils.Result;
 using SSRD.IdentityUI.Account.Areas.Account.Interfaces;
 using SSRD.IdentityUI.Account.Areas.Account.Models.Session;
 using SSRD.IdentityUI.Core.Interfaces.Services.Auth;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
 {
+    [Route("/api/[area]/[controller]/[action]")]
     public class SessionController : BaseController
     {
         private readonly ISessionDataService _sessionDataService;
@@ -22,17 +21,17 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             _sessionService = sessionService;
         }
 
-        [HttpGet]
+        [HttpGet("/[area]/[controller]")]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<SessionModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get()
+        [ProducesResponseType(typeof(DataTableResult<SessionModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Get(DataTableRequest dataTableRequest)
         {
-            Result<List<SessionModel>> result = await _sessionDataService.Get();
+            Result<DataTableResult<SessionModel>> result = await _sessionDataService.Get(dataTableRequest);
 
             return result.ToApiResult();
         }
