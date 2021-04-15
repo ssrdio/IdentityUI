@@ -1,8 +1,8 @@
-﻿class AuditMain {
-    constructor(actionTypes, subjectTypes) {
+class AccountAudit{
+    constructor(actionTypes) {
         this.statusAlert = new StatusAlertComponent('#status-alert-container');
 
-        this.auditTable = new AuditTable(actionTypes, subjectTypes, this.statusAlert);
+        this.auditTable = new AccountAuditTable(actionTypes, this.statusAlert);
 
         const $actionsDropdown = $('#actions-dropdown');
 
@@ -20,7 +20,7 @@
 
         const validParams = Object.fromEntries(Object.entries(this.auditTable.getFilters()).filter(([_, v]) => v != null));
 
-        fetch(`/IdentityAdmin/Audit/Export?${new URLSearchParams(validParams).toString()}`)
+        fetch(`/Account/Audit/Export?${new URLSearchParams(validParams).toString()}`)
             .then((resp) => {
                 if (!resp.ok) {
                     this.statusAlert.showError('Failed to export audit');
@@ -65,13 +65,14 @@
     }
 }
 
-class AuditDetailsModal {
-    constructor(actionTypes) {
+class AccountAuditDetailsModal {
+    constructor(actionTypes, groupId) {
         this.$modal = $('#audit-details-modal');
         this.$modal.on('hidden.bs.modal', () => {
             this.reset();
         });
 
+        this.groupId = groupId;
         this.actionTypes = actionTypes;
 
         this.$auditDataContiner = this.$modal.find('#audit-data-container')
@@ -162,7 +163,7 @@ class AuditDetailsModal {
     get(id) {
         this.loader.show();
 
-        Api.get(`/IdentityAdmin/Audit/Get/${id}`)
+        Api.get(`/Account/Audit/Get/${id}`)
             .done((data) => {
                 this.set(data)
             })
@@ -175,20 +176,18 @@ class AuditDetailsModal {
     }
 }
 
-class AuditTable {
-    constructor(actionTypes, subjectTypes, statusAlert) {
-        this.$auditTable = $('#audit-table');
+class AccountAuditTable {
+    constructor(actionTypes, statusAlert) {
+        this.$auditTable = $('#accout-audit-table');
         this.actionTypes = actionTypes;
-
         this.statusAlert = statusAlert;
 
-        this.auditDetailsModal = new AuditDetailsModal();
-        this.auditTableFilters = new AuditTableFilters(subjectTypes, actionTypes, this.statusAlert, () => {
+        this.auditDetailsModal = new AccountAuditDetailsModal();
+        this.auditTableFilters = new AccountAuditTableFilters(actionTypes, this.statusAlert, () => {
             this.reloadTable();
         });
 
-        this.auditCommentModal = new AuditCommentModal();
-
+        this.auditCommentModal = new AccountAuditCommentModal();
         this.init();
     }
 
@@ -196,12 +195,12 @@ class AuditTable {
         this.$auditTable.DataTable({
             serverSide: true,
             processing: true,
-            order: [[5, 'desc']],
+            order: [[2, 'desc']],
             lengthChange: false,
             pageLength: 20,
             searching: false,
             ajax: {
-                url: '/IdentityAdmin/Audit/Get',
+                url: `/Account/Audit/Get`,
                 type: 'GET',
                 data: (params) => {
                     const orderByTypes = Object.freeze({
@@ -214,7 +213,7 @@ class AuditTable {
                         start: params.start,
                     }
 
-                    switch (params.order.find(x => x.column === 5).dir) {
+                    switch (params.order.find(x => x.column === 2).dir) {
                         case "desc": {
                             customParams.orderBy = orderByTypes.Dessending;
                             break;
@@ -242,8 +241,8 @@ class AuditTable {
                 {
                     title: "Type",
                     orderable: false,
-                    class: "audit-action-type",
                     data: "actionType",
+                    className: "audit-action-type",
                     render: $.fn.dataTable.render.text()
                 },
                 {
@@ -253,50 +252,31 @@ class AuditTable {
                     render: $.fn.dataTable.render.text()
                 },
                 {
-                    title: "Object Type",
-                    orderable: false,
-                    data: "objectType",
-                    render: $.fn.dataTable.render.text()
-                },
-                {
-                    title: "Subject Type",
-                    orderable: false,
-                    className: "audit-subject-type",
-                    data: "subjectType",
-                    render: $.fn.dataTable.render.text()
-                },
-                {
-                    title: "Subject Identifier",
-                    orderable: false,
-                    className: "audit-subject-id",
-                    data: "subjectIdentifier",
-                    render: $.fn.dataTable.render.text()
-                },
-                {
-                    data: null,
-                    className: "audit-created",
                     title: "Created",
+                    orderable: true,
+                    data: "created",
+                    className: "audit-created",
                     render: (data) => {
-                        return `<span>${DateTimeUtils.toDisplayDateTime(data.created)}</span>`;
+                        return `<span>${DateTimeUtils.toDisplayDateTime(data)}</span>`;
                     }
                 },
                 {
+                    title: "",
                     orderable: false,
                     data: null,
                     className: "audit-action-buttons",
                     render: (data) => {
                         let dropDown = `
-                            <div class="dropdown">
-                              <button type="button" class="btn btn-primary table-button action-table-button" data-toggle="dropdown">
-                                Action
-                                <i class="fas fa-sort-down"></i>
-                              </button>
-                              <div class="dropdown-menu">
-                                <button class="dropdown-item audit-details" data-id="${data.id}">Details</button>
-                                <button class="dropdown-item audit-comments" data-id="${data.id}">Comments</button>
-                              </div>
-                            </div>`
-
+                                <div class="dropdown">
+                                  <button type="button" class="btn btn-primary table-button action-table-button" data-toggle="dropdown">
+                                    Action
+                                    <i class="fas fa-sort-down"></i>
+                                  </button>
+                                  <div class="dropdown-menu">
+                                    <button class="dropdown-item audit-details" data-id="${data.id}">Details</button>
+                                    <button class="dropdown-item audit-comments" data-id="${data.id}">Comments</button>
+                                  </div>
+                                </div>`;
                         return dropDown;
                     }
                 }
@@ -331,51 +311,17 @@ class AuditTable {
     }
 }
 
-class AuditTableFilters {
-    constructor(subjectTypes, actionTypes, statusAlert, onChange) {
+class AccountAuditTableFilters {
+    constructor(actionTypes, statusAlert, onChange) {
         this.onChange = onChange;
         this.statusAlert = statusAlert;
 
-        const $objectTypeContainer = $('#object-type');
-        this.$objectTypeSelect = $objectTypeContainer.find('select');
-
-        $objectTypeContainer.on('click', 'button.reset-button', () => {
-            this.resetObjectType();
-        });
-
-        const $objectIdentifierContainer = $('#object-identifier');
-        this.$objectIdentifierSelect = $objectIdentifierContainer.find('select');
-
-        $objectIdentifierContainer.on('click', 'button.reset-button', () => {
-            this.resetObjectIdentifierSelect();
-        });
-
-        const $subjectTypeContainer = $('#subject-type');
-        this.$subjectTypeSelect = $subjectTypeContainer.find('select');
-
-        $subjectTypeContainer.on('click', 'button.reset-button', () => {
-            this.resetSubjectType();
-        });
-
-        const $subjectIdentifierContainer = $('#subject-identifier');
-        this.$subjectIdentifierSelect = $subjectIdentifierContainer.find('select');
-
-        $subjectIdentifierContainer.on('click', 'button.reset-button', () => {
-            this.resetSubjectIdentifier();
-        });
 
         const $actionTypeContainer = $('#action-type');
         this.$actionTypeSelect = $actionTypeContainer.find('select');
 
         $actionTypeContainer.on('click', "button.reset-button", () => {
             this.resetActionType();
-        });
-
-        const $resourceNameContainer = $('#resource-name');
-        this.$resourceNameSelect = $resourceNameContainer.find('select');
-
-        $resourceNameContainer.on('click', 'button.reset-button', () => {
-            this.resetResourceName();
         });
 
         const $dateTimeRangePicker = $('#date-time-range-container');
@@ -391,15 +337,7 @@ class AuditTableFilters {
             this.daterangePicker.reset();
         });
 
-        this.initObjectTypeSelect();
-        this.initObjectIdentifierSelect();
-
-        this.initSubjectTypeSelect(subjectTypes);
-        this.initSubjectIdentifierSelect();
-
         this.initActionTypeSelect(actionTypes);
-
-        this.initResourceNameSelect();
         this.initPageLenghtSelect();
     }
 
@@ -421,111 +359,11 @@ class AuditTableFilters {
 
     getFilters() {
         return {
-            objectType: this.$objectTypeSelect.val(),
-            objectIdentifier: this.$objectIdentifierSelect.val(),
-            subjectType: this.$subjectTypeSelect.val(),
-            subjectIdentifier: this.$subjectIdentifierSelect.val(),
             actionType: this.$actionTypeSelect.val(),
-            resourceName: this.$resourceNameSelect.val(),
             from: this.daterangePicker.getFrom(),
             to: this.daterangePicker.getTo(),
             length: this.$pageLenghtSelect.val()
         }
-    }
-
-    initObjectTypeSelect() {
-        this.$objectTypeSelect.select2({
-            placeholder: "Select object type",
-            allowClear: true,
-            ajax: {
-                url: `/IdentityAdmin/Audit/GetObjectTypes`,
-                delay: 100,
-                data: (params) => {
-                    params.page = params.page ?? 1;
-
-                    return params;
-                }
-            }
-        });
-
-        this.$objectTypeSelect.on('change', () => {
-            this.hideError();
-
-            this.selectedObjectType = this.$objectTypeSelect.val();
-            this.resetObjectIdentifierSelect();
-            this.$objectIdentifierSelect.prop('disabled', false);
-
-            this.change();
-        });
-
-        this.$objectTypeSelect.on('select2:clear', () => {
-            this.$objectIdentifierSelect.val(null).trigger('change');
-            setTimeout(() => {
-                this.$objectIdentifierSelect.prop('disabled', true);
-            }, 400);
-        });
-    }
-
-    initObjectIdentifierSelect() {
-        this.$objectIdentifierSelect.select2({
-            placeholder: "Select object identifier",
-            allowClear: true,
-            ajax: {
-                url: `/IdentityAdmin/Audit/GetObjectIdentifiers`,
-                delay: 100,
-                data: (params) => {
-                    params.page = params.page ?? 1;
-
-                    params.objectType = this.$objectTypeSelect.val();
-
-                    return params;
-                }
-            }
-        });
-
-        this.$objectIdentifierSelect.on('change', () => {
-            this.hideError();
-
-            this.change();
-        });
-    }
-
-    initSubjectTypeSelect(subjectTypes) {
-        this.$subjectTypeSelect.select2({
-            placeholder: "Select subject type",
-            allowClear: true,
-            data: subjectTypes
-        });
-
-        this.$subjectTypeSelect.val(null).trigger('change');
-
-        this.$subjectTypeSelect.on('change', () => {
-            this.hideError();
-
-            this.change();
-        });
-    }
-
-    initSubjectIdentifierSelect() {
-        this.$subjectIdentifierSelect.select2({
-            placeholder: "Select subject identifier",
-            allowClear: true,
-            ajax: {
-                url: `/IdentityAdmin/Audit/GetSubjectIdentifiers`,
-                delay: 100,
-                data: (params) => {
-                    params.page = params.page ?? 1;
-
-                    return params;
-                }
-            }
-        });
-
-        this.$subjectIdentifierSelect.on('change', () => {
-            this.hideError();
-
-            this.change();
-        });
     }
 
     initActionTypeSelect(actionTypes) {
@@ -538,28 +376,6 @@ class AuditTableFilters {
         this.$actionTypeSelect.val(null).trigger('change');
 
         this.$actionTypeSelect.on('change', () => {
-            this.hideError();
-
-            this.change();
-        })
-    }
-
-    initResourceNameSelect() {
-        this.$resourceNameSelect.select2({
-            placeholder: "Select resource name",
-            allowClear: true,
-            ajax: {
-                url: `/IdentityAdmin/Audit/GetResourceNames`,
-                delay: 100,
-                data: (params) => {
-                    params.page = params.page ?? 1;
-
-                    return params;
-                }
-            }
-        });
-
-        this.$resourceNameSelect.on('change', () => {
             this.hideError();
 
             this.change();
@@ -603,13 +419,7 @@ class AuditTableFilters {
 
         this.onChange = null;
 
-        this.resetObjectType();
-
-        this.resetSubjectType();
-        this.resetSubjectIdentifier();
-
         this.resetActionType();
-        this.resetResourceName();
 
         this.daterangePicker.reset();
 
@@ -617,47 +427,12 @@ class AuditTableFilters {
         this.change();
     }
 
-    resetObjectType() {
-        const onChange = this.onChange;
-        this.onChange = null;
-
-        this.$objectTypeSelect.val(null).trigger('change');
-        //TODO: remove options
-
-        this.resetObjectIdentifierSelect();
-        this.$objectIdentifierSelect.prop('disabled', true);
-
-        this.onChange = onChange;
-        this.change();
-    }
-
-    resetObjectIdentifierSelect() {
-        this.$objectIdentifierSelect.val(null).trigger('change');
-        //TODO: remove options
-    }
-
-    resetSubjectType() {
-        this.$subjectTypeSelect.val(null).trigger('change');
-        //TODO: remove options
-    }
-
-    resetSubjectIdentifier() {
-        this.$subjectIdentifierSelect.val(null).trigger('change');
-        //TODO: remove options
-    }
-
     resetActionType() {
         this.$actionTypeSelect.val(null).trigger('change');
-        //TODO: remove options
-    }
-
-    resetResourceName() {
-        this.$resourceNameSelect.val(null).trigger('change');
-        //TODO: remove options
     }
 }
 
-class AuditCommentModal {
+class AccountAuditCommentModal {
     constructor() {
         this.$modal = $('#audit-comments-modal');
 
@@ -759,7 +534,7 @@ class AuditCommentModal {
         this.hideErrors();
         this.loader.show();
 
-        Api.post(`/IdentityAdmin/Audit/AddComment/${this.id}`, this.getData())
+        Api.post(`/Account/Audit/AddComment/${this.id}`, this.getData())
             .done(() => {
                 this.commentArea.value(null);
                 this.getComments();
@@ -774,7 +549,7 @@ class AuditCommentModal {
         this.hideErrors();
         this.loader.show();
 
-        Api.get(`/IdentityAdmin/Audit/GetComments/${this.id}`)
+        Api.get(`/Account/Audit/GetComments/${this.id}`)
             .done((data) => {
                 this.showComments(data);
             })

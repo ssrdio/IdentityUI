@@ -489,38 +489,11 @@ table.dataTableClass > tbody > tr > td {
     padding-left: 2px;
 }
 
-.audit-created{
-    width: 165px !important;
-}
-
-.audit-subject-id{
-    width: 325px !important;
-}
-
-.audit-subject-type{
-    width: 95px !important;
-}
-
-.audit-object-type {
-    width: 290px !important;
-}
-
-
-.audit-action-buttons {
-    width: 145px !important;
-    text-align: center !important;
-}
-
-.audit-action-type {
-    width: 75px !important;
-}
-
 .attribute-table-buttons {
     width: 235px;
     text-align: center;
 }
 
-#audit-table,
 #attribute-table {
     table-layout: fixed;
 }

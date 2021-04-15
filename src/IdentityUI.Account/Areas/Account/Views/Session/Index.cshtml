@@ -2,51 +2,52 @@
 
 @{ SidebarSelection.SelectedOption = SidebarOptions.Session; }
 
+@{ ViewData["Title"] = "Sessions"; }
+
+@{ Layout = "/Areas/Account/Views/Shared/_ManageLayout.cshtml"; }
+
+
+<div id="modalContainer">
+    @await Component.InvokeAsync("IdentityConfirmationModal")
+</div>
+
+<div id="status-alert-container">
+    @await Component.InvokeAsync("IdentityStatusAlertJs")
+</div>
+
+<div class="tab-content table-card">
+    <div class="main-card mb-3 card fullWidthCard">
+        <div class="card-body">
+            <div class="card-title-space">
+                <h5 class="card-title">
+                    Sessions
+                </h5>
+            </div>
+            <!--#endregion-->
+            <div class="custom_container custom_table ">
+                <table id="accout-session-table" class="dataTableClass display "></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--#region Section - script includes -->
 @section script {
+    <script type="text/javascript" src="~/adminUI/app/lib/moment/moment.min.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/confirmationModal/conformationModal.js" asp-append-version="true"></script>
+    <script src="~/account/app/js/account-sessions.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/dot-loader.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/statusAlert/StatusAlert.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/js/components/status-message.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/adminUI/app/lib/datatables/datatables.min.js" asp-append-version="true"></script>
+
     <script type="text/javascript" src="~/adminUI/app/js/utils/Api.js" asp-append-version="true"></script>
 
     <script>
         $(document).ready(function () {
-            new AccountSessions().remove(41);
+            new AccountSessions();
         });
-
-        class AccountSessions {
-            constructor() {
-
-            }
-
-            showSessions() {
-
-            }
-
-            showError() {
-
-            }
-
-            hideError() {
-
-            }
-
-            get() {
-                Api.get(`/Account/Session/Get`)
-                    .done((data) => {
-                        console.log(data);
-                        //show sessions
-                    })
-                    .fail((response) => {
-                        this.showError(response.responseJSON);
-                    });
-            }
-
-            remove(id) {
-                Api.delete(`/Account/Session/Remove/${id}`)
-                    .done(() => {
-                        //remove session
-                    })
-                    .fail((response) => {
-                        this.showError(response.responseJSON);
-                    })
-            }
-        }
     </script>
+
 }
+<!-- #endregion -->

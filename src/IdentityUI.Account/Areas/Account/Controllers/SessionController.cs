@@ -36,7 +36,7 @@ namespace SSRD.IdentityUI.Account.Areas.Account.Controllers
             return result.ToApiResult();
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> Remove([FromRoute] long id)
         {

@@ -1,7 +1,6 @@
 ﻿class AuditGroupAdmin {
     constructor(groupId, actionTypes, subjectTypes) {
         this.statusAlert = new StatusAlertComponent('#status-alert-container');
-        console.log('group id', groupId);
         this.groupId = groupId;
 
         this.auditTable = new AuditTable(actionTypes, subjectTypes, this.statusAlert, this.groupId);

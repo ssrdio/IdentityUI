@@ -1,0 +1,141 @@
+﻿.audit-modal-body {
+    padding: 0px;
+    max-height: 70vh;
+    overflow: auto;
+    margin-bottom: 30px;
+}
+
+#audit-details-modal .modal-header,
+#audit-comments-modal .modal-header {
+    padding-left: 35px;
+}
+
+    #audit-details-modal .modal-header .modal-title,
+    #audit-comments-modal .modal-header .modal-title {
+        font-size: 18px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #008fef;
+    }
+
+.comment-body h4 {
+    color: #008fef;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#audit-comments-modal .audit-comment-modal-body {
+    padding: 25px 35px;
+}
+
+.comment-submit-button {
+    margin-top: 1em;
+    min-width: 200px;
+    justify-content: center;
+}
+
+#add-audit-comment-form label {
+    font-weight: bold;
+}
+
+#audit-data-container .row {
+    margin: 0px;
+    padding: 15px 20px;
+    border-top: solid 1px #e7e7e7;
+    align-items: flex-start;
+}
+
+.comments-label {
+    font-weight: bold;
+    padding-bottom: 10px;
+}
+
+.jjson-container, .jjson-container ul {
+    word-break: break-word;
+    list-style-type: none !important;
+    padding: 0px;
+    margin: 0px;
+}
+
+    .jjson-container .expanded {
+        display: none;
+    }
+
+#audit-data-container .row label {
+    margin: 0px;
+}
+
+.height-1 {
+    height: 1em;
+}
+
+.line-height-02 {
+    line-height: 0.2
+}
+
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc,
+table.dataTable thead .sorting_asc_disabled,
+table.dataTable thead .sorting_desc_disabled {
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center right;
+}
+
+table.dataTable thead th {
+    position: relative;
+    background-image: none !important;
+}
+
+    table.dataTable thead th.sorting:after,
+    table.dataTable thead th.sorting_asc:after,
+    table.dataTable thead th.sorting_desc:after {
+        position: absolute;
+        right: 8px;
+        display: block;
+        font-family: "Font Awesome 5 Free";
+    }
+
+    table.dataTable thead th.sorting:after {
+        content: "\f0dc";
+        color: #ddd;
+        font-size: 0.8em;
+        padding-top: 0.12em;
+    }
+
+    table.dataTable thead th.sorting_asc:after {
+        content: "\f0de";
+        top: 9px;
+    }
+
+    table.dataTable thead th.sorting_desc:after {
+        content: "\f0dd";
+        top: 3px;
+    }
+
+#audit-table {
+    word-break: break-word;
+}
+
+
+.audit-created {
+    width: 165px !important;
+}
+
+.audit-subject-id {
+    width: 325px !important;
+}
+
+.audit-subject-type {
+    width: 95px !important;
+}
+
+.audit-action-buttons {
+    width: 145px !important;
+    text-align: center !important;
+}
+
+.audit-action-type {
+    width: 75px !important;
+}

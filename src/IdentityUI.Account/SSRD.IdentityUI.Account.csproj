@@ -57,6 +57,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="www\**\*" />
+    <None Remove="www\account\app\js\account-audit.js" />
     <Content Update="**\*.cshtml" Pack="false" />
   </ItemGroup>
 
